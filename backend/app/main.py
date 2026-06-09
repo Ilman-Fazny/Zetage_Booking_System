@@ -18,10 +18,6 @@ app.add_middleware(
 )
 
 # Register routers
-app.include_router(auth.router)
-app.include_router(events.router)
-app.include_router(bookings.router)
-
 
 @app.get("/")
 def read_root():
