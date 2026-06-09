@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-from sqlarchemy.orm import sessionmaker, DeclarativeBase
+from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from app.core.config import settings
 
 #connection pool to PostgreSQL database

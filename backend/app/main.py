@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.router import auth, events, bookings
+from app.db.init_db import init_db
 
 app = FastAPI(
     title="Zetage Booking System API",
@@ -12,7 +13,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_methods=["*"],
+    allow_methods=["*"], 
     allow_headers=["*"],
     allow_credentials=True,
 )
@@ -29,3 +30,7 @@ def read_root():
 @app.get("/api/health")
 def health_check():
     return {"status": "ok", "app": settings.app_name}
+
+@app.on_event("startup")
+def on_startup():
+    init_db()
