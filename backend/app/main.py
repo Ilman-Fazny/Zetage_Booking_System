@@ -19,6 +19,7 @@ app.add_middleware(
 )
 
 # Register routers
+app.include_router(auth.router, prefix="/api")
 
 @app.get("/")
 def read_root():
