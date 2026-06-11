@@ -1,11 +1,16 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, BackgroundTasks
 from app.models.booking import Booking, BookingStatus
 from app.models.event import Event
+from app.services.email_service import send_booking_confirmation
 
-def create_booking(db: Session, user_id: int, event_id: int) -> Booking:
-    # Lock the event row for the duration of this transaction
+def create_booking(
+    db: Session,
+    user_id: int,
+    event_id: int,
+    background_tasks: BackgroundTasks
+) -> Booking:
     event = (
         db.execute(
             select(Event)
@@ -46,8 +51,22 @@ def create_booking(db: Session, user_id: int, event_id: int) -> Booking:
     db.add(booking)
     db.commit()
     db.refresh(booking)
-    return booking
 
+    # Load user for email — booking is committed, this is safe
+    from app.models.user import User
+    user = db.query(User).filter(User.id == user_id).first()
+
+    background_tasks.add_task(
+        send_booking_confirmation,
+        to_email=user.email,
+        user_name=user.email,
+        event_title=event.title,
+        event_date=event.event_date.strftime("%B %d, %Y at %I:%M %p"),
+        venue=event.venue,
+        booking_id=booking.id
+    )
+
+    return booking
 
 def get_user_bookings(db: Session, user_id: int) -> list[Booking]:
     return db.query(Booking).filter(Booking.user_id == user_id).all()
