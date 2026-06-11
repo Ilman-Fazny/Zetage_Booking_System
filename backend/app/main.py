@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.router import auth, events, bookings
 from app.db.init_db import init_db
+from models import User, Seat, Booking 
 
 app = FastAPI(
     title="Zetage Booking System API",
