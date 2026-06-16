@@ -1,15 +1,26 @@
-from pydantic import BaseModel
-from datetime import datetime
+from pydantic import BaseModel, field_validator
 from app.models.booking import BookingStatus
 
 class BookingCreate(BaseModel):
-    event_id: int
+    seat_code:         str
+    district:          str
+    is_sasnaka_member: bool
+    phone:             str | None = None
 
-class BookingResponse(BaseModel):
-    id: int
-    event_id: int
-    user_id: int
-    status: BookingStatus
-    created_at: datetime
+    @field_validator("district")
+    @classmethod
+    def district_not_empty(cls, v: str) -> str:
+        if not v.strip():
+            raise ValueError("District is required")
+        return v.strip()
+
+class BookingOut(BaseModel):
+    id:                int
+    booking_ref:       str
+    seat_code:         str
+    section:           str
+    district:          str
+    is_sasnaka_member: bool
+    status:            BookingStatus
 
     model_config = {"from_attributes": True}
