@@ -1,56 +1,53 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select
-from fastapi import HTTPException, status, BackgroundTasks
+from fastapi import HTTPException, status
+from app.models.seat import Seat, SeatStatus
 from app.models.booking import Booking, BookingStatus
-from app.models.event import Event
+from app.models.user import User
+from app.schemas.booking import BookingCreate
 from app.services.email_service import send_booking_confirmation
 
-def create_booking(
-    db: Session,
-    user_id: int,
-    event_id: int,
-    background_tasks: BackgroundTasks
-) -> Booking:
-    event = (
+def create_booking(db: Session, user: User, data: BookingCreate) -> Booking:
+    # 1. Reject if user already has a booking
+    if user.booking:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="You already have a booking. One seat per person."
+        )
+
+    # 2. Lock the seat row — SELECT FOR UPDATE prevents double-booking
+    seat = (
         db.execute(
-            select(Event)
-            .where(Event.id == event_id)
+            select(Seat)
+            .where(Seat.seat_code == data.seat_code)
             .with_for_update()
         )
         .scalars()
         .first()
     )
 
-    if not event:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Event not found"
-        )
+    if not seat:
+        raise HTTPException(status_code=404, detail="Seat not found")
 
-    if event.available_seats <= 0:
+    if seat.status != SeatStatus.AVAILABLE:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="No seats available"
+            detail="That seat was just taken. Please choose another."
         )
 
-    existing = db.query(Booking).filter(
-        Booking.user_id == user_id,
-        Booking.event_id == event_id,
-        Booking.status == BookingStatus.confirmed
-    ).first()
-
-    if existing:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="You already have a booking for this event"
-        )
-
-    event.available_seats -= 1
-
-    booking = Booking(user_id=user_id, event_id=event_id)
+    # 3. Mark seat booked + create booking record — single transaction
+    seat.status = SeatStatus.BOOKED
+    booking = Booking(
+        user_id=user.id,
+        seat_id=seat.id,
+        district=data.district,
+        is_sasnaka_member=data.is_sasnaka_member,
+        phone=data.phone,
+    )
     db.add(booking)
     db.commit()
     db.refresh(booking)
+    db.refresh(seat)
 
     # Load user for email — booking is committed, this is safe
     from app.models.user import User
@@ -65,36 +62,21 @@ def create_booking(
         venue=event.venue,
         booking_id=booking.id
     )
-
+    
     return booking
 
-def get_user_bookings(db: Session, user_id: int) -> list[Booking]:
-    return db.query(Booking).filter(Booking.user_id == user_id).all()
+def cancel_booking(db: Session, user: User) -> None:
+    booking = user.booking
+    if not booking or booking.status == BookingStatus.CANCELLED:
+        raise HTTPException(status_code=404, detail="No active booking found")
 
+    # Release seat atomically
+    seat = db.query(Seat).filter(Seat.id == booking.seat_id).first()
+    if seat:
+        seat.status = SeatStatus.AVAILABLE
 
-def cancel_booking(db: Session, booking_id: int, user_id: int) -> Booking:
-    booking = db.query(Booking).filter(
-        Booking.id == booking_id,
-        Booking.user_id == user_id
-    ).first()
-
-    if not booking:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Booking not found"
-        )
-
-    if booking.status == BookingStatus.cancelled:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Booking is already cancelled"
-        )
-
-    booking.status = BookingStatus.cancelled
-
-    event = db.query(Event).filter(Event.id == booking.event_id).first()
-    event.available_seats += 1
-
+    booking.status = BookingStatus.CANCELLED
     db.commit()
-    db.refresh(booking)
-    return booking
+
+def get_my_booking(db: Session, user: User) -> Booking | None:
+    return user.booking
