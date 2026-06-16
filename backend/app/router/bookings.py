@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, BackgroundTasks
 from sqlalchemy.orm import Session
-from app.db.session import get_db
-from app.dependencies.dependencies import get_current_user
+from app.dependencies import get_db, get_current_user
 from app.services.booking_service import create_booking, cancel_booking, get_my_booking
 from app.services.email_service import send_ticket_email
 from app.schemas.booking import BookingCreate, BookingOut

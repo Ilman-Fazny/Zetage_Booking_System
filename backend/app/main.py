@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
-from app.router import auth, bookings, seats, admin
+from app.router import auth, bookings, seats
 from app.db.init_db import init_db
 from app.models import User, Seat, Booking
 
@@ -23,7 +23,6 @@ app.add_middleware(
 app.include_router(auth.router, prefix="/api")
 app.include_router(bookings.router, prefix="/api")
 app.include_router(seats.router, prefix="/api")
-app.include_router(admin.router, prefix="/api")
 
 @app.get("/")
 def read_root():

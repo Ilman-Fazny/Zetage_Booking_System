@@ -46,3 +46,13 @@ def send_booking_confirmation(
         "subject": f"Booking Confirmed — {event_title}",
         "html": html,
     })
+
+def send_ticket_email(user, booking) -> None:
+    send_booking_confirmation(
+        to_email=user.email,
+        user_name=user.name or "Guest",
+        event_title=settings.event_name,
+        event_date=settings.event_date,
+        venue=settings.event_venue,
+        booking_id=booking.id
+    )

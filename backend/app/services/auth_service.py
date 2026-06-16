@@ -13,9 +13,9 @@ async def exchange_google_code(code: str) -> dict:
     async with httpx.AsyncClient() as client:
         token_res = await client.post(GOOGLE_TOKEN_URL, data={
             "code":          code,
-            "client_id":     settings.GOOGLE_CLIENT_ID,
-            "client_secret": settings.GOOGLE_CLIENT_SECRET,
-            "redirect_uri":  settings.GOOGLE_REDIRECT_URI,
+            "client_id":     settings.google_client_id,
+            "client_secret": settings.google_client_secret,
+            "redirect_uri":  settings.google_redirect_uri,
             "grant_type":    "authorization_code",
         })
         token_res.raise_for_status()
