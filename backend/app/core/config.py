@@ -1,13 +1,29 @@
+# app/core/config.py
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
-    app_name: str = "Booking System"
-    database_url: str
-    secret_key: str
-    algorithm: str = "HS256"
-    access_token_expire_minutes: int = 30
-    resend_api_key: str
-    from_email: str
+    DATABASE_URL:        str
+    SECRET_KEY:          str
+    ALGORITHM:           str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+
+    # Google OAuth
+    GOOGLE_CLIENT_ID:     str = ""
+    GOOGLE_CLIENT_SECRET: str = ""
+    GOOGLE_REDIRECT_URI:  str = "http://localhost:8000/auth/google/callback"
+
+    # Event
+    EVENT_NAME:     str = "Zentage Talent Show"
+    EVENT_DATE:     str = "September 6, 2026"
+    EVENT_VENUE:    str = "Elphinstone Theatre, Maradana"
+    EVENT_PRICE:    int = 500   # LKR
+
+    # Email
+    SMTP_HOST:     str = ""
+    SMTP_PORT:     int = 587
+    SMTP_USER:     str = ""
+    SMTP_PASSWORD: str = ""
+    EMAIL_FROM:    str = ""
 
     class Config:
         env_file = ".env"
