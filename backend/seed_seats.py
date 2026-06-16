@@ -95,7 +95,7 @@ def seed():
         seats = generate_seats()
         db.add_all(seats)
         db.commit()
-        print(f"✓ Seeded {len(seats)} seats from Elphinstone blueprint.")
+        print(f"OK: Seeded {len(seats)} seats from Elphinstone blueprint.")
     except Exception as e:
         db.rollback()
         print(f"Error seeding seats: {e}")

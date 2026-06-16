@@ -5,7 +5,7 @@ from sqlalchemy import Column, Integer, String, Boolean, Enum as SAEnum
 from sqlalchemy import ForeignKey, DateTime, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from database import Base
+from app.db.session import Base
 
 class BookingStatus(str, enum.Enum):
     CONFIRMED  = "confirmed"

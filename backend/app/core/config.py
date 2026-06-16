@@ -1,31 +1,38 @@
 # app/core/config.py
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
-    DATABASE_URL:        str
-    SECRET_KEY:          str
-    ALGORITHM:           str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    app_name: str = "Zetage Booking System"
+    database_url: str
+    secret_key: str
+    algorithm: str = "HS256"
+    access_token_expire_minutes: int = 30
 
     # Google OAuth
-    GOOGLE_CLIENT_ID:     str = ""
-    GOOGLE_CLIENT_SECRET: str = ""
-    GOOGLE_REDIRECT_URI:  str = "http://localhost:8000/auth/google/callback"
+    google_client_id: str = ""
+    google_client_secret: str = ""
+    google_redirect_uri: str = "http://localhost:8000/auth/google/callback"
 
     # Event
-    EVENT_NAME:     str = "Zentage Talent Show"
-    EVENT_DATE:     str = "September 6, 2026"
-    EVENT_VENUE:    str = "Elphinstone Theatre, Maradana"
-    EVENT_PRICE:    int = 500   # LKR
+    event_name: str = "Zentage Talent Show"
+    event_date: str = "September 6, 2026"
+    event_venue: str = "Elphinstone Theatre, Maradana"
+    event_price: int = 500   # LKR
 
     # Email
-    SMTP_HOST:     str = ""
-    SMTP_PORT:     int = 587
-    SMTP_USER:     str = ""
-    SMTP_PASSWORD: str = ""
-    EMAIL_FROM:    str = ""
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_password: str = ""
+    email_from: str = ""
 
-    class Config:
-        env_file = ".env"
+    # Resend Email
+    resend_api_key: str = ""
+    from_email: str = "onboarding@resend.dev"
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        extra="ignore"
+    )
 
 settings = Settings()

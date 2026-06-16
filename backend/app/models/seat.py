@@ -2,7 +2,7 @@
 import enum
 from sqlalchemy import Column, Integer, String, Enum as SAEnum, UniqueConstraint
 from sqlalchemy.orm import relationship
-from database import Base
+from app.db.session import Base
 
 class SeatStatus(str, enum.Enum):
     AVAILABLE = "available"
