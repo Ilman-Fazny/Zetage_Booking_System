@@ -1,3 +1,7 @@
+import sys, os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "app"))
+
+from db.init_db import Base
 from app.db.session import SessionLocal, engine, Base
 from app.models.seat import Seat, SeatSection, SeatStatus
 
