@@ -49,20 +49,6 @@ def create_booking(db: Session, user: User, data: BookingCreate) -> Booking:
     db.refresh(booking)
     db.refresh(seat)
 
-    # Load user for email — booking is committed, this is safe
-    from app.models.user import User
-    user = db.query(User).filter(User.id == user_id).first()
-
-    background_tasks.add_task(
-        send_booking_confirmation,
-        to_email=user.email,
-        user_name=user.email,
-        event_title=event.title,
-        event_date=event.event_date.strftime("%B %d, %Y at %I:%M %p"),
-        venue=event.venue,
-        booking_id=booking.id
-    )
-    
     return booking
 
 def cancel_booking(db: Session, user: User) -> None:
