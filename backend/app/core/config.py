@@ -19,13 +19,6 @@ class Settings(BaseSettings):
     event_venue: str = "Elphinstone Theatre, Maradana"
     event_price: int = 500   # LKR
 
-    # Email
-    smtp_host: str = ""
-    smtp_port: int = 587
-    smtp_user: str = ""
-    smtp_password: str = ""
-    email_from: str = ""
-
     # Resend Email
     resend_api_key: str = ""
     from_email: str = "onboarding@resend.dev"
