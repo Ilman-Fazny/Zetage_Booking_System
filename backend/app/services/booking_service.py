@@ -17,7 +17,7 @@ def create_booking(db: Session, user: User, data: BookingCreate) -> Booking:
             detail="You already have a booking. One seat per person."
         )
 
-    # 2. Lock the seat row — SELECT FOR UPDATE prevents double-booking
+    # 2. Lock the seat row - SELECT FOR UPDATE prevents double-booking
     seat = (
         db.execute(
             select(Seat)
@@ -37,7 +37,7 @@ def create_booking(db: Session, user: User, data: BookingCreate) -> Booking:
             detail="That seat was just taken. Please choose another."
         )
 
-    # 3. Mark seat booked + create booking record — single transaction
+    # 3. Mark seat booked + create booking record - single transaction
     seat.status = SeatStatus.BOOKED
     booking = Booking(
         user_id=user.id,
