@@ -29,9 +29,17 @@ class Booking(Base):
     is_sasnaka_member  = Column(Boolean, nullable=False, default=False)
     phone              = Column(String, nullable=True)
 
-    status             = Column(SAEnum(BookingStatus),
+    status             = Column(SAEnum(BookingStatus, values_callable=lambda x: [e.value for e in x]),
                                 default=BookingStatus.CONFIRMED, nullable=False)
     created_at         = Column(DateTime(timezone=True), server_default=func.now())
 
     user = relationship("User", back_populates="booking")
     seat = relationship("Seat", back_populates="booking")
+
+    @property
+    def seat_code(self) -> str:
+        return self.seat.seat_code if self.seat else ""
+
+    @property
+    def section(self) -> str:
+        return self.seat.section.value if self.seat and self.seat.section else ""
