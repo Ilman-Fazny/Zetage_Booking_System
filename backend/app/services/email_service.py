@@ -36,7 +36,7 @@ def _build_ticket_html(user: User, booking: Booking, qr_base64: str) -> str:
       </div>
 
       <div style="padding:24px;text-align:center">
-        <img src="data:image/png;base64,{qr_base64}" width="160" height="160"
+        <img src="cid:ticket-qr" width="160" height="160"
              alt="QR code for booking {booking.booking_ref}"
              style="border-radius:8px;background:#fff;padding:8px" />
 
@@ -62,7 +62,7 @@ def _build_ticket_html(user: User, booking: Booking, qr_base64: str) -> str:
 
 
 def send_ticket_email(user: User, booking: Booking) -> None:
-    """Called via BackgroundTasks — failures are logged, never raised to the request."""
+    """Called via BackgroundTasks - failures are logged, never raised to the request."""
     try:
         qr_base64 = _generate_qr_base64(booking.booking_ref)
         html = _build_ticket_html(user, booking, qr_base64)
@@ -70,8 +70,15 @@ def send_ticket_email(user: User, booking: Booking) -> None:
         resend.Emails.send({
             "from":    settings.from_email,
             "to":      [user.email],
-            "subject": f"Your {settings.event_name} ticket — {booking.booking_ref}",
+            "subject": f"Your {settings.event_name} ticket - {booking.booking_ref}",
             "html":    html,
+            "attachments": [
+                {
+                    "content": qr_base64,
+                    "filename": f"qr_{booking.booking_ref}.png",
+                    "content_id": "ticket-qr"
+                }
+            ]
         })
     except Exception as e:
         # Never let email failure break the booking - just log it

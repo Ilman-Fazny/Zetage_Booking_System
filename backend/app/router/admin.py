@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
-from app.db.session import get_db
-from app.dependencies.dependencies import get_admin_user
+from app.dependencies.dependencies import get_db, get_admin_user
 from app.services.booking_service import list_bookings, get_booking_stats
 from app.services.seat_service import get_seat_map
 from app.schemas.booking import AdminBookingOut, BookingStats

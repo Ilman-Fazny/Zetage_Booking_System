@@ -119,7 +119,7 @@ def get_booking_stats(db: Session) -> dict:
         "total_seats":          total_seats,
         "booked_seats":         booked_seats,
         "available_seats":       total_seats - booked_seats,
-        "total_revenue":         booked_seats * settings.EVENT_PRICE,
+        "total_revenue":         booked_seats * settings.event_price,
         "sasnaka_member_count":  sasnaka_count,
         "by_district":            {d: c for d, c in by_district_rows},
         "by_section":              {s.value: c for s, c in by_section_rows},
