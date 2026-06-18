@@ -48,7 +48,7 @@ def create_booking(db: Session, user: User, data: BookingCreate) -> Booking:
     db.commit()
     db.refresh(booking)
     db.refresh(seat)
-
+    _ = booking.seat   # force-load the relationship while the session is still open
     return booking
 
 def cancel_booking(db: Session, user: User) -> None:

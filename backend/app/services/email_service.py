@@ -14,7 +14,7 @@ def _generate_qr_base64(booking_ref: str) -> str:
     qr = qrcode.QRCode(version=1, box_size=8, border=2)
     qr.add_data(booking_ref)
     qr.make(fit=True)
-    img = qr.make_image(fill_color="black", back_color="white")
+    img = qr.make_image(fill_color="blue", back_color="white")
 
     buffer = io.BytesIO()
     img.save(buffer, format="PNG")
