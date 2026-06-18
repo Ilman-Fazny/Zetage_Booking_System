@@ -6,7 +6,7 @@ from app.core.config import settings
 from app.models.user import User
 from app.models.booking import Booking
 
-resend.api_key = settings.RESEND_API_KEY
+resend.api_key = settings.resend_api_key
 
 
 def _generate_qr_base64(booking_ref: str) -> str:
@@ -30,7 +30,7 @@ def _build_ticket_html(user: User, booking: Booking, qr_base64: str) -> str:
                 background:#0f1115;color:#fff;border-radius:16px;overflow:hidden">
       <div style="background:#1a1d24;padding:20px;text-align:center">
         <p style="font-size:11px;letter-spacing:.08em;color:#9aa0ab;margin:0 0 4px">
-          {settings.EVENT_NAME.upper()}
+          {settings.event_name.upper()}
         </p>
         <h1 style="font-size:18px;margin:0;color:#fff">Your ticket is confirmed</h1>
       </div>
@@ -46,9 +46,9 @@ def _build_ticket_html(user: User, booking: Booking, qr_base64: str) -> str:
           <tr><td style="padding:6px 0;color:#9aa0ab">Seat</td>
               <td style="padding:6px 0;text-align:right">{seat_label}</td></tr>
           <tr><td style="padding:6px 0;color:#9aa0ab">Date</td>
-              <td style="padding:6px 0;text-align:right">{settings.EVENT_DATE}</td></tr>
+              <td style="padding:6px 0;text-align:right">{settings.event_date}</td></tr>
           <tr><td style="padding:6px 0;color:#9aa0ab">Venue</td>
-              <td style="padding:6px 0;text-align:right">{settings.EVENT_VENUE}</td></tr>
+              <td style="padding:6px 0;text-align:right">{settings.event_venue}</td></tr>
           <tr><td style="padding:6px 0;color:#9aa0ab">Name</td>
               <td style="padding:6px 0;text-align:right">{user.name or user.email}</td></tr>
         </table>
@@ -68,9 +68,9 @@ def send_ticket_email(user: User, booking: Booking) -> None:
         html = _build_ticket_html(user, booking, qr_base64)
 
         resend.Emails.send({
-            "from":    settings.EMAIL_FROM,
+            "from":    settings.from_email,
             "to":      [user.email],
-            "subject": f"Your {settings.EVENT_NAME} ticket — {booking.booking_ref}",
+            "subject": f"Your {settings.event_name} ticket — {booking.booking_ref}",
             "html":    html,
         })
     except Exception as e:

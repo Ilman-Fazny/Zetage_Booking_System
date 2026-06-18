@@ -5,7 +5,7 @@ from app.models.seat import Seat, SeatStatus
 from app.models.booking import Booking, BookingStatus
 from app.models.user import User
 from app.schemas.booking import BookingCreate
-from app.services.email_service import send_booking_confirmation
+
 
 def create_booking(db: Session, user: User, data: BookingCreate) -> Booking:
     # 1. Reject if user already has a booking
