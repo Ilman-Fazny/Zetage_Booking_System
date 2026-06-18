@@ -5,6 +5,8 @@ from app.models.seat import Seat, SeatStatus
 from app.models.booking import Booking, BookingStatus
 from app.models.user import User
 from app.schemas.booking import BookingCreate
+from sqlalchemy import func
+from app.models.user import User as UserModel
 
 
 def create_booking(db: Session, user: User, data: BookingCreate) -> Booking:
@@ -66,3 +68,59 @@ def cancel_booking(db: Session, user: User) -> None:
 
 def get_my_booking(db: Session, user: User) -> Booking | None:
     return user.booking
+
+
+def list_bookings(
+    db: Session,
+    district: str | None = None,
+    is_sasnaka_member: bool | None = None,
+    section: str | None = None,
+) -> list[Booking]:
+    query = (
+        db.query(Booking)
+        .join(UserModel, Booking.user_id == UserModel.id)
+        .join(Seat, Booking.seat_id == Seat.id)
+        .filter(Booking.status == BookingStatus.CONFIRMED)
+    )
+
+    if district:
+        query = query.filter(Booking.district.ilike(f"%{district}%"))
+    if is_sasnaka_member is not None:
+        query = query.filter(Booking.is_sasnaka_member == is_sasnaka_member)
+    if section:
+        query = query.filter(Seat.section == section)
+
+    return query.order_by(Booking.created_at.desc()).all()
+
+def get_booking_stats(db: Session) -> dict:
+    total_seats = db.query(Seat).count()
+    booked_seats = db.query(Seat).filter(Seat.status == SeatStatus.BOOKED).count()
+
+    confirmed = db.query(Booking).filter(Booking.status == BookingStatus.CONFIRMED)
+    sasnaka_count = confirmed.filter(Booking.is_sasnaka_member == True).count()  # noqa: E712
+
+    by_district_rows = (
+        db.query(Booking.district, func.count(Booking.id))
+        .filter(Booking.status == BookingStatus.CONFIRMED)
+        .group_by(Booking.district)
+        .all()
+    )
+    by_section_rows = (
+        db.query(Seat.section, func.count(Booking.id))
+        .join(Booking, Booking.seat_id == Seat.id)
+        .filter(Booking.status == BookingStatus.CONFIRMED)
+        .group_by(Seat.section)
+        .all()
+    )
+
+    from app.core.config import settings
+
+    return {
+        "total_seats":          total_seats,
+        "booked_seats":         booked_seats,
+        "available_seats":       total_seats - booked_seats,
+        "total_revenue":         booked_seats * settings.EVENT_PRICE,
+        "sasnaka_member_count":  sasnaka_count,
+        "by_district":            {d: c for d, c in by_district_rows},
+        "by_section":              {s.value: c for s, c in by_section_rows},
+    }
