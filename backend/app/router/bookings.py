@@ -16,7 +16,7 @@ def book_seat(
     current_user: User = Depends(get_current_user),
 ):
     booking = create_booking(db, current_user, payload)
-    background_tasks.add_task(send_ticket_email, current_user, booking)
+    background_tasks.add_task(send_ticket_email, current_user.id, booking.id)
     return booking
 
 @router.get("/me", response_model=BookingOut | None)

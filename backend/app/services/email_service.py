@@ -61,9 +61,25 @@ def _build_ticket_html(user: User, booking: Booking, qr_base64: str) -> str:
     """
 
 
-def send_ticket_email(user: User, booking: Booking) -> None:
+def send_ticket_email(user_id: int, booking_id: int) -> None:
     """Called via BackgroundTasks - failures are logged, never raised to the request."""
+    from app.db.session import SessionLocal
+    from sqlalchemy.orm import joinedload
+
+    db = SessionLocal()
     try:
+        booking = (
+            db.query(Booking)
+            .options(joinedload(Booking.seat))
+            .filter(Booking.id == booking_id)
+            .first()
+        )
+        user = db.query(User).filter(User.id == user_id).first()
+
+        if not user or not booking:
+            print(f"[email_service] User {user_id} or booking {booking_id} not found in DB.")
+            return
+
         qr_base64 = _generate_qr_base64(booking.booking_ref)
         html = _build_ticket_html(user, booking, qr_base64)
 
@@ -82,5 +98,7 @@ def send_ticket_email(user: User, booking: Booking) -> None:
         })
     except Exception as e:
         # Never let email failure break the booking - just log it
-        print(f"[email_service] Failed to send ticket email for booking "
-              f"{booking.booking_ref}: {e}")
+        print(f"[email_service] Failed to send ticket email for booking ID "
+              f"{booking_id}: {e}")
+    finally:
+        db.close()
