@@ -5,45 +5,41 @@ from app.core.security import hash_password, verify_password, create_access_toke
 import httpx
 from app.core.config import settings
 
-GOOGLE_TOKEN_URL    = "https://oauth2.googleapis.com/token"
-GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v2/userinfo"
+from google.oauth2 import id_token as google_id_token
+from google.auth.transport import requests as google_requests
+from fastapi import HTTPException, status
 
-async def exchange_google_code(code: str) -> dict:
-    """Exchange the OAuth authorization code for user info."""
-    async with httpx.AsyncClient() as client:
-        token_res = await client.post(GOOGLE_TOKEN_URL, data={
-            "code":          code,
-            "client_id":     settings.google_client_id,
-            "client_secret": settings.google_client_secret,
-            "redirect_uri":  settings.google_redirect_uri,
-            "grant_type":    "authorization_code",
-        })
-        token_res.raise_for_status()
-        access_token = token_res.json()["access_token"]
-
-        user_res = await client.get(
-            GOOGLE_USERINFO_URL,
-            headers={"Authorization": f"Bearer {access_token}"}
+def verify_google_token(credential: str) -> dict:
+    """Verify the ID token sent directly from the frontend's Google button."""
+    try:
+        payload = google_id_token.verify_oauth2_token(
+            credential,
+            google_requests.Request(),
+            settings.google_client_id,
         )
-        user_res.raise_for_status()
-        return user_res.json()   # { id, email, name, picture }
+        return payload   # contains sub (google id), email, name, picture
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid Google token"
+        )
+
 
 def get_or_create_google_user(db, google_data: dict):
     from app.models.user import User
-    from app.db.session import SessionLocal
 
-    user = db.query(User).filter(User.google_id == google_data["id"]).first()
+    google_id = google_data["sub"]
+    user = db.query(User).filter(User.google_id == google_id).first()
     if not user:
-        # check if email already registered manually
         user = db.query(User).filter(User.email == google_data["email"]).first()
         if user:
-            user.google_id = google_data["id"]
+            user.google_id = google_id
             user.name = user.name or google_data.get("name")
         else:
             user = User(
                 email=google_data["email"],
                 name=google_data.get("name"),
-                google_id=google_data["id"],
+                google_id=google_id,
                 hashed_password=None,
             )
             db.add(user)

@@ -11,3 +11,4 @@ resend==2.30.1
 httpx
 resend
 qrcode[pil]
+google-auth
