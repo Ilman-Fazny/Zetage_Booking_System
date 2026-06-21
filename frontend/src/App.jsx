@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./components/shared/ProtectedRoute";
 import LoginPage from "./pages/LoginPage";
+import SeatSelectionPage from "./pages/SeatSelectionPage";
 
 function Placeholder({ name }) {
   return <div className="p-8 text-center text-gray-500">{name} — coming next</div>;
@@ -14,7 +15,7 @@ export default function App() {
         path="/"
         element={
           <ProtectedRoute>
-            <Placeholder name="Seat selection" />
+            <SeatSelectionPage />
           </ProtectedRoute>
         }
       />
