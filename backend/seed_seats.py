@@ -2,91 +2,144 @@ import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "app"))
 
 from db.init_db import Base
-from app.db.session import SessionLocal, engine, Base
-from app.models.seat import Seat, SeatSection, SeatStatus
+from db.session import SessionLocal, engine
+from models.seat import Seat, SeatSection, SeatStatus
 
-def generate_seats():
+def seats_1_to(n, start=1):
+    return list(range(start, n + 1))
+
+GROUND_FLOOR_LEFT = [
+    ("A1", seats_1_to(7)), ("B1", seats_1_to(7)), ("C1", seats_1_to(7)),
+    ("D1", seats_1_to(7)), ("E1", seats_1_to(7)), ("F1", seats_1_to(7)),
+    ("G1", seats_1_to(7)), ("H1", seats_1_to(7)), ("I1", seats_1_to(7)),
+    ("J1", seats_1_to(7)), ("K1", seats_1_to(7)), ("L1", seats_1_to(7)),
+    ("M1", seats_1_to(7)), ("N1", seats_1_to(7)),
+    ("O1", seats_1_to(6)), ("P1", seats_1_to(6)), ("Q1", seats_1_to(6)),
+]
+
+GROUND_FLOOR_CENTER = [
+    ("A8", seats_1_to(7, start=9)), ("B8", seats_1_to(7, start=9)),
+    ("C8", seats_1_to(7, start=9)), ("D8", seats_1_to(7, start=9)),
+    ("E8", seats_1_to(7, start=9)), ("F8", seats_1_to(7, start=9)),
+    ("G8", seats_1_to(7, start=9)), ("H8", seats_1_to(7, start=9)),
+    ("I8", seats_1_to(7, start=9)), ("J8", seats_1_to(7, start=9)),
+    ("K8", seats_1_to(7, start=9)),
+]
+
+GROUND_FLOOR_RIGHT = [
+    ("A16", seats_1_to(6, start=17)), ("B16", seats_1_to(6, start=17)),
+    ("C16", seats_1_to(6, start=17)), ("D16", seats_1_to(6, start=17)),
+    ("E16", seats_1_to(6, start=17)), ("F16", seats_1_to(6, start=17)),
+    ("G16", seats_1_to(6, start=17)), ("H16", seats_1_to(6, start=17)),
+    ("I16", seats_1_to(6, start=17)), ("J16", seats_1_to(6, start=17)),
+    ("K16", seats_1_to(6, start=17)), ("L16", seats_1_to(6, start=17)),
+    ("M16", seats_1_to(6, start=17)), ("N16", seats_1_to(6, start=17)),
+    ("O8",  seats_1_to(7, start=8)),
+    ("P7",  seats_1_to(5, start=8)),
+    ("Q7",  seats_1_to(5, start=8)),
+]
+
+# ── Balcony Left Side strips (rotated single columns, top to bottom) ──
+BALCONY_LEFT_STRIPS = {
+    "UL1":  [5, 6, 7, 8],
+    "UL9":  [10, 11, 12],
+    "UL13": [17, 18, 19, 20],
+    "UL31": [25, 26, 27, 26],   # blueprint shows duplicate-looking nums — flag to verify
+    "UL29": [33, 34, 35, 36],
+}
+BALCONY_LEFT_STRIPS_2 = {
+    # the second visible column next to each strip above
+    "UL1b":  [1, 2, 3, 4],
+    "UL9b":  [9, 14, 15, 16],
+    "UL13b": [13, 14, 15, 16],
+    "UL31b": [22, 23, 24],
+    "UL29b": [30, 31, 32],
+}
+
+# ── Balcony Right Side strips (mirror of left) ─────────────────────
+BALCONY_RIGHT_STRIPS = {
+    "UR1":  [5, 6, 7, 8, 9],
+    "UR10": [11, 12, 13],
+    "UR14": [15, 19, 16, 17],
+    "UR22": [26, 23, 24, 25],
+    "UR30": [34, 31, 32, 33],
+}
+BALCONY_RIGHT_STRIPS_2 = {
+    "UR1b":  [1, 2, 3, 4],
+    "UR10b": [10],
+    "UR14b": [14],
+    "UR22b": [27, 28],
+    "UR30b": [35, 36, 37],
+}
+
+# ── Balcony Front Side (rows UA1-UE1, UA6-UE8, UA19-UE20, total 222) ──
+BALCONY_FRONT = [
+    ("UA1", seats_1_to(5, start=2)),  ("UB1", seats_1_to(5, start=2)),
+    ("UC1", seats_1_to(6, start=2)),  ("UD1", seats_1_to(5, start=2)),
+    ("UE1", seats_1_to(6, start=2)),
+
+    ("UA6", seats_1_to(11, start=7)), ("UB7", seats_1_to(11, start=8)),
+    ("UC8", seats_1_to(11, start=9)), ("UD7", seats_1_to(11, start=8)),
+    ("UE8", seats_1_to(11, start=9)),
+
+    ("UA19", seats_1_to(4, start=19)), ("UB19", seats_1_to(6, start=20)),
+    ("UC20", seats_1_to(5, start=21)), ("UD19", seats_1_to(4, start=20)),
+    ("UE20", seats_1_to(6, start=21)),
+]
+
+# ── Bottom strips (UF/UG/UH/UI rows) ───────────────────────────────
+BALCONY_BOTTOM = [
+    ("UF1",  seats_1_to(5, start=2)),
+    ("UG1",  seats_1_to(9, start=2)),
+    ("UG11", seats_1_to(5, start=12)),
+    ("UG16", seats_1_to(5, start=17)),
+    ("UF6",  seats_1_to(5, start=7)),
+    ("UH22", seats_1_to(9, start=22)),
+
+    ("UH1",  seats_1_to(9, start=2)),
+    ("UH11", seats_1_to(10, start=12)),
+    ("UI1",  seats_1_to(5, start=2)),
+    ("UI6",  seats_1_to(13, start=7)),
+    ("UH22b", seats_1_to(9, start=22)),
+    ("UI25", seats_1_to(5, start=26)),
+]
+
+
+def build_seats():
     seats = []
+    y = 0
 
-    # Ground Floor Center (rows A–Q, seats 8–15 approx per row)
-    gfc_rows = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q"]
-    for row in gfc_rows:
-        for num in range(8, 16):
-            seats.append(Seat(
-                seat_code=f"GFC-{row}-{num}",
-                section=SeatSection.GROUND_FLOOR_CENTER,
-                row=row, number=num
-            ))
+    def add_grid(rows, section):
+        nonlocal y
+        for x, (row_label, nums) in enumerate(rows):
+            for n in nums:
+                seats.append(Seat(
+                    seat_code=f"{row_label}-{n}",
+                    section=section,
+                    row=row_label,
+                    number=n,
+                ))
+        y += 1
 
-    # Ground Floor Right Side (rows A–N, seats 16–22)
-    gfr_rows = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N"]
-    for row in gfr_rows:
-        for num in range(16, 23):
-            seats.append(Seat(
-                seat_code=f"GFR-{row}-{num}",
-                section=SeatSection.GROUND_FLOOR_RIGHT_SIDE,
-                row=row, number=num
-            ))
+    add_grid(GROUND_FLOOR_LEFT, SeatSection.GROUND_FLOOR_CENTER)   # left block reuses center enum below adjusted
+    add_grid(GROUND_FLOOR_CENTER, SeatSection.GROUND_FLOOR_CENTER)
+    add_grid(GROUND_FLOOR_RIGHT, SeatSection.GROUND_FLOOR_RIGHT_SIDE)
 
-    # Balcony Left Side (total 38, rows A–N, seats 1–7 approx)
-    bl_rows = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N"]
-    for i, row in enumerate(bl_rows):
-        count = 3 if i < 2 else (2 if i < 4 else 3)
-        for num in range(1, count + 1):
-            seats.append(Seat(
-                seat_code=f"BL-{row}-{num}",
-                section=SeatSection.BALCONY_LEFT,
-                row=row, number=num
-            ))
+    for strip_dict in (BALCONY_LEFT_STRIPS, BALCONY_LEFT_STRIPS_2):
+        for label, nums in strip_dict.items():
+            for n in nums:
+                seats.append(Seat(seat_code=f"{label}-{n}", section=SeatSection.BALCONY_LEFT, row=label, number=n))
 
-    # Balcony Right Side (total 39)
-    # Named blocks from blueprint: UA1, UB1, UC1, UD2, UE1, UF1, UG1
-    br_blocks = {
-        "UA1": 4, "UB1": 4, "UC1": 3,
-        "UD2": 3, "UE1": 3, "UF1": 4,
-        "UG1": 4, "UH1": 4, "UI1": 4,
-        "UI11": 3, "UI16": 3,
-    }
-    for block, count in br_blocks.items():
-        for num in range(1, count + 1):
-            seats.append(Seat(
-                seat_code=f"BR-{block}-{num}",
-                section=SeatSection.BALCONY_RIGHT,
-                row=block, number=num
-            ))
+    for strip_dict in (BALCONY_RIGHT_STRIPS, BALCONY_RIGHT_STRIPS_2):
+        for label, nums in strip_dict.items():
+            for n in nums:
+                seats.append(Seat(seat_code=f"{label}-{n}", section=SeatSection.BALCONY_RIGHT, row=label, number=n))
 
-    # Balcony Front Side (total 222, rows A–E, seats 8–25 range)
-    bf_sections = {
-        "UB19": 10, "UB20": 11, "UC20": 12, "UC21": 11,
-        "UG18": 10, "UG19": 10, "UC23": 8,
-        "UG11": 12, "U49": 8, "U66": 8, "UB89": 8, "UB8": 8,
-    }
-    for block, count in bf_sections.items():
-        for num in range(1, count + 1):
-            seats.append(Seat(
-                seat_code=f"BF-{block}-{num}",
-                section=SeatSection.BALCONY_FRONT,
-                row=block, number=num
-            ))
-
-    # Upper sections (UR1, UR4, URI2, URI4, UL1, UL9, HL2, BIL etc)
-    upper_blocks = {
-        "UR1": 8, "URI4": 17, "URI12": 10,
-        "URI14": 12, "URI19": 13, "UR34": 5,
-        "UL1": 8, "UL9": 3, "UL19": 2,
-        "HL21": 8, "BIL11": 5,
-        "UIL33": 6, "UII1": 4, "UI33": 6,
-        "UL16": 6,
-    }
-    for block, count in upper_blocks.items():
-        for num in range(1, count + 1):
-            seats.append(Seat(
-                seat_code=f"UP-{block}-{num}",
-                section=SeatSection.UPPER,
-                row=block, number=num
-            ))
+    add_grid(BALCONY_FRONT, SeatSection.BALCONY_FRONT)
+    add_grid(BALCONY_BOTTOM, SeatSection.BALCONY_FRONT)
 
     return seats
+
 
 def seed():
     Base.metadata.create_all(bind=engine)
@@ -94,12 +147,14 @@ def seed():
     try:
         existing = db.query(Seat).count()
         if existing > 0:
-            print(f"Seats already seeded ({existing} rows). Skipping.")
+            print(f"Seats already seeded ({existing} rows). Run with --reset to wipe and reseed.")
             return
-        seats = generate_seats()
+        seats = build_seats()
         db.add_all(seats)
         db.commit()
-        print(f"OK: Seeded {len(seats)} seats from Elphinstone blueprint.")
+        print(f"✓ Seeded {len(seats)} seats.")
+        print(f"  (Blueprint states 645 total — 346 ground floor + 299 balcony)")
+        print(f"  If the count doesn't match, edit the layout tables at the top of this file and rerun with --reset.")
     except Exception as e:
         db.rollback()
         print(f"Error seeding seats: {e}")
@@ -107,5 +162,18 @@ def seed():
     finally:
         db.close()
 
+
+def reset():
+    db = SessionLocal()
+    try:
+        db.query(Seat).delete()
+        db.commit()
+        print("✓ Cleared all seats.")
+    finally:
+        db.close()
+
+
 if __name__ == "__main__":
+    if "--reset" in sys.argv:
+        reset()
     seed()
