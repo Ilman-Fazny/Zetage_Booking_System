@@ -1,6 +1,7 @@
 // src/pages/SeatSelectionPage.jsx
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useSeatMap } from "../lib/useSeatMap";
+import { useAuth } from "../context/AuthContext";
 import TheatreMap from "../components/seat-map/TheatreMap";
 import SeatLegend from "../components/seat-map/SeatLegend";
 import SeatSummaryBar from "../components/seat-map/SeatSummaryBar";
@@ -9,6 +10,7 @@ const EVENT_PRICE = 500; // LKR — matches backend config.EVENT_PRICE
 
 export default function SeatSelectionPage() {
   const { sections, selectedSeat, selectSeat, loading, error } = useSeatMap();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   function handleContinue() {
@@ -26,6 +28,16 @@ export default function SeatSelectionPage() {
   return (
     <div className="min-h-screen bg-neutral-50 px-4 py-6">
       <div className="max-w-3xl mx-auto">
+        {user?.is_admin && (
+          <div className="flex justify-end mb-2">
+            <Link
+              to="/admin"
+              className="text-xs text-neutral-500 hover:text-neutral-700 underline underline-offset-2 font-medium"
+            >
+              Admin panel →
+            </Link>
+          </div>
+        )}
         <div className="mb-4">
           <h1 className="text-lg font-semibold text-neutral-900">Select your seat</h1>
           <p className="text-sm text-neutral-500">Zentage Talent Show · September 6, 2026</p>

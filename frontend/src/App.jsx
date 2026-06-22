@@ -4,6 +4,7 @@ import LoginPage from "./pages/LoginPage";
 import SeatSelectionPage from "./pages/SeatSelectionPage";
 import AttendeeDetailsPage from "./pages/AttendeeDetailsPage";
 import TicketPage from "./pages/TicketPage";
+import AdminDashboard from "./pages/AdminDashboard";
 
 function Placeholder({ name }) {
   return <div className="p-8 text-center text-gray-500">{name} — coming next</div>;
@@ -43,7 +44,7 @@ export default function App() {
             path="/admin"
             element={
               <ProtectedRoute adminOnly>
-                <Placeholder name="Admin dashboard" />
+                <AdminDashboard />
               </ProtectedRoute>
             }
           />
