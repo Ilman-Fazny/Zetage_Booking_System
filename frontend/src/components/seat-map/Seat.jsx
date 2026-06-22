@@ -1,4 +1,7 @@
 // src/components/seat-map/Seat.jsx
+import { motion } from "framer-motion";
+import { microSpring } from "../../lib/motionVariants";
+
 export default function Seat({ seat, isSelected, onSelect, x, y, size }) {
   const isBooked = seat.status === "booked";
 
@@ -6,16 +9,34 @@ export default function Seat({ seat, isSelected, onSelect, x, y, size }) {
   const cy = y + size / 2;
 
   return (
-    <g
+    <motion.g
       onClick={() => !isBooked && onSelect(seat)}
       style={{
         cursor: isBooked ? "not-allowed" : "pointer",
         transformOrigin: `${cx}px ${cy}px`,
-        transition: "transform 0.18s cubic-bezier(0.34,1.56,0.64,1), filter 0.18s ease",
       }}
+      // ── Entry animation: staggered wave on seat-map load ───────────────
+      initial={{ opacity: 0, scale: 0.75 }}
+      animate={{ opacity: 1, scale: 1   }}
+      transition={{
+        opacity: {
+          duration: 0.28,
+          delay: (seat.number % 20) * 0.012,
+          ease: "easeOut",
+        },
+        scale: {
+          type: "spring",
+          stiffness: 420,
+          damping: 22,
+          delay: (seat.number % 20) * 0.012,
+        },
+      }}
+      // ── Micro-interactions ─────────────────────────────────────────────
+      whileHover={!isBooked ? { scale: 1.12, transition: microSpring } : {}}
+      whileTap={!isBooked   ? { scale: 0.92, transition: microSpring } : {}}
       className={!isBooked && !isSelected ? "seat-hover-group" : ""}
     >
-      {/* ── Selected: outer glow ring ───────────────────── */}
+      {/* ── Selected: outer glow ring ───────────────────────────────────── */}
       {isSelected && (
         <>
           {/* Soft bloom behind seat */}
@@ -38,20 +59,20 @@ export default function Seat({ seat, isSelected, onSelect, x, y, size }) {
         </>
       )}
 
-      {/* ── Seat body ───────────────────────────────────── */}
+      {/* ── Seat body ───────────────────────────────────────────────────── */}
       <rect
         x={x} y={y}
         width={size} height={size}
         rx={3}
         fill={
-          isBooked   ? "#27272A"            // charcoal — unavailable
-          : isSelected ? "#8B5CF6"          // electric violet — selected
-          : "transparent"                   // ghost — available
+          isBooked    ? "#27272A"           // charcoal — unavailable
+          : isSelected ? "#8B5CF6"         // electric violet — selected
+          : "transparent"                  // ghost — available
         }
         stroke={
-          isBooked   ? "none"               // no border on booked
-          : isSelected ? "#a78bfa"          // bright violet ring
-          : "rgba(255,255,255,0.25)"        // crisp silver outline — available
+          isBooked    ? "none"
+          : isSelected ? "#a78bfa"         // bright violet ring
+          : "rgba(255,255,255,0.25)"       // crisp silver outline — available
         }
         strokeWidth={isSelected ? 1.2 : 0.75}
         style={
@@ -61,7 +82,7 @@ export default function Seat({ seat, isSelected, onSelect, x, y, size }) {
         }
       />
 
-      {/* ── Seat number ─────────────────────────────────── */}
+      {/* ── Seat number ─────────────────────────────────────────────────── */}
       <text
         x={cx} y={cy}
         textAnchor="middle"
@@ -69,14 +90,14 @@ export default function Seat({ seat, isSelected, onSelect, x, y, size }) {
         fontSize={size * 0.38}
         fontWeight={isSelected ? "700" : "400"}
         fill={
-          isBooked   ? "rgba(255,255,255,0.12)"   // barely visible on charcoal
-          : isSelected ? "#ffffff"                 // white on violet
-          : "rgba(255,255,255,0.45)"               // dim silver on transparent
+          isBooked    ? "rgba(255,255,255,0.12)"  // barely visible on charcoal
+          : isSelected ? "#ffffff"                // white on violet
+          : "rgba(255,255,255,0.45)"              // dim silver on transparent
         }
         style={{ userSelect: "none", letterSpacing: "-0.3px" }}
       >
         {seat.number}
       </text>
-    </g>
+    </motion.g>
   );
 }

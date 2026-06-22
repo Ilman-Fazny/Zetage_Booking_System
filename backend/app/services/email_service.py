@@ -50,7 +50,7 @@ def _build_ticket_html(user: User, booking: Booking, qr_base64: str) -> str:
           <tr><td style="padding:6px 0;color:#9aa0ab">Venue</td>
               <td style="padding:6px 0;text-align:right">{settings.event_venue}</td></tr>
           <tr><td style="padding:6px 0;color:#9aa0ab">Name</td>
-              <td style="padding:6px 0;text-align:right">{booking.attendee_name}</td></tr>
+              <td style="padding:6px 0;text-align:right">{user.name or booking.attendee_name}</td></tr>
         </table>
 
         <p style="font-size:11px;color:#6b7280;margin-top:20px">
@@ -83,9 +83,10 @@ def send_ticket_email(user_id: int, booking_id: int) -> None:
         qr_base64 = _generate_qr_base64(booking.booking_ref)
         html = _build_ticket_html(user, booking, qr_base64)
 
+        recipient = f"{user.name} <{user.email}>" if user.name else user.email
         resend.Emails.send({
             "from":    settings.from_email,
-            "to":      [user.email],
+            "to":      [recipient],
             "subject": f"Your {settings.event_name} ticket - {booking.booking_ref}",
             "html":    html,
             "attachments": [

@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { loginWithPassword, registerWithPassword, loginWithGoogle } from "../lib/auth";
 import GoogleButton from "../components/shared/GoogleButton";
+import MotionButton from "../components/shared/MotionButton";
+import MotionInput from "../components/shared/MotionInput";
 import logo from "../assets/zentage-TS.png";
 
 /* ─────────────────────────────────────────────
@@ -492,7 +494,7 @@ export default function LoginPage() {
           <form key={fieldsKey} onSubmit={handleSubmit}>
             <div className="lp-fields">
               {mode === "register" && (
-                <input
+                <MotionInput
                   id="input-name"
                   type="text"
                   placeholder="Full name"
@@ -502,7 +504,7 @@ export default function LoginPage() {
                   className="lp-input"
                 />
               )}
-              <input
+              <MotionInput
                 id="input-email"
                 type="email"
                 placeholder="Email address"
@@ -511,7 +513,7 @@ export default function LoginPage() {
                 required
                 className="lp-input"
               />
-              <input
+              <MotionInput
                 id="input-password"
                 type="password"
                 placeholder="Password"
@@ -524,7 +526,7 @@ export default function LoginPage() {
 
               {error && <p className="lp-error">{error}</p>}
 
-              <button
+              <MotionButton
                 id="btn-submit"
                 type="submit"
                 disabled={loading}
@@ -541,7 +543,7 @@ export default function LoginPage() {
                 ) : (
                   "Create account"
                 )}
-              </button>
+              </MotionButton>
             </div>
           </form>
         </div>

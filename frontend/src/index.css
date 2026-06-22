@@ -146,3 +146,11 @@ code {
     top: 0;
   }
 }
+
+/* Base style for splash screen to prevent flash of unstyled content (FOUC) */
+.splash-root {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background-color: #06080F;
+}

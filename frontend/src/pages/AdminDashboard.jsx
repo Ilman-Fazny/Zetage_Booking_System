@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { fetchStats, fetchBookings } from "../lib/admin";
 import { DISTRICTS } from "../lib/districts";
+import { listContainerVariants, listItemVariants, microSpring } from "../lib/motionVariants";
 import logo from "../assets/zentage-TS.png";
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -706,37 +708,17 @@ function OverviewTab({ stats, loading }) {
   return (
     <div>
       {/* ── Stat cards ── */}
-      <div className="adm-cards-grid">
-        <GlassCard
-          variant="total"
-          icon="⬡"
-          label="Total Seats"
-          value={stats.total_seats}
-          sub="venue capacity"
-        />
-        <GlassCard
-          variant="booked"
-          icon="◈"
-          label="Booked"
-          value={stats.booked_seats}
-          sub="confirmed tickets"
-        />
-        <GlassCard
-          variant="avail"
-          icon="◇"
-          label="Available"
-          value={stats.available_seats}
-          sub="seats remaining"
-        />
-        <GlassCard
-          variant="revenue"
-          icon="✦"
-          label="Revenue"
-          value={`LKR ${stats.total_revenue.toLocaleString()}`}
-          small
-          sub="total collected"
-        />
-      </div>
+      <motion.div
+        className="adm-cards-grid"
+        variants={listContainerVariants}
+        initial="initial"
+        animate="animate"
+      >
+        <GlassCard variant="total"  icon="⬡" label="Total Seats" value={stats.total_seats}   sub="venue capacity"    />
+        <GlassCard variant="booked" icon="◈" label="Booked"     value={stats.booked_seats}   sub="confirmed tickets" />
+        <GlassCard variant="avail"  icon="◇" label="Available"  value={stats.available_seats} sub="seats remaining"   />
+        <GlassCard variant="revenue" icon="✦" label="Revenue" value={`LKR ${stats.total_revenue.toLocaleString()}`} small sub="total collected" />
+      </motion.div>
 
       {/* ── Occupancy bar ── */}
       <div className="adm-panel" style={{ marginBottom: 16 }}>
@@ -823,12 +805,16 @@ function OverviewTab({ stats, loading }) {
 
 function GlassCard({ variant, icon, label, value, sub, small }) {
   return (
-    <div className={`adm-glass-card adm-card-${variant}`}>
+    <motion.div
+      className={`adm-glass-card adm-card-${variant}`}
+      variants={listItemVariants}
+      whileHover={{ y: -3, scale: 1.02, transition: microSpring }}
+    >
       <div className="adm-card-icon">{icon}</div>
       <p className="adm-card-label">{label}</p>
       <p className={`adm-card-value${small ? " sm" : ""}`}>{value}</p>
       {sub && <p className="adm-card-sub">{sub}</p>}
-    </div>
+    </motion.div>
   );
 }
 
@@ -885,9 +871,15 @@ function BookingsTab({
             {SECTIONS.map((s) => <option key={s}>{s}</option>)}
           </select>
         </div>
-        <button className="adm-apply-btn" onClick={onApplyFilters}>
+        <motion.button
+          className="adm-apply-btn"
+          onClick={onApplyFilters}
+          whileHover={{ scale: 1.03, y: -1 }}
+          whileTap={{ scale: 0.97 }}
+          transition={microSpring}
+        >
           Apply Filters →
-        </button>
+        </motion.button>
       </div>
 
       {/* Results count */}
@@ -913,9 +905,13 @@ function BookingsTab({
                   ))}
                 </tr>
               </thead>
-              <tbody>
+              <motion.tbody
+                variants={listContainerVariants}
+                initial="initial"
+                animate="animate"
+              >
                 {bookings.map((b) => (
-                  <tr key={b.id}>
+                  <motion.tr key={b.id} variants={listItemVariants}>
                     <td className="adm-td-ref">{b.booking_ref}</td>
                     <td>{b.attendee_name || "—"}</td>
                     <td className="adm-td-email">{b.user_email}</td>
@@ -932,9 +928,9 @@ function BookingsTab({
                         day: "2-digit", month: "short", year: "numeric",
                       })}
                     </td>
-                  </tr>
+                  </motion.tr>
                 ))}
-              </tbody>
+              </motion.tbody>
             </table>
           </div>
         </div>

@@ -1,7 +1,11 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate, Navigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { createBooking } from "../lib/bookings";
 import { DISTRICTS } from "../lib/districts";
+import MotionButton from "../components/shared/MotionButton";
+import MotionInput from "../components/shared/MotionInput";
+import { floatingCardVariants, fadeUpVariants } from "../lib/motionVariants";
 import logo from "../assets/zentage-TS.png";
 
 const EVENT_PRICE = 500;
@@ -536,7 +540,12 @@ export default function AttendeeDetailsPage() {
         </button>
 
         {/* ── Seat stub ticket ── */}
-        <div className="adp-stub">
+        <motion.div
+          className="adp-stub"
+          variants={floatingCardVariants}
+          initial="initial"
+          animate="animate"
+        >
           {/* Eyebrow */}
           <div className="adp-stub-eyebrow">
             <img src={logo} alt="Zentage" className="adp-stub-logo" />
@@ -571,10 +580,16 @@ export default function AttendeeDetailsPage() {
               <span className="adp-price-val">LKR {EVENT_PRICE.toLocaleString()}</span>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* ── Details form card ── */}
-        <div className="adp-card">
+        <motion.div
+          className="adp-card"
+          variants={fadeUpVariants}
+          initial="initial"
+          animate="animate"
+          transition={{ delay: 0.15 }}
+        >
           <h1 className="adp-form-title">Your Details</h1>
 
           <form onSubmit={handleSubmit}>
@@ -624,7 +639,7 @@ export default function AttendeeDetailsPage() {
             {/* Phone */}
             <div className="adp-field">
               <label className="adp-label">Phone Number</label>
-              <input
+              <MotionInput
                 id="input-phone"
                 type="tel"
                 value={phone}
@@ -656,7 +671,7 @@ export default function AttendeeDetailsPage() {
             )}
 
             {/* Confirm button */}
-            <button
+            <MotionButton
               id="btn-confirm"
               type="submit"
               disabled={loading}
@@ -671,9 +686,9 @@ export default function AttendeeDetailsPage() {
               ) : (
                 "Confirm Booking →"
               )}
-            </button>
+            </MotionButton>
           </form>
-        </div>
+        </motion.div>
 
       </div>
     </div>

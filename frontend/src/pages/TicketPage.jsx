@@ -1,7 +1,9 @@
 import { useEffect, useRef } from "react";
 import { useLocation, useNavigate, Navigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import QRCode from "qrcode";
 import logo from "../assets/zentage-TS.png";
+import { popVariants, fadeUpVariants, microSpring } from "../lib/motionVariants";
 
 const EVENT = {
   name: "Zentage Talent Show",
@@ -477,7 +479,13 @@ export default function TicketPage() {
         </div>
 
         {/* ── Ticket card ─────────────────────────────── */}
-        <div className="tp-card print-ticket">
+        <motion.div
+          className="tp-card print-ticket"
+          variants={popVariants}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+        >
 
           {/* Gold confirmed banner */}
           <div className="tp-banner">
@@ -508,7 +516,12 @@ export default function TicketPage() {
           <Perforation />
 
           {/* QR code scanner zone */}
-          <div className="tp-qr-zone">
+          <motion.div
+            className="tp-qr-zone"
+            initial={{ opacity: 0, scale: 0.8, rotate: -2 }}
+            animate={{ opacity: 1, scale: 1, rotate: 0 }}
+            transition={{ delay: 0.28, duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+          >
             <div className="tp-qr-frame">
               {/* Additional corner brackets (pseudo handles top-left & bottom-right) */}
               <span className="tp-qr-corner-tr" />
@@ -516,7 +529,7 @@ export default function TicketPage() {
               <canvas ref={canvasRef} className="tp-qr-canvas" />
             </div>
             <p className="tp-qr-hint">⬡ Scan at entrance ⬡</p>
-          </div>
+          </motion.div>
 
           {/* Perforation 2 */}
           <Perforation />
@@ -536,14 +549,23 @@ export default function TicketPage() {
             <span className="tp-foot-text">Non-transferable · 1 person</span>
             <span className="tp-foot-badge">E-Ticket</span>
           </div>
-        </div>
+        </motion.div>
 
         {/* ── Actions ─────────────────────────────────── */}
-        <div className="tp-actions">
-          <button
+        <motion.div
+          className="tp-actions"
+          variants={fadeUpVariants}
+          initial="initial"
+          animate="animate"
+          transition={{ delay: 0.45 }}
+        >
+          <motion.button
             id="btn-print"
             onClick={() => window.print()}
             className="tp-btn-primary"
+            whileHover={{ scale: 1.02, y: -1 }}
+            whileTap={{ scale: 0.97 }}
+            transition={microSpring}
           >
             <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="6 9 6 2 18 2 18 9" />
@@ -551,15 +573,18 @@ export default function TicketPage() {
               <rect x="6" y="14" width="12" height="8" />
             </svg>
             Print / Save as PDF
-          </button>
-          <button
+          </motion.button>
+          <motion.button
             id="btn-back"
             onClick={() => navigate("/")}
             className="tp-btn-ghost"
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.98 }}
+            transition={microSpring}
           >
             ← Back to seat map
-          </button>
-        </div>
+          </motion.button>
+        </motion.div>
 
       </div>
     </div>

@@ -1,19 +1,29 @@
 // src/components/seat-map/SeatSummaryBar.jsx
+import { motion, AnimatePresence } from "framer-motion";
+import { microSpring } from "../../lib/motionVariants";
+
 export default function SeatSummaryBar({ selectedSeat, price, onContinue }) {
   return (
-    <div style={{
-      position: "fixed",
-      bottom: 0,
-      left: 0,
-      right: 0,
-      zIndex: 50,
-      padding: "0 24px",
-      background: "rgba(11,15,25,0.75)",
-      backdropFilter: "blur(20px) saturate(1.5)",
-      WebkitBackdropFilter: "blur(20px) saturate(1.5)",
-      borderTop: "1px solid rgba(255,255,255,0.07)",
-      boxShadow: "0 -4px 40px rgba(0,0,0,0.5), 0 -1px 0 rgba(139,92,246,0.1)",
-    }}>
+    <AnimatePresence mode="wait">
+    <motion.div
+      key="summary-bar"
+      initial={{ opacity: 0, y: 60 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 40 }}
+      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+      style={{
+        position: "fixed",
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: 50,
+        padding: "0 24px",
+        background: "rgba(11,15,25,0.75)",
+        backdropFilter: "blur(20px) saturate(1.5)",
+        WebkitBackdropFilter: "blur(20px) saturate(1.5)",
+        borderTop: "1px solid rgba(255,255,255,0.07)",
+        boxShadow: "0 -4px 40px rgba(0,0,0,0.5), 0 -1px 0 rgba(139,92,246,0.1)",
+      }}>
       {/* Top glow edge */}
       <div style={{
         position: "absolute",
@@ -88,9 +98,12 @@ export default function SeatSummaryBar({ selectedSeat, price, onContinue }) {
                 </p>
               </div>
 
-              <button
+              <motion.button
                 id="btn-continue"
                 onClick={onContinue}
+                whileHover={{ scale: 1.04, y: -2 }}
+                whileTap={{ scale: 0.96, y: 0 }}
+                transition={microSpring}
                 style={{
                   padding: "11px 28px",
                   background: "linear-gradient(135deg,#7c3aed 0%,#6d28d9 50%,#5b21b6 100%)",
@@ -103,25 +116,17 @@ export default function SeatSummaryBar({ selectedSeat, price, onContinue }) {
                   letterSpacing: "0.03em",
                   cursor: "pointer",
                   boxShadow: "0 0 20px rgba(109,40,217,0.5), 0 4px 12px rgba(109,40,217,0.35), inset 0 1px 0 rgba(255,255,255,0.12)",
-                  transition: "transform 0.15s ease, box-shadow 0.15s ease",
                   position: "relative",
                   overflow: "hidden",
                 }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.transform = "translateY(-1px)";
-                  e.currentTarget.style.boxShadow = "0 0 30px rgba(109,40,217,0.7), 0 6px 18px rgba(109,40,217,0.5), inset 0 1px 0 rgba(255,255,255,0.15)";
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow = "0 0 20px rgba(109,40,217,0.5), 0 4px 12px rgba(109,40,217,0.35), inset 0 1px 0 rgba(255,255,255,0.12)";
-                }}
               >
                 Continue →
-              </button>
+              </motion.button>
             </div>
           </>
         )}
       </div>
-    </div>
+    </motion.div>
+    </AnimatePresence>
   );
 }
