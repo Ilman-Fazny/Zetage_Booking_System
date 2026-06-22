@@ -1,161 +1,131 @@
+import { useEffect, useRef } from "react";
 import { useLocation, useNavigate, Navigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import { useState } from "react";
-import api from "../lib/api";
+import QRCode from "qrcode";
+
+const EVENT = {
+  name: "Zentage Talent Show",
+  date: "September 6, 2026",
+  venue: "Elphinstone Theatre, Maradana",
+  price: "LKR 5,000",
+};
 
 export default function TicketPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const canvasRef = useRef(null);
   const booking = location.state?.booking;
-  const [cancelling, setCancelling] = useState(false);
-  const [error, setError] = useState("");
 
+  // No booking in state — user refreshed or navigated directly.
   if (!booking) {
     return <Navigate to="/" replace />;
   }
 
-  async function handleCancelBooking() {
-    if (!confirm("Are you sure you want to cancel this booking? This will release your seat.")) {
-      return;
-    }
-    setCancelling(true);
-    setError("");
-    try {
-      await api.delete("/bookings/me");
-      navigate("/", { replace: true });
-    } catch (err) {
-      setError("Failed to cancel your booking. Please try again.");
-    } finally {
-      setCancelling(false);
-    }
-  }
+  useEffect(() => {
+    if (!canvasRef.current) return;
+    QRCode.toCanvas(canvasRef.current, booking.booking_ref, {
+      width: 180,
+      margin: 1,
+      color: { dark: "#0f172a", light: "#ffffff" },
+    });
+  }, [booking.booking_ref]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-tr from-blue-100/60 via-sky-50 to-indigo-100/50 px-4 py-8 flex flex-col items-center justify-center">
-      <div className="w-full max-w-sm print:max-w-none print:shadow-none">
-        
-        {/* Back Button (Hidden in Print) */}
-        <button
-          onClick={() => navigate("/")}
-          className="text-sm font-medium text-neutral-600 mb-6 hover:text-neutral-900 flex items-center gap-1.5 transition print:hidden"
-        >
-          <span>←</span> Back to Seat Map
-        </button>
+    <div className="min-h-screen bg-neutral-50 px-4 py-10 flex items-start justify-center">
+      <div className="w-full max-w-sm">
 
-        {/* Ticket Wrapper */}
-        <div className="bg-white rounded-3xl shadow-xl shadow-blue-900/5 overflow-hidden border border-blue-100/60 relative">
-          
-          {/* Header stub */}
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-6 text-white text-center">
-            <p className="text-xs font-bold uppercase tracking-widest text-indigo-200">Official Entry Ticket</p>
-            <h2 className="text-xl font-bold mt-1">Zentage Talent Show</h2>
-            <p className="text-xs text-indigo-150 mt-1 opacity-90">Sasnaka Sansada Foundation</p>
+        {/* Success header */}
+        <div className="text-center mb-6">
+          <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+            <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h1 className="text-xl font-semibold text-neutral-900">Booking confirmed</h1>
+          <p className="text-sm text-neutral-500 mt-1">
+            Your ticket has been sent to your email
+          </p>
+        </div>
+
+        {/* Ticket card */}
+        <div className="bg-white rounded-2xl overflow-hidden border border-neutral-200 shadow-sm print-ticket">
+
+          {/* Ticket top — dark header */}
+          <div className="bg-neutral-900 px-5 py-4 text-center">
+            <p className="text-xs font-semibold tracking-widest text-neutral-400 uppercase mb-1">
+              Sasnaka Sansada Foundation
+            </p>
+            <p className="text-white font-semibold text-base">{EVENT.name}</p>
           </div>
 
-          {/* Ticket Body */}
-          <div className="p-6 space-y-5">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-xs text-neutral-400 font-medium uppercase tracking-wider">Date & Time</p>
-                <p className="text-sm font-semibold text-neutral-800 mt-0.5">Sept 6, 2026</p>
-                <p className="text-xs text-neutral-500">6:00 PM onwards</p>
-              </div>
-              <div>
-                <p className="text-xs text-neutral-400 font-medium uppercase tracking-wider">Venue</p>
-                <p className="text-sm font-semibold text-neutral-800 mt-0.5">Elphinstone Theatre</p>
-                <p className="text-xs text-neutral-500">Maradana, Sri Lanka</p>
-              </div>
-            </div>
-
-            <div className="bg-neutral-50 border border-neutral-150 rounded-2xl p-4 flex justify-between items-center">
-              <div>
-                <p className="text-xs text-neutral-400 font-semibold uppercase tracking-wider">Seat Allocation</p>
-                <p className="text-2xl font-black text-indigo-600 mt-0.5">{booking.seat_code}</p>
-                <p className="text-xs text-neutral-500 font-medium">{booking.section}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-xs text-neutral-400 font-semibold uppercase tracking-wider">Ref Code</p>
-                <p className="text-sm font-bold text-neutral-800 mt-1 font-mono">{booking.booking_ref}</p>
-                <p className="text-xs text-green-600 font-semibold mt-0.5">✓ Confirmed</p>
-              </div>
-            </div>
-
-            <div className="space-y-2 pt-1">
-              <div className="flex justify-between text-sm">
-                <span className="text-neutral-500">Attendee Name</span>
-                <span className="font-semibold text-neutral-800">{user?.name || "Attendee"}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-neutral-500">Email Address</span>
-                <span className="font-semibold text-neutral-800 font-mono text-xs">{user?.email}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-neutral-500">District</span>
-                <span className="font-semibold text-neutral-800">{booking.district}</span>
-              </div>
-            </div>
+          {/* Perforated divider */}
+          <div className="relative flex items-center">
+            <div className="absolute -left-3 w-6 h-6 bg-neutral-50 rounded-full border border-neutral-200" />
+            <div className="flex-1 border-t border-dashed border-neutral-300 mx-3" />
+            <div className="absolute -right-3 w-6 h-6 bg-neutral-50 rounded-full border border-neutral-200" />
           </div>
 
-          {/* Dotted Ticket Stub Separator with side cuts */}
-          <div className="relative flex items-center justify-between py-2 my-1">
-            <div className="w-4 h-8 bg-gradient-to-r from-neutral-100 to-transparent border-r border-blue-100 rounded-r-full -left-0.5 absolute" />
-            <div className="w-full border-t-2 border-dashed border-neutral-200 mx-6" />
-            <div className="w-4 h-8 bg-gradient-to-l from-neutral-100 to-transparent border-l border-blue-100 rounded-l-full -right-0.5 absolute" />
+          {/* QR code */}
+          <div className="flex justify-center pt-5 pb-3">
+            <canvas ref={canvasRef} className="rounded-lg" />
           </div>
 
-          {/* Ticket Barcode Stub */}
-          <div className="p-6 pt-3 text-center space-y-4">
-            <p className="text-xs text-neutral-400 font-medium uppercase tracking-wider">Scan At Entrance</p>
-            
-            {/* Visual Barcode stub */}
-            <div className="flex justify-center items-center h-12 gap-0.5 bg-neutral-50 p-2 rounded-xl border border-neutral-100">
-              <div className="w-0.5 h-full bg-neutral-850" />
-              <div className="w-1.5 h-full bg-neutral-850" />
-              <div className="w-0.5 h-full bg-neutral-850" />
-              <div className="w-2.5 h-full bg-neutral-850" />
-              <div className="w-0.5 h-full bg-neutral-850" />
-              <div className="w-1 h-full bg-neutral-850" />
-              <div className="w-2.5 h-full bg-neutral-850" />
-              <div className="w-0.5 h-full bg-neutral-850" />
-              <div className="w-1.5 h-full bg-neutral-850" />
-              <div className="w-0.5 h-full bg-neutral-850" />
-              <div className="w-1 h-full bg-neutral-850" />
-              <div className="w-0.5 h-full bg-neutral-850" />
-              <div className="w-2 h-full bg-neutral-850" />
-              <div className="w-1.5 h-full bg-neutral-850" />
-              <div className="w-0.5 h-full bg-neutral-850" />
-              <div className="w-1 h-full bg-neutral-850" />
-              <div className="w-1.5 h-full bg-neutral-850" />
-              <div className="w-0.5 h-full bg-neutral-850" />
-              <div className="w-2.5 h-full bg-neutral-850" />
-            </div>
+          <p className="text-center text-xs text-neutral-400 pb-4">
+            Show this at the entrance
+          </p>
 
-            <p className="text-xs font-mono text-neutral-500 tracking-wider">{booking.booking_ref}</p>
+          {/* Perforated divider */}
+          <div className="relative flex items-center">
+            <div className="absolute -left-3 w-6 h-6 bg-neutral-50 rounded-full border border-neutral-200" />
+            <div className="flex-1 border-t border-dashed border-neutral-300 mx-3" />
+            <div className="absolute -right-3 w-6 h-6 bg-neutral-50 rounded-full border border-neutral-200" />
+          </div>
+
+          {/* Ticket details */}
+          <div className="px-5 py-4 space-y-3">
+            <TicketRow label="Booking ref" value={booking.booking_ref} mono />
+            <TicketRow label="Seat" value={booking.seat_code} />
+            <TicketRow label="Section" value={booking.section} />
+            <TicketRow label="Date" value={EVENT.date} />
+            <TicketRow label="Venue" value={EVENT.venue} />
+            <TicketRow label="Price" value={EVENT.price} />
+          </div>
+
+          {/* Bottom strip */}
+          <div className="bg-neutral-50 border-t border-neutral-200 px-5 py-3 text-center">
+            <p className="text-xs text-neutral-400">
+              One ticket per person · Non-transferable
+            </p>
           </div>
         </div>
 
-        {/* Action Buttons (Hidden in Print) */}
-        <div className="mt-6 flex flex-col gap-3 print:hidden">
+        {/* Actions */}
+        <div className="mt-5 space-y-2">
           <button
             onClick={() => window.print()}
-            className="w-full bg-blue-600 text-white text-sm font-semibold py-2.5 rounded-lg hover:bg-blue-700 transition shadow-md shadow-blue-500/10 flex items-center justify-center gap-1.5"
+            className="w-full text-sm font-medium py-2.5 rounded-lg border border-neutral-300 bg-white hover:bg-neutral-50 transition text-neutral-700"
           >
-            🖨️ Print Ticket
+            Print / Save as PDF
           </button>
-          
           <button
-            onClick={handleCancelBooking}
-            disabled={cancelling}
-            className="w-full bg-white text-red-600 border border-red-200 text-sm font-semibold py-2.5 rounded-lg hover:bg-red-50 transition disabled:opacity-50 flex items-center justify-center gap-1.5"
+            onClick={() => navigate("/")}
+            className="w-full text-sm text-neutral-400 py-2 hover:text-neutral-600 transition"
           >
-            {cancelling ? "Releasing seat..." : "Cancel Reservation"}
+            Back to seat map
           </button>
-
-          {error && <p className="text-sm text-red-600 text-center">{error}</p>}
         </div>
 
       </div>
+    </div>
+  );
+}
+
+function TicketRow({ label, value, mono = false }) {
+  return (
+    <div className="flex justify-between items-baseline">
+      <span className="text-xs text-neutral-500">{label}</span>
+      <span className={`text-sm font-medium text-neutral-900 ${mono ? "font-mono" : ""}`}>
+        {value}
+      </span>
     </div>
   );
 }

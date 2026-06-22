@@ -3,7 +3,7 @@ import { useLocation, useNavigate, Navigate } from "react-router-dom";
 import { createBooking } from "../lib/bookings";
 import { DISTRICTS } from "../lib/districts";
 
-const EVENT_PRICE = 500; // LKR — matches backend and selection page
+const EVENT_PRICE = 500;
 
 export default function AttendeeDetailsPage() {
   const location = useLocation();
@@ -16,7 +16,7 @@ export default function AttendeeDetailsPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // No seat in state — user landed here directly (refresh, back button, etc).
+  // No seat in state - user landed here directly (refresh, back button, etc).
   // Send them back to pick a seat rather than letting them submit a broken form.
   if (!seat) {
     return <Navigate to="/" replace />;
@@ -109,22 +109,20 @@ export default function AttendeeDetailsPage() {
                 <button
                   type="button"
                   onClick={() => setIsSasnakaMember(true)}
-                  className={`flex-1 py-2.5 text-sm font-medium rounded-lg border transition ${
-                    isSasnakaMember === true
+                  className={`flex-1 py-2.5 text-sm font-medium rounded-lg border transition ${isSasnakaMember === true
                       ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
                       : "bg-white text-neutral-700 border-blue-200 hover:bg-neutral-50"
-                  }`}
+                    }`}
                 >
                   Yes
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsSasnakaMember(false)}
-                  className={`flex-1 py-2.5 text-sm font-medium rounded-lg border transition ${
-                    isSasnakaMember === false
+                  className={`flex-1 py-2.5 text-sm font-medium rounded-lg border transition ${isSasnakaMember === false
                       ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
                       : "bg-white text-neutral-700 border-blue-200 hover:bg-neutral-50"
-                  }`}
+                    }`}
                 >
                   No
                 </button>
