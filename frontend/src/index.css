@@ -72,6 +72,15 @@ body {
   box-sizing: border-box;
 }
 
+/* Full-bleed escape hatch for login + seat selection pages */
+#root:has(.lp-root),
+#root:has(.ssp-root) {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  border-inline: none;
+}
+
 h1,
 h2 {
   font-family: var(--heading);

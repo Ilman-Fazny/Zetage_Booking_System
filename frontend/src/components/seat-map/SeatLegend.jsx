@@ -1,27 +1,68 @@
 // src/components/seat-map/SeatLegend.jsx
 export default function SeatLegend() {
-  const items = [
-    { label: "Available", color: "#f8fafc", border: "#cbd5e1", showSlash: false },
-    { label: "Selected", color: "#4f46e5", border: "#4338ca", showSlash: false },
-    { label: "Booked (Unavailable)", color: "#f3f4f6", border: "#e2e8f0", showSlash: true },
-  ];
   return (
-    <div className="flex gap-5 text-xs text-neutral-600 py-1">
-      {items.map((item) => (
-        <div key={item.label} className="flex items-center gap-2 select-none">
-          <span
-            className="relative w-4 h-4 rounded-[4px] border flex items-center justify-center overflow-hidden"
-            style={{ backgroundColor: item.color, borderColor: item.border, borderWidth: '0.75px' }}
-          >
-            {item.showSlash && (
-              <svg className="absolute inset-0 w-full h-full text-slate-300" viewBox="0 0 16 16" fill="none">
-                <line x1="0" y1="0" x2="16" y2="16" stroke="currentColor" strokeWidth="1" />
-              </svg>
-            )}
-          </span>
-          <span className="font-medium text-neutral-700">{item.label}</span>
-        </div>
-      ))}
+    <div style={{
+      display: "flex",
+      gap: "20px",
+      alignItems: "center",
+      padding: "8px 14px",
+      background: "rgba(255,255,255,0.04)",
+      border: "1px solid rgba(255,255,255,0.07)",
+      borderRadius: "10px",
+      backdropFilter: "blur(8px)",
+      width: "fit-content",
+    }}>
+      {/* Available */}
+      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <span style={{
+          width: 14, height: 14,
+          borderRadius: 3,
+          background: "rgba(255,255,255,0.04)",
+          border: "0.8px solid rgba(255,255,255,0.2)",
+          display: "inline-block",
+          flexShrink: 0,
+        }} />
+        <span style={{ fontSize: 12, color: "rgba(200,196,220,0.7)", fontWeight: 400, userSelect: "none" }}>
+          Available
+        </span>
+      </div>
+
+      {/* Selected */}
+      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <span style={{
+          width: 14, height: 14,
+          borderRadius: 3,
+          background: "rgba(109,40,217,0.85)",
+          border: "1.2px solid #a78bfa",
+          boxShadow: "0 0 6px rgba(139,92,246,0.8), 0 0 12px rgba(109,40,217,0.5)",
+          display: "inline-block",
+          flexShrink: 0,
+        }} />
+        <span style={{ fontSize: 12, color: "rgba(200,196,220,0.7)", fontWeight: 400, userSelect: "none" }}>
+          Selected
+        </span>
+      </div>
+
+      {/* Booked */}
+      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <span style={{
+          width: 14, height: 14,
+          borderRadius: 3,
+          background: "rgba(255,255,255,0.03)",
+          border: "0.8px solid rgba(255,255,255,0.07)",
+          display: "inline-block",
+          flexShrink: 0,
+          position: "relative",
+          overflow: "hidden",
+        }}>
+          <svg viewBox="0 0 14 14" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
+            <line x1="2" y1="2" x2="12" y2="12" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
+          </svg>
+        </span>
+        <span style={{ fontSize: 12, color: "rgba(200,196,220,0.7)", fontWeight: 400, userSelect: "none" }}>
+          Booked
+        </span>
+      </div>
     </div>
   );
 }

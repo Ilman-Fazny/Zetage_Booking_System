@@ -269,7 +269,7 @@ export default function SeatSection({ seats, blockKey, blockX, blockY, selectedS
                 textAnchor="end"
                 dominantBaseline="central"
                 fontSize={10}
-                fill="#6b7280"
+                fill="rgba(148,163,184,0.45)"
               >
                 {rowLabel}
               </text>
@@ -323,7 +323,7 @@ export default function SeatSection({ seats, blockKey, blockX, blockY, selectedS
                 textAnchor="end"
                 dominantBaseline="central"
                 fontSize={10}
-                fill="#6b7280"
+                fill="rgba(148,163,184,0.45)"
               >
                 {rowLabel}
               </text>
@@ -376,7 +376,7 @@ export default function SeatSection({ seats, blockKey, blockX, blockY, selectedS
               textAnchor="end"
               dominantBaseline="central"
               fontSize={10}
-              fill="#6b7280"
+              fill="rgba(148,163,184,0.45)"
             >
               {rowLabel}
             </text>

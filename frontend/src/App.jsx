@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import ProtectedRoute from "./components/shared/ProtectedRoute";
 import LoginPage from "./pages/LoginPage";
 import SeatSelectionPage from "./pages/SeatSelectionPage";
@@ -11,6 +11,10 @@ function Placeholder({ name }) {
 }
 
 export default function App() {
+  const location = useLocation();
+  const isLoginPage = location.pathname === "/login";
+  const isFullScreen = location.pathname === "/login" || location.pathname === "/";
+
   return (
     <div className="flex flex-col min-h-screen w-full">
       <div className="flex-grow">
@@ -50,9 +54,11 @@ export default function App() {
           />
         </Routes>
       </div>
-      <footer className="py-4 text-center text-xs text-neutral-400 border-t border-neutral-200 bg-neutral-50 print:hidden select-none">
-        © Sasnaka Sansada Talent Show 2026 - Zentage
-      </footer>
+      {!isFullScreen && (
+        <footer className="py-4 text-center text-xs text-neutral-400 border-t border-neutral-200 bg-neutral-50 print:hidden select-none">
+          © Sasnaka Sansada Talent Show 2026 - Zentage
+        </footer>
+      )}
     </div>
   );
 }

@@ -2,62 +2,91 @@
 export default function Seat({ seat, isSelected, onSelect, x, y, size }) {
   const isBooked = seat.status === "booked";
 
-  let fill = "#f8fafc";       // available — slate-50
-  let stroke = "#cbd5e1";     // slate-300
-  let textColor = "#475569";  // slate-600
-  
-  if (isSelected) {
-    fill = "#4f46e5";          // selected — indigo-600
-    stroke = "#4338ca";        // indigo-700
-    textColor = "#ffffff";     // white
-  } else if (isBooked) {
-    fill = "#f3f4f6";          // booked — slate-100
-    stroke = "#e2e8f0";        // slate-200
-    textColor = "#94a3b8";     // slate-400 (faded)
-  }
-
-  const style = {
-    cursor: isBooked ? "not-allowed" : "pointer",
-    transition: "all 0.15s ease-in-out",
-    transformOrigin: `${x + size / 2}px ${y + size / 2}px`,
-  };
+  const cx = x + size / 2;
+  const cy = y + size / 2;
 
   return (
     <g
-      onClick={() => onSelect(seat)}
-      style={style}
-      className={`group ${isBooked ? "opacity-50" : "hover:scale-[1.22] hover:brightness-[0.98]"}`}
+      onClick={() => !isBooked && onSelect(seat)}
+      style={{
+        cursor: isBooked ? "not-allowed" : "pointer",
+        transformOrigin: `${cx}px ${cy}px`,
+        transition: "transform 0.18s cubic-bezier(0.34,1.56,0.64,1), filter 0.18s ease",
+      }}
+      className={!isBooked && !isSelected ? "seat-hover-group" : ""}
     >
+      {/* Selected glow ring */}
+      {isSelected && (
+        <rect
+          x={x - 3}
+          y={y - 3}
+          width={size + 6}
+          height={size + 6}
+          rx={6}
+          fill="none"
+          stroke="rgba(139,92,246,0.45)"
+          strokeWidth={2.5}
+          style={{ filter: "blur(1.5px)" }}
+        />
+      )}
+
+      {/* Seat body */}
       <rect
         x={x}
         y={y}
         width={size}
         height={size}
         rx={4}
-        fill={fill}
-        stroke={stroke}
-        strokeWidth={0.75}
-        className="transition-all duration-150"
+        fill={
+          isBooked
+            ? "rgba(255,255,255,0.03)"
+            : isSelected
+            ? "rgba(109,40,217,0.85)"
+            : "rgba(255,255,255,0.04)"
+        }
+        stroke={
+          isBooked
+            ? "rgba(255,255,255,0.07)"
+            : isSelected
+            ? "#a78bfa"
+            : "rgba(255,255,255,0.18)"
+        }
+        strokeWidth={isSelected ? 1.2 : 0.8}
+        style={
+          isSelected
+            ? { filter: "drop-shadow(0 0 5px rgba(139,92,246,0.9)) drop-shadow(0 0 10px rgba(109,40,217,0.6))" }
+            : {}
+        }
       />
+
+      {/* Booked cross-slash */}
       {isBooked && (
         <line
-          x1={x}
-          y1={y}
-          x2={x + size}
-          y2={y + size}
-          stroke="#cbd5e1"
-          strokeWidth={0.75}
+          x1={x + 3}
+          y1={y + 3}
+          x2={x + size - 3}
+          y2={y + size - 3}
+          stroke="rgba(255,255,255,0.09)"
+          strokeWidth={0.8}
         />
       )}
+
+      {/* Seat number label */}
       <text
-        x={x + size / 2}
-        y={y + size / 2}
+        x={cx}
+        y={cy}
         textAnchor="middle"
         dominantBaseline="central"
-        fontSize={size * 0.4}
-        fontWeight={isSelected ? "600" : "500"}
-        fill={textColor}
-        className="select-none transition-all duration-150"
+        fontSize={size * 0.38}
+        fontWeight={isSelected ? "700" : "400"}
+        fill={
+          isBooked
+            ? "rgba(255,255,255,0.15)"
+            : isSelected
+            ? "#f5f3ff"
+            : "rgba(255,255,255,0.5)"
+        }
+        style={{ userSelect: "none", letterSpacing: "-0.3px" }}
       >
         {seat.number}
       </text>
