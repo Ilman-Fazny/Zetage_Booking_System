@@ -25,6 +25,7 @@ class Booking(Base):
     seat_id            = Column(Integer, ForeignKey("seats.id"), nullable=False)
 
     # attendee details collected after seat selection
+    attendee_name      = Column(String, nullable=False, server_default="Unknown")
     district           = Column(String, nullable=False)
     is_sasnaka_member  = Column(Boolean, nullable=False, default=False)
     phone              = Column(String, nullable=True)

@@ -37,7 +37,6 @@ export default function TheatreMap({ sections, selectedSeat, onSelect }) {
     const next = Math.min(2.5, Math.max(0.4, scale - e.deltaY * 0.001));
     setScale(next);
   }
-
   function handlePointerDown(e) {
     dragRef.current = { startX: e.clientX, startY: e.clientY, panX: pan.x, panY: pan.y };
   }
@@ -47,9 +46,7 @@ export default function TheatreMap({ sections, selectedSeat, onSelect }) {
     const dy = e.clientY - dragRef.current.startY;
     setPan({ x: dragRef.current.panX + dx, y: dragRef.current.panY + dy });
   }
-  function handlePointerUp() {
-    dragRef.current = null;
-  }
+  function handlePointerUp() { dragRef.current = null; }
 
   const blockSeats = {
     groundFloor: [],
@@ -62,9 +59,7 @@ export default function TheatreMap({ sections, selectedSeat, onSelect }) {
   for (const sectionGroup of sections) {
     for (const seat of sectionGroup.seats) {
       const blockKey = getBlockForSeat(seat);
-      if (blockSeats[blockKey]) {
-        blockSeats[blockKey].push(seat);
-      }
+      if (blockSeats[blockKey]) blockSeats[blockKey].push(seat);
     }
   }
 
@@ -74,45 +69,40 @@ export default function TheatreMap({ sections, selectedSeat, onSelect }) {
       width: "100%",
       height: "70vh",
       overflow: "hidden",
-      background: "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(109,40,217,0.07) 0%, transparent 55%), #0B0F19",
+      background: "#0B0F19",
       borderRadius: 16,
       border: "1px solid rgba(255,255,255,0.06)",
       boxShadow: "0 0 0 1px rgba(139,92,246,0.04), 0 24px 60px rgba(0,0,0,0.6)",
     }}>
-      {/* Seat hover effect injected once */}
+      {/* ── Seat hover CSS injected once ── */}
       <style>{`
         .seat-hover-group:hover {
-          transform: scale(1.28);
-          filter: brightness(1.3) drop-shadow(0 0 4px rgba(139,92,246,0.6));
+          transform: scale(1.3);
+          filter: brightness(1.4) drop-shadow(0 0 5px rgba(139,92,246,0.65));
         }
       `}</style>
 
-      {/* Zoom Controls */}
+      {/* ── Zoom controls ── */}
       <div style={{
-        position: "absolute",
-        top: 12,
-        right: 12,
-        zIndex: 10,
-        display: "flex",
-        gap: 6,
+        position: "absolute", top: 12, right: 12, zIndex: 10,
+        display: "flex", gap: 6,
       }}>
         {[
-          { label: "+", action: () => setScale(s => Math.min(2.5, s + 0.2)) },
-          { label: "−", action: () => setScale(s => Math.max(0.4, s - 0.2)) },
+          { label: "+",     action: () => setScale(s => Math.min(2.5, s + 0.2)) },
+          { label: "−",     action: () => setScale(s => Math.max(0.4, s - 0.2)) },
           { label: "Reset", action: () => { setScale(1); setPan({ x: 0, y: 0 }); } },
         ].map(({ label, action }) => (
           <button
             key={label}
             onClick={action}
             style={{
-              height: 32,
-              minWidth: 32,
+              height: 30, minWidth: 30,
               padding: label === "Reset" ? "0 12px" : 0,
-              background: "rgba(255,255,255,0.06)",
-              border: "1px solid rgba(255,255,255,0.10)",
+              background: "rgba(255,255,255,0.05)",
+              border: "1px solid rgba(255,255,255,0.09)",
               borderRadius: 8,
-              color: "rgba(220,214,255,0.8)",
-              fontSize: label === "Reset" ? 11 : 16,
+              color: "rgba(220,214,255,0.75)",
+              fontSize: label === "Reset" ? 11 : 15,
               fontWeight: 500,
               fontFamily: "'Inter',system-ui,sans-serif",
               cursor: "pointer",
@@ -121,12 +111,12 @@ export default function TheatreMap({ sections, selectedSeat, onSelect }) {
               letterSpacing: label === "Reset" ? "0.04em" : 0,
             }}
             onMouseEnter={e => {
-              e.currentTarget.style.background = "rgba(139,92,246,0.2)";
+              e.currentTarget.style.background = "rgba(139,92,246,0.18)";
               e.currentTarget.style.borderColor = "rgba(139,92,246,0.4)";
             }}
             onMouseLeave={e => {
-              e.currentTarget.style.background = "rgba(255,255,255,0.06)";
-              e.currentTarget.style.borderColor = "rgba(255,255,255,0.10)";
+              e.currentTarget.style.background = "rgba(255,255,255,0.05)";
+              e.currentTarget.style.borderColor = "rgba(255,255,255,0.09)";
             }}
           >
             {label}
@@ -143,199 +133,98 @@ export default function TheatreMap({ sections, selectedSeat, onSelect }) {
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
       >
-        {/* ── SVG defs: gradients & filters ───────────────────── */}
+        {/* ── SVG Defs ── */}
         <defs>
-          {/* Stage gradient */}
-          <radialGradient id="stageGrad" cx="50%" cy="50%" r="60%">
-            <stop offset="0%"  stopColor="#fbbf24" stopOpacity="0.18" />
-            <stop offset="40%" stopColor="#dc2626" stopOpacity="0.55" />
-            <stop offset="100%" stopColor="#7f1d1d" stopOpacity="0.9" />
-          </radialGradient>
-          {/* Stage glow filter */}
-          <filter id="stageGlow" x="-30%" y="-60%" width="160%" height="220%">
-            <feGaussianBlur stdDeviation="6" result="blur" />
-            <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+          {/* Stage: horizontal neon sweep */}
+          <linearGradient id="stageLinear" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%"   stopColor="#1e0a3c" stopOpacity="1" />
+            <stop offset="25%"  stopColor="#4c1d95" stopOpacity="1" />
+            <stop offset="50%"  stopColor="#7c3aed" stopOpacity="1" />
+            <stop offset="75%"  stopColor="#4c1d95" stopOpacity="1" />
+            <stop offset="100%" stopColor="#1e0a3c" stopOpacity="1" />
+          </linearGradient>
+
+          {/* Stage top highlight shimmer */}
+          <linearGradient id="stageShimmer" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%"   stopColor="rgba(255,255,255,0)" />
+            <stop offset="35%"  stopColor="rgba(196,181,253,0.35)" />
+            <stop offset="65%"  stopColor="rgba(196,181,253,0.35)" />
+            <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+          </linearGradient>
+
+          {/* Stage outer bloom filter */}
+          <filter id="stageBloom" x="-15%" y="-80%" width="130%" height="260%">
+            <feGaussianBlur stdDeviation="5" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
           </filter>
-          {/* Sound control gradient */}
-          <linearGradient id="soundCtrlGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#7c3aed" />
-            <stop offset="100%" stopColor="#5b21b6" />
-          </linearGradient>
-          {/* Ground floor bar */}
-          <linearGradient id="groundBarGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%"  stopColor="#854d0e" />
-            <stop offset="50%" stopColor="#ca8a04" />
-            <stop offset="100%" stopColor="#854d0e" />
-          </linearGradient>
-          {/* Balcony bar */}
-          <linearGradient id="balconyBarGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%"  stopColor="#3730a3" />
-            <stop offset="50%" stopColor="#6366f1" />
-            <stop offset="100%" stopColor="#3730a3" />
-          </linearGradient>
+
+          {/* Seat selected violet glow filter */}
+          <filter id="seatGlow" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="2" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
         </defs>
 
         <g transform={`translate(${pan.x} ${pan.y}) scale(${scale})`}>
 
-          {/* ── Stage ───────────────────────────────────────────── */}
-          {/* Outer glow halo */}
+          {/* ════════════════════════════════════════════
+              STAGE — Neon gradient bar, no text clutter
+          ════════════════════════════════════════════ */}
+
+          {/* Ambient bloom behind stage */}
           <rect
-            x={STAGE.x - 8} y={STAGE.y - 8}
-            width={STAGE.width + 16} height={STAGE.height + 16}
+            x={STAGE.x - 4} y={STAGE.y - 4}
+            width={STAGE.width + 8} height={STAGE.height + 8}
             rx={10}
             fill="none"
-            stroke="rgba(251,191,36,0.15)"
-            strokeWidth={8}
-            style={{ filter: "blur(6px)" }}
+            stroke="rgba(139,92,246,0.25)"
+            strokeWidth={10}
+            style={{ filter: "blur(8px)" }}
           />
-          {/* Stage body */}
+
+          {/* Stage body with neon gradient */}
           <rect
             x={STAGE.x} y={STAGE.y}
             width={STAGE.width} height={STAGE.height}
             rx={6}
-            fill="url(#stageGrad)"
-            stroke="rgba(220,38,38,0.5)"
-            strokeWidth={1}
-            filter="url(#stageGlow)"
+            fill="url(#stageLinear)"
+            stroke="rgba(139,92,246,0.55)"
+            strokeWidth={0.75}
+            filter="url(#stageBloom)"
           />
-          {/* Stage top highlight strip */}
+
+          {/* Top shimmer highlight strip */}
           <rect
-            x={STAGE.x + 2} y={STAGE.y + 1}
-            width={STAGE.width - 4} height={3}
-            rx={3}
-            fill="rgba(251,191,36,0.25)"
+            x={STAGE.x + 4} y={STAGE.y + 1}
+            width={STAGE.width - 8} height={2.5}
+            rx={2}
+            fill="url(#stageShimmer)"
           />
-          {/* Stage label */}
+
+          {/* Minimal "STAGE" label — clean, no dimensions */}
           <text
             x={STAGE.x + STAGE.width / 2}
             y={STAGE.y + STAGE.height / 2}
             textAnchor="middle"
             dominantBaseline="central"
-            fontSize={11}
-            fill="rgba(255,255,255,0.85)"
+            fontSize={10}
+            fill="rgba(196,181,253,0.7)"
             fontWeight={600}
             fontFamily="'Inter',system-ui,sans-serif"
-            style={{ letterSpacing: "0.05em" }}
+            style={{ letterSpacing: "0.22em", textTransform: "uppercase" }}
           >
-            ( Length 50 feet ) ✦ STAGE ✦ ( Width 29 feet )
+            STAGE
           </text>
 
-          {/* ── Sound Light Control Unit ────────────────────────── */}
-          <g>
-            <rect
-              x={492} y={395} width={176} height={35}
-              rx={4}
-              fill="url(#soundCtrlGrad)"
-              stroke="rgba(139,92,246,0.4)"
-              strokeWidth={1}
-            />
-            <text
-              x={492 + 176 / 2} y={395 + 35 / 2}
-              textAnchor="middle" dominantBaseline="central"
-              fontSize={10} fill="rgba(232,225,255,0.9)"
-              fontWeight={500}
-              fontFamily="'Inter',system-ui,sans-serif"
-              style={{ letterSpacing: "0.03em" }}
-            >
-              Sound Light Control Unit
-            </text>
-          </g>
-
-          {/* ── Seat count labels ───────────────────────────────── */}
-          {[
-            { x: 370, y: 452, text: "Seats 117" },
-            { x: 571, y: 387, text: "Seats 112" },
-            { x: 772, y: 452, text: "Seats 117" },
-          ].map(({ x, y, text }) => (
-            <text
-              key={text + x}
-              x={x} y={y}
-              textAnchor="middle" dominantBaseline="central"
-              fontSize={10} fill="rgba(167,139,250,0.65)"
-              fontWeight={600}
-              fontFamily="'Inter',system-ui,sans-serif"
-            >
-              {text}
-            </text>
-          ))}
-
-          {/* ── Ground Floor Total Bar ──────────────────────────── */}
-          <g>
-            <rect x={293} y={465} width={566} height={20} fill="url(#groundBarGrad)" rx={4} />
-            <text
-              x={293 + 566 / 2} y={465 + 10}
-              textAnchor="middle" dominantBaseline="central"
-              fontSize={11} fill="rgba(254,243,199,0.9)" fontWeight={600}
-              fontFamily="'Inter',system-ui,sans-serif"
-            >
-              Ground Floor Total Number Of Seats  346
-            </text>
-          </g>
-
-          {/* ── Balcony Total Bar ───────────────────────────────── */}
-          <g>
-            <rect x={293} y={490} width={566} height={20} fill="url(#balconyBarGrad)" rx={4} />
-            <text
-              x={293 + 566 / 2} y={490 + 10}
-              textAnchor="middle" dominantBaseline="central"
-              fontSize={11} fill="rgba(224,231,255,0.9)" fontWeight={600}
-              fontFamily="'Inter',system-ui,sans-serif"
-            >
-              Balcony Total Number Of Seats  299
-            </text>
-          </g>
-
-          {/* ── Total Seats Text ────────────────────────────────── */}
-          <text
-            x={293 + 566 / 2} y={530}
-            textAnchor="middle" dominantBaseline="central"
-            fontSize={13} fill="rgba(248,113,113,0.9)" fontWeight={700}
-            fontFamily="'Inter',system-ui,sans-serif"
-            style={{ letterSpacing: "0.04em" }}
-          >
-            Total Seats  645
-          </text>
-
-          {/* ── Balcony Front Total Label ───────────────────────── */}
-          <text
-            x={571} y={735}
-            textAnchor="middle" dominantBaseline="central"
-            fontSize={11} fill="rgba(167,139,250,0.6)" fontWeight={600}
-            fontFamily="'Inter',system-ui,sans-serif"
-          >
-            Balcony Front Side — Total Seats 222
-          </text>
-
-          {/* ── Side vertical labels ────────────────────────────── */}
-          <text
-            x={210} y={255}
-            transform="rotate(-90 210 255)"
-            textAnchor="middle" dominantBaseline="central"
-            fontSize={11} fill="rgba(148,163,184,0.55)" fontWeight={600}
-            fontFamily="'Inter',system-ui,sans-serif"
-          >
-            Balcony Left Side — Seats 38
-          </text>
-          <text
-            x={895} y={255}
-            transform="rotate(-90 895 255)"
-            textAnchor="middle" dominantBaseline="central"
-            fontSize={11} fill="rgba(148,163,184,0.55)" fontWeight={600}
-            fontFamily="'Inter',system-ui,sans-serif"
-          >
-            Total Seats: 645
-          </text>
-          <text
-            x={920} y={255}
-            transform="rotate(-90 920 255)"
-            textAnchor="middle" dominantBaseline="central"
-            fontSize={11} fill="rgba(148,163,184,0.55)" fontWeight={600}
-            fontFamily="'Inter',system-ui,sans-serif"
-          >
-            Usable Seats: 600
-          </text>
-
-          {/* ── Seat sections ───────────────────────────────────── */}
+          {/* ════════════════════════════════════════════
+              SEAT SECTIONS — all interactive, no metadata
+          ════════════════════════════════════════════ */}
           {Object.entries(blockSeats).map(([blockKey, seats]) => {
             if (seats.length === 0) return null;
             const block = SECTION_BLOCKS[blockKey];
@@ -351,6 +240,7 @@ export default function TheatreMap({ sections, selectedSeat, onSelect }) {
               />
             );
           })}
+
         </g>
       </svg>
     </div>

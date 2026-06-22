@@ -25,6 +25,7 @@ def admin_list_bookings(
             booking_ref=b.booking_ref,
             seat_code=b.seat.seat_code,
             section=b.seat.section.value,
+            attendee_name=b.attendee_name,
             district=b.district,
             is_sasnaka_member=b.is_sasnaka_member,
             status=b.status,

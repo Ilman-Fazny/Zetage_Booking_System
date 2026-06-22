@@ -551,8 +551,14 @@ const STYLES = `
   .adm-badge-no {
     font-size: 10px;
     font-weight: 600;
-    color: rgba(180,170,210,0.3);
+    color: rgba(255, 251, 0, 0.3);
     letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border: 1px solid rgba(233, 217, 35, 0.2);
+    padding: 2px 8px;
+    border-radius: 20px;
+    background: rgba(83, 72, 21, 0.06);
+    white-space: nowrap;
   }
   .adm-no-results {
     padding: 32px;
@@ -866,7 +872,7 @@ function BookingsTab({
             onChange={(e) => setFilterSasnaka(e.target.value)}
             className="adm-select"
           >
-            <option value="">Sasnaka — All</option>
+            <option value="">Sasnaka - All</option>
             <option value="yes">Members Only</option>
             <option value="no">Non-members Only</option>
           </select>
@@ -911,7 +917,7 @@ function BookingsTab({
                 {bookings.map((b) => (
                   <tr key={b.id}>
                     <td className="adm-td-ref">{b.booking_ref}</td>
-                    <td>{b.user_name || "—"}</td>
+                    <td>{b.attendee_name || "—"}</td>
                     <td className="adm-td-email">{b.user_email}</td>
                     <td className="adm-td-seat">{b.seat_code}</td>
                     <td style={{ fontSize: 11.5, whiteSpace: "nowrap" }}>{b.section}</td>

@@ -7,5 +7,5 @@ export async function createBooking({ seatCode, district, isSasnakaMember, phone
     is_sasnaka_member: isSasnakaMember,
     phone: phone || null,
   });
-  return data; // BookingOut: { id, booking_ref, seat_code, section, district, is_sasnaka_member, status }
+  return data; // BookingOut: { id, booking_ref, seat_code, section, attendee_name, district, is_sasnaka_member, status }
 }

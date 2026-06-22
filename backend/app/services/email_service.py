@@ -50,7 +50,7 @@ def _build_ticket_html(user: User, booking: Booking, qr_base64: str) -> str:
           <tr><td style="padding:6px 0;color:#9aa0ab">Venue</td>
               <td style="padding:6px 0;text-align:right">{settings.event_venue}</td></tr>
           <tr><td style="padding:6px 0;color:#9aa0ab">Name</td>
-              <td style="padding:6px 0;text-align:right">{user.name or user.email}</td></tr>
+              <td style="padding:6px 0;text-align:right">{booking.attendee_name}</td></tr>
         </table>
 
         <p style="font-size:11px;color:#6b7280;margin-top:20px">

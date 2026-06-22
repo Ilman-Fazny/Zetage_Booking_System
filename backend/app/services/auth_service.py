@@ -53,6 +53,7 @@ def register_user(db: Session, data: UserRegister) -> User:
         return None
     user = User(
         email = data.email,
+        name = data.name,
         hashed_password = hash_password(data.password)
     )
     db.add(user)

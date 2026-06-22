@@ -42,6 +42,7 @@ def create_booking(db: Session, user: User, data: BookingCreate) -> Booking:
     booking = Booking(
         user_id=user.id,
         seat_id=seat.id,
+        attendee_name=user.name or user.email or "Unknown",
         district=data.district,
         is_sasnaka_member=data.is_sasnaka_member,
         phone=data.phone,

@@ -15,76 +15,63 @@ export default function Seat({ seat, isSelected, onSelect, x, y, size }) {
       }}
       className={!isBooked && !isSelected ? "seat-hover-group" : ""}
     >
-      {/* Selected glow ring */}
+      {/* ── Selected: outer glow ring ───────────────────── */}
       {isSelected && (
-        <rect
-          x={x - 3}
-          y={y - 3}
-          width={size + 6}
-          height={size + 6}
-          rx={6}
-          fill="none"
-          stroke="rgba(139,92,246,0.45)"
-          strokeWidth={2.5}
-          style={{ filter: "blur(1.5px)" }}
-        />
+        <>
+          {/* Soft bloom behind seat */}
+          <rect
+            x={x - 5} y={y - 5}
+            width={size + 10} height={size + 10}
+            rx={7}
+            fill="rgba(139,92,246,0.22)"
+            style={{ filter: "blur(4px)" }}
+          />
+          {/* Crisp neon border ring */}
+          <rect
+            x={x - 2} y={y - 2}
+            width={size + 4} height={size + 4}
+            rx={5}
+            fill="none"
+            stroke="rgba(167,139,250,0.7)"
+            strokeWidth={1}
+          />
+        </>
       )}
 
-      {/* Seat body */}
+      {/* ── Seat body ───────────────────────────────────── */}
       <rect
-        x={x}
-        y={y}
-        width={size}
-        height={size}
-        rx={4}
+        x={x} y={y}
+        width={size} height={size}
+        rx={3}
         fill={
-          isBooked
-            ? "rgba(255,255,255,0.03)"
-            : isSelected
-            ? "rgba(109,40,217,0.85)"
-            : "rgba(255,255,255,0.04)"
+          isBooked   ? "#27272A"            // charcoal — unavailable
+          : isSelected ? "#8B5CF6"          // electric violet — selected
+          : "transparent"                   // ghost — available
         }
         stroke={
-          isBooked
-            ? "rgba(255,255,255,0.07)"
-            : isSelected
-            ? "#a78bfa"
-            : "rgba(255,255,255,0.18)"
+          isBooked   ? "none"               // no border on booked
+          : isSelected ? "#a78bfa"          // bright violet ring
+          : "rgba(255,255,255,0.25)"        // crisp silver outline — available
         }
-        strokeWidth={isSelected ? 1.2 : 0.8}
+        strokeWidth={isSelected ? 1.2 : 0.75}
         style={
           isSelected
-            ? { filter: "drop-shadow(0 0 5px rgba(139,92,246,0.9)) drop-shadow(0 0 10px rgba(109,40,217,0.6))" }
+            ? { filter: "drop-shadow(0 0 6px rgba(139,92,246,1)) drop-shadow(0 0 12px rgba(109,40,217,0.7))" }
             : {}
         }
       />
 
-      {/* Booked cross-slash */}
-      {isBooked && (
-        <line
-          x1={x + 3}
-          y1={y + 3}
-          x2={x + size - 3}
-          y2={y + size - 3}
-          stroke="rgba(255,255,255,0.09)"
-          strokeWidth={0.8}
-        />
-      )}
-
-      {/* Seat number label */}
+      {/* ── Seat number ─────────────────────────────────── */}
       <text
-        x={cx}
-        y={cy}
+        x={cx} y={cy}
         textAnchor="middle"
         dominantBaseline="central"
         fontSize={size * 0.38}
         fontWeight={isSelected ? "700" : "400"}
         fill={
-          isBooked
-            ? "rgba(255,255,255,0.15)"
-            : isSelected
-            ? "#f5f3ff"
-            : "rgba(255,255,255,0.5)"
+          isBooked   ? "rgba(255,255,255,0.12)"   // barely visible on charcoal
+          : isSelected ? "#ffffff"                 // white on violet
+          : "rgba(255,255,255,0.45)"               // dim silver on transparent
         }
         style={{ userSelect: "none", letterSpacing: "-0.3px" }}
       >

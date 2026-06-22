@@ -20,6 +20,7 @@ class BookingOut(BaseModel):
     booking_ref:       str
     seat_code:         str
     section:           str
+    attendee_name:     str
     district:          str
     is_sasnaka_member: bool
     status:            BookingStatus
@@ -31,6 +32,7 @@ class AdminBookingOut(BaseModel):
     booking_ref:       str
     seat_code:         str
     section:           str
+    attendee_name:     str
     district:          str
     is_sasnaka_member: bool
     status:            BookingStatus
