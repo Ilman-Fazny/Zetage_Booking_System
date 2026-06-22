@@ -34,6 +34,14 @@ export default function AttendeeDetailsPage() {
       setError("Please let us know if you're a Sasnaka Sansada Foundation member.");
       return;
     }
+    if (!phone) {
+      setError("Please enter your phone number.");
+      return;
+    }
+    if (phone.length !== 10) {
+      setError("Phone number must be exactly 10 digits.");
+      return;
+    }
 
     setLoading(true);
     try {
@@ -131,13 +139,15 @@ export default function AttendeeDetailsPage() {
 
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-1.5">
-                Phone number <span className="text-neutral-400 font-normal">(optional)</span>
+                Phone number
               </label>
               <input
                 type="tel"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="07X XXX XXXX"
+                onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, ""))}
+                placeholder="e.g. 0771234567"
+                maxLength={10}
+                required
                 className="w-full px-3 py-2 text-sm border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
               />
             </div>

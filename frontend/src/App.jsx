@@ -11,40 +11,47 @@ function Placeholder({ name }) {
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-            <SeatSelectionPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/details"
-        element={
-          <ProtectedRoute>
-            <AttendeeDetailsPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/ticket"
-        element={
-          <ProtectedRoute>
-            <TicketPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin"
-        element={
-          <ProtectedRoute adminOnly>
-            <Placeholder name="Admin dashboard" />
-          </ProtectedRoute>
-        }
-      />
-    </Routes>
+    <div className="flex flex-col min-h-screen w-full">
+      <div className="flex-grow">
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <SeatSelectionPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/details"
+            element={
+              <ProtectedRoute>
+                <AttendeeDetailsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/ticket"
+            element={
+              <ProtectedRoute>
+                <TicketPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute adminOnly>
+                <Placeholder name="Admin dashboard" />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </div>
+      <footer className="py-4 text-center text-xs text-neutral-400 border-t border-neutral-200 bg-neutral-50 print:hidden select-none">
+        © Sasnaka Sansada Talent Show 2026 - Zentage
+      </footer>
+    </div>
   );
 }
