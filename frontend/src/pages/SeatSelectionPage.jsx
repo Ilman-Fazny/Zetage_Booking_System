@@ -5,7 +5,7 @@ import TheatreMap from "../components/seat-map/TheatreMap";
 import SeatLegend from "../components/seat-map/SeatLegend";
 import SeatSummaryBar from "../components/seat-map/SeatSummaryBar";
 
-const EVENT_PRICE = 5000; // LKR — matches backend config.EVENT_PRICE
+const EVENT_PRICE = 500; // LKR — matches backend config.EVENT_PRICE
 
 export default function SeatSelectionPage() {
   const { sections, selectedSeat, selectSeat, loading, error } = useSeatMap();

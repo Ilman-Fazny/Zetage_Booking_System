@@ -6,7 +6,7 @@ const EVENT = {
   name: "Zentage Talent Show",
   date: "September 6, 2026",
   venue: "Elphinstone Theatre, Maradana",
-  price: "LKR 5,000",
+  price: "LKR 500",
 };
 
 export default function TicketPage() {
