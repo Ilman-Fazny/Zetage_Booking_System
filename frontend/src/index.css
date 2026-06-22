@@ -72,11 +72,12 @@ body {
   box-sizing: border-box;
 }
 
-/* Full-bleed escape hatch for login + seat selection + ticket + admin pages */
+/* Full-bleed escape hatch for all immersive dark pages */
 #root:has(.lp-root),
 #root:has(.ssp-root),
 #root:has(.tp-root),
-#root:has(.adm-root) {
+#root:has(.adm-root),
+#root:has(.adp-root) {
   width: 100%;
   max-width: 100%;
   margin: 0;

@@ -1,26 +1,484 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useNavigate, Navigate } from "react-router-dom";
 import { createBooking } from "../lib/bookings";
 import { DISTRICTS } from "../lib/districts";
+import logo from "../assets/zentage-TS.png";
 
 const EVENT_PRICE = 500;
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   Scoped styles
+───────────────────────────────────────────────────────────────────────────── */
+const STYLES = `
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  /* ── Page root ── */
+  .adp-root {
+    min-height: 100svh;
+    background-color: #0B0F19;
+    background-image:
+      radial-gradient(ellipse 70% 45% at 50% 0%, rgba(109,40,217,0.11) 0%, transparent 55%),
+      radial-gradient(ellipse 45% 35% at 5%  100%, rgba(59,130,246,0.07) 0%, transparent 50%),
+      radial-gradient(ellipse 35% 25% at 95% 50%, rgba(236,72,153,0.05) 0%, transparent 50%);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 36px 16px 72px;
+    font-family: 'Inter', system-ui, sans-serif;
+    box-sizing: border-box;
+  }
+  .adp-root *, .adp-root *::before, .adp-root *::after { box-sizing: border-box; }
+
+  .adp-inner {
+    width: 100%;
+    max-width: 460px;
+    animation: adp-up 0.65s cubic-bezier(0.22,1,0.36,1) both;
+  }
+  @keyframes adp-up {
+    from { opacity:0; transform: translateY(20px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+
+  /* ── Back button ── */
+  .adp-back {
+    background: none;
+    border: none;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 12.5px;
+    color: rgba(167,139,250,0.55);
+    cursor: pointer;
+    padding: 0;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    letter-spacing: 0.02em;
+    transition: color 0.2s;
+  }
+  .adp-back:hover { color: rgba(167,139,250,0.9); }
+
+  /* ── Seat stub card ── */
+  .adp-stub {
+    position: relative;
+    background: linear-gradient(135deg, rgba(109,40,217,0.2) 0%, rgba(79,30,157,0.12) 50%, rgba(30,20,60,0.3) 100%);
+    border: 1px solid rgba(139,92,246,0.25);
+    border-radius: 18px;
+    padding: 20px 22px;
+    margin-bottom: 14px;
+    overflow: hidden;
+    backdrop-filter: blur(12px);
+    box-shadow:
+      0 0 0 1px rgba(139,92,246,0.06),
+      0 20px 50px rgba(0,0,0,0.45),
+      inset 0 1px 0 rgba(255,255,255,0.07);
+  }
+  /* Top violet edge glow */
+  .adp-stub::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 10%; right: 10%; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(167,139,250,0.6), transparent);
+  }
+  /* Abstract background pattern */
+  .adp-stub::after {
+    content: '';
+    position: absolute;
+    right: -30px; top: -30px;
+    width: 130px; height: 130px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .adp-stub-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .adp-stub-logo {
+    height: 22px; width: auto;
+    filter: drop-shadow(0 0 6px rgba(139,92,246,0.4)) brightness(1.05);
+    flex-shrink: 0;
+  }
+  .adp-stub-tag {
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(167,139,250,0.6);
+  }
+  .adp-stub-main {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+    position: relative;
+    z-index: 1;
+  }
+  .adp-stub-seat {
+    font-size: 38px;
+    font-weight: 800;
+    color: #f0ece8;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .adp-stub-section {
+    font-size: 12px;
+    color: rgba(180,170,210,0.55);
+    font-weight: 500;
+    text-align: right;
+    line-height: 1.4;
+    max-width: 160px;
+  }
+  /* Perforation line */
+  .adp-stub-perf {
+    display: flex;
+    align-items: center;
+    margin: 0 -22px;
+    gap: 0;
+    position: relative;
+  }
+  .adp-stub-notch {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: #0B0F19;
+    flex-shrink: 0;
+  }
+  .adp-stub-dash {
+    flex: 1;
+    border-top: 1.5px dashed rgba(167,139,250,0.18);
+    height: 0;
+  }
+  .adp-stub-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 14px;
+  }
+  .adp-stub-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .adp-stub-meta-label {
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(180,170,210,0.35);
+    font-weight: 600;
+  }
+  .adp-stub-meta-val {
+    font-size: 12.5px;
+    color: rgba(210,204,240,0.75);
+    font-weight: 500;
+  }
+  .adp-price-tag {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 1px;
+  }
+  .adp-price-label {
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(202,162,23,0.55);
+    font-weight: 600;
+  }
+  .adp-price-val {
+    font-size: 20px;
+    font-weight: 800;
+    color: #fbbf24;
+    letter-spacing: -0.03em;
+    font-family: 'JetBrains Mono', monospace;
+    line-height: 1;
+    text-shadow: 0 0 16px rgba(251,191,36,0.4);
+  }
+
+  /* ── Form card ── */
+  .adp-card {
+    position: relative;
+    background: rgba(255,255,255,0.035);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 20px;
+    padding: 26px 26px 28px;
+    backdrop-filter: blur(16px);
+    box-shadow:
+      0 0 0 1px rgba(139,92,246,0.04),
+      0 24px 60px rgba(0,0,0,0.5),
+      inset 0 1px 0 rgba(255,255,255,0.05);
+    animation: adp-up 0.65s cubic-bezier(0.22,1,0.36,1) 0.1s both;
+  }
+  .adp-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 20%; right: 20%; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(139,92,246,0.25), transparent);
+  }
+
+  /* ── Form heading ── */
+  .adp-form-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #e2d9ff;
+    letter-spacing: -0.02em;
+    margin: 0 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .adp-form-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(139,92,246,0.2), transparent);
+  }
+
+  /* ── Form field group ── */
+  .adp-field { margin-bottom: 18px; }
+  .adp-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(180,170,210,0.45);
+    margin-bottom: 8px;
+  }
+
+  /* ── Inputs & Select ── */
+  .adp-input,
+  .adp-select {
+    width: 100%;
+    padding: 11px 14px;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 14px;
+    color: #e2d9ff;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 11px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .adp-input::placeholder { color: rgba(156,163,175,0.35); }
+  .adp-input:focus,
+  .adp-select:focus {
+    border-color: rgba(139,92,246,0.6);
+    background: rgba(109,40,217,0.06);
+    box-shadow: 0 0 0 3px rgba(139,92,246,0.13), 0 0 18px rgba(139,92,246,0.08);
+  }
+  .adp-input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 40px #131825 inset !important;
+    -webkit-text-fill-color: #e2d9ff !important;
+  }
+  .adp-select option { background: #1a1529; color: #e2d9ff; }
+
+  /* Select wrapper for custom arrow */
+  .adp-select-wrap {
+    position: relative;
+  }
+  .adp-select-wrap::after {
+    content: '';
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0; height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid rgba(167,139,250,0.45);
+    pointer-events: none;
+  }
+
+  /* ── Sasnaka toggle ── */
+  .adp-toggle-wrap {
+    display: flex;
+    gap: 10px;
+  }
+  .adp-toggle-btn {
+    flex: 1;
+    padding: 11px 0;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    border-radius: 11px;
+    border: 1px solid rgba(255,255,255,0.09);
+    background: rgba(255,255,255,0.035);
+    color: rgba(180,170,210,0.45);
+    cursor: pointer;
+    transition: all 0.22s cubic-bezier(0.34,1.56,0.64,1);
+    position: relative;
+    overflow: hidden;
+  }
+  .adp-toggle-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.22s;
+  }
+  /* YES active */
+  .adp-toggle-btn.yes-active {
+    background: rgba(52,211,153,0.12);
+    border-color: rgba(52,211,153,0.4);
+    color: #34d399;
+    box-shadow: 0 0 18px rgba(52,211,153,0.18), 0 0 6px rgba(52,211,153,0.25), inset 0 1px 0 rgba(255,255,255,0.08);
+    transform: translateY(-1px);
+  }
+  /* NO active */
+  .adp-toggle-btn.no-active {
+    background: rgba(248,113,113,0.10);
+    border-color: rgba(248,113,113,0.35);
+    color: #f87171;
+    box-shadow: 0 0 18px rgba(248,113,113,0.15), 0 0 6px rgba(248,113,113,0.2), inset 0 1px 0 rgba(255,255,255,0.06);
+    transform: translateY(-1px);
+  }
+  .adp-toggle-btn:hover:not(.yes-active):not(.no-active) {
+    background: rgba(255,255,255,0.06);
+    border-color: rgba(255,255,255,0.14);
+    color: rgba(180,170,210,0.8);
+  }
+
+  /* ── Phone hint ── */
+  .adp-hint {
+    font-size: 11px;
+    color: rgba(180,170,210,0.3);
+    margin-top: 6px;
+    letter-spacing: 0.02em;
+  }
+
+  /* ── Error message ── */
+  .adp-error {
+    background: rgba(248,113,113,0.07);
+    border: 1px solid rgba(248,113,113,0.2);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #fca5a5;
+    letter-spacing: 0.01em;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .adp-error-icon { flex-shrink: 0; opacity: 0.7; margin-top: 1px; }
+
+  /* ── Submit button ── */
+  .adp-submit {
+    width: 100%;
+    padding: 13px;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: #fff;
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 45%, #5b21b6 100%);
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.15s, box-shadow 0.2s, opacity 0.2s;
+    box-shadow:
+      0 0 24px rgba(109,40,217,0.5),
+      0 4px 14px rgba(109,40,217,0.4),
+      inset 0 1px 0 rgba(255,255,255,0.13);
+  }
+  /* shimmer sweep */
+  .adp-submit::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -80%; width: 55%; height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.18), transparent);
+    transform: skewX(-20deg);
+    animation: adp-shimmer 3.8s ease-in-out infinite;
+  }
+  @keyframes adp-shimmer {
+    0%   { left: -80%; opacity: 0; }
+    25%  { opacity: 1; }
+    65%  { left: 130%; opacity: 0; }
+    100% { left: 130%; }
+  }
+  .adp-submit:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow:
+      0 0 36px rgba(109,40,217,0.65),
+      0 8px 22px rgba(109,40,217,0.5),
+      inset 0 1px 0 rgba(255,255,255,0.16);
+  }
+  .adp-submit:active:not(:disabled) { transform: translateY(0); }
+  .adp-submit:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  /* Loading dots inside button */
+  .adp-dots {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .adp-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.8);
+    animation: adp-bounce 1.1s ease-in-out infinite;
+  }
+  .adp-dot:nth-child(2) { animation-delay: 0.18s; }
+  .adp-dot:nth-child(3) { animation-delay: 0.36s; }
+  @keyframes adp-bounce {
+    0%, 80%, 100% { transform: translateY(0); }
+    40%           { transform: translateY(-5px); }
+  }
+
+  /* ── Divider ── */
+  .adp-divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 20px 0;
+  }
+  .adp-divider-line {
+    flex: 1;
+    height: 1px;
+    background: rgba(255,255,255,0.06);
+  }
+  .adp-divider-text {
+    font-size: 10px;
+    color: rgba(180,170,210,0.25);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+`;
+
+function useInjectStyles(css) {
+  useEffect(() => {
+    const id = "zentage-adp-styles";
+    if (document.getElementById(id)) return;
+    const tag = document.createElement("style");
+    tag.id = id;
+    tag.textContent = css;
+    document.head.appendChild(tag);
+  }, []);
+}
+
 export default function AttendeeDetailsPage() {
+  useInjectStyles(STYLES);
+
   const location = useLocation();
   const navigate = useNavigate();
   const seat = location.state?.seat;
 
   const [district, setDistrict] = useState("");
-  const [isSasnakaMember, setIsSasnakaMember] = useState(null); // null = unanswered
+  const [isSasnakaMember, setIsSasnakaMember] = useState(null);
   const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // No seat in state - user landed here directly (refresh, back button, etc).
-  // Send them back to pick a seat rather than letting them submit a broken form.
-  if (!seat) {
-    return <Navigate to="/" replace />;
-  }
+  if (!seat) return <Navigate to="/" replace />;
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -55,7 +513,6 @@ export default function AttendeeDetailsPage() {
     } catch (err) {
       const detail = err.response?.data?.detail;
       if (err.response?.status === 409) {
-        // seat was taken in the gap between selection and submit
         setError(detail || "That seat was just taken. Please choose another seat.");
       } else {
         setError(detail || "Something went wrong. Please try again.");
@@ -70,103 +527,154 @@ export default function AttendeeDetailsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-tr from-blue-100/60 via-sky-50 to-indigo-100/50 px-4 py-8 flex items-center justify-center">
-      <div className="w-full max-w-md">
-        <button
-          onClick={handleBack}
-          className="text-sm font-medium text-neutral-600 mb-6 hover:text-neutral-900 flex items-center gap-1.5 transition"
-        >
-          <span>←</span> Change seat
+    <div className="adp-root">
+      <div className="adp-inner">
+
+        {/* ── Back button ── */}
+        <button className="adp-back" onClick={handleBack}>
+          ← Change seat
         </button>
 
-        <div className="bg-white/95 backdrop-blur-md border border-blue-100/80 rounded-2xl p-6 shadow-xl shadow-blue-900/5 mb-6">
-          <p className="text-xs font-semibold tracking-wide text-neutral-400 uppercase mb-1">Selected Seat</p>
-          <div className="flex items-baseline justify-between mb-4">
-            <span className="text-2xl font-bold text-neutral-900">{seat.seat_code}</span>
-            <span className="text-sm font-medium text-neutral-500">{seat.section}</span>
+        {/* ── Seat stub ticket ── */}
+        <div className="adp-stub">
+          {/* Eyebrow */}
+          <div className="adp-stub-eyebrow">
+            <img src={logo} alt="Zentage" className="adp-stub-logo" />
+            <span className="adp-stub-tag">Selected Seat</span>
           </div>
-          <div className="pt-3 border-t border-neutral-100 flex justify-between text-sm">
-            <span className="text-neutral-500">Ticket Price</span>
-            <span className="font-bold text-indigo-600">LKR {EVENT_PRICE.toLocaleString()}</span>
+
+          {/* Seat + section */}
+          <div className="adp-stub-main">
+            <div className="adp-stub-seat">{seat.seat_code}</div>
+            <div className="adp-stub-section">{seat.section}</div>
+          </div>
+
+          {/* Perforation */}
+          <div className="adp-stub-perf">
+            <div className="adp-stub-notch" />
+            <div className="adp-stub-dash" />
+            <div className="adp-stub-notch" />
+          </div>
+
+          {/* Footer details + price */}
+          <div className="adp-stub-footer">
+            <div className="adp-stub-meta">
+              <span className="adp-stub-meta-label">Event</span>
+              <span className="adp-stub-meta-val">Zentage Talent Show</span>
+            </div>
+            <div className="adp-stub-meta" style={{ textAlign: "center" }}>
+              <span className="adp-stub-meta-label">Date</span>
+              <span className="adp-stub-meta-val">Sep 6, 2026</span>
+            </div>
+            <div className="adp-price-tag">
+              <span className="adp-price-label">Ticket Price</span>
+              <span className="adp-price-val">LKR {EVENT_PRICE.toLocaleString()}</span>
+            </div>
           </div>
         </div>
 
-        <div className="bg-white/95 backdrop-blur-md border border-blue-100/80 rounded-2xl p-6 shadow-xl shadow-blue-900/5">
-          <h1 className="text-lg font-bold text-neutral-900 mb-5">Your Details</h1>
+        {/* ── Details form card ── */}
+        <div className="adp-card">
+          <h1 className="adp-form-title">Your Details</h1>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1.5">District</label>
-              <select
-                value={district}
-                onChange={(e) => setDistrict(e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-blue-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="">Select your district</option>
-                {DISTRICTS.map((d) => (
-                  <option key={d} value={d}>{d}</option>
-                ))}
-              </select>
+          <form onSubmit={handleSubmit}>
+            {/* District */}
+            <div className="adp-field">
+              <label className="adp-label">District</label>
+              <div className="adp-select-wrap">
+                <select
+                  id="sel-district"
+                  value={district}
+                  onChange={(e) => setDistrict(e.target.value)}
+                  className="adp-select"
+                >
+                  <option value="">Select your district…</option>
+                  {DISTRICTS.map((d) => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                </select>
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1.5">
-                Are you a Sasnaka Sansada Foundation member?
+            {/* Sasnaka membership */}
+            <div className="adp-field">
+              <label className="adp-label">
+                Sasnaka Sansada Foundation Member?
               </label>
-              <div className="flex gap-3">
+              <div className="adp-toggle-wrap">
                 <button
+                  id="toggle-yes"
                   type="button"
+                  className={`adp-toggle-btn ${isSasnakaMember === true ? "yes-active" : ""}`}
                   onClick={() => setIsSasnakaMember(true)}
-                  className={`flex-1 py-2.5 text-sm font-medium rounded-lg border transition ${isSasnakaMember === true
-                      ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
-                      : "bg-white text-neutral-700 border-blue-200 hover:bg-neutral-50"
-                    }`}
                 >
-                  Yes
+                  {isSasnakaMember === true ? "✓ Yes" : "Yes"}
                 </button>
                 <button
+                  id="toggle-no"
                   type="button"
+                  className={`adp-toggle-btn ${isSasnakaMember === false ? "no-active" : ""}`}
                   onClick={() => setIsSasnakaMember(false)}
-                  className={`flex-1 py-2.5 text-sm font-medium rounded-lg border transition ${isSasnakaMember === false
-                      ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
-                      : "bg-white text-neutral-700 border-blue-200 hover:bg-neutral-50"
-                    }`}
                 >
-                  No
+                  {isSasnakaMember === false ? "✕ No" : "No"}
                 </button>
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1.5">
-                Phone number
-              </label>
+            {/* Phone */}
+            <div className="adp-field">
+              <label className="adp-label">Phone Number</label>
               <input
+                id="input-phone"
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, ""))}
                 placeholder="e.g. 0771234567"
                 maxLength={10}
                 required
-                className="w-full px-3 py-2 text-sm border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                className="adp-input"
               />
+              <p className="adp-hint">10-digit Sri Lankan mobile number</p>
             </div>
 
+            {/* Error */}
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-                <p className="text-sm text-red-700">{error}</p>
+              <div className="adp-error">
+                <svg
+                  className="adp-error-icon"
+                  width="14" height="14"
+                  fill="none" stroke="currentColor"
+                  viewBox="0 0 24 24" strokeWidth="2"
+                  strokeLinecap="round" strokeLinejoin="round"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+                {error}
               </div>
             )}
 
+            {/* Confirm button */}
             <button
+              id="btn-confirm"
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 text-white text-sm font-semibold py-2.5 rounded-lg hover:bg-blue-700 transition disabled:opacity-50 shadow-md shadow-blue-500/10"
+              className="adp-submit"
             >
-              {loading ? "Confirming..." : "Confirm booking"}
+              {loading ? (
+                <span className="adp-dots">
+                  <span className="adp-dot" />
+                  <span className="adp-dot" />
+                  <span className="adp-dot" />
+                </span>
+              ) : (
+                "Confirm Booking →"
+              )}
             </button>
           </form>
         </div>
+
       </div>
     </div>
   );
