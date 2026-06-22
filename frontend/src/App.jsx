@@ -13,7 +13,7 @@ function Placeholder({ name }) {
 export default function App() {
   const location = useLocation();
   const isLoginPage = location.pathname === "/login";
-  const isFullScreen = location.pathname === "/login" || location.pathname === "/";
+  const isFullScreen = location.pathname === "/login" || location.pathname === "/" || location.pathname === "/ticket" || location.pathname === "/admin";
 
   return (
     <div className="flex flex-col min-h-screen w-full">

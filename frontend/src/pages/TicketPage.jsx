@@ -1,13 +1,444 @@
 import { useEffect, useRef } from "react";
 import { useLocation, useNavigate, Navigate } from "react-router-dom";
 import QRCode from "qrcode";
+import logo from "../assets/zentage-TS.png";
 
 const EVENT = {
   name: "Zentage Talent Show",
   date: "September 6, 2026",
-  venue: "Elphinstone Theatre, Maradana",
+  time: "6:00 PM onwards",
+  venue: "Elphinstone Theatre",
+  location: "Maradana, Colombo",
   price: "LKR 500",
+  org: "Sasnaka Sansada Foundation",
 };
+
+/* ─── Injected scoped styles ─── */
+const STYLES = `
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  .tp-root {
+    min-height: 100svh;
+    background-color: #0B0F19;
+    background-image:
+      radial-gradient(ellipse 70% 50% at 50% -5%, rgba(180,130,40,0.09) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 80% 100%, rgba(109,40,217,0.07) 0%, transparent 55%);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 40px 16px 60px;
+    font-family: 'Inter', system-ui, sans-serif;
+    box-sizing: border-box;
+  }
+
+  .tp-wrapper {
+    width: 100%;
+    max-width: 400px;
+    animation: tp-fadeup 0.7s cubic-bezier(0.22,1,0.36,1) both;
+  }
+
+  @keyframes tp-fadeup {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Success header ── */
+  .tp-header {
+    text-align: center;
+    margin-bottom: 28px;
+    animation: tp-fadeup 0.6s cubic-bezier(0.22,1,0.36,1) 0.1s both;
+  }
+  .tp-check-ring {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(202,162,23,0.18) 0%, rgba(202,162,23,0.06) 60%, transparent 100%);
+    border: 1.5px solid rgba(202,162,23,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 14px;
+    box-shadow: 0 0 18px rgba(202,162,23,0.2), 0 0 40px rgba(202,162,23,0.08);
+    animation: tp-pop 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.3s both;
+  }
+  @keyframes tp-pop {
+    from { opacity: 0; transform: scale(0.6); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  .tp-check-icon {
+    width: 22px; height: 22px;
+    color: #f0c040;
+  }
+  .tp-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #f0ece8;
+    letter-spacing: -0.03em;
+    margin: 0 0 6px;
+  }
+  .tp-subtitle {
+    font-size: 13px;
+    color: rgba(180,170,210,0.6);
+    letter-spacing: 0.01em;
+    margin: 0;
+  }
+
+  /* ── Ticket card shell ── */
+  .tp-card {
+    position: relative;
+    background: linear-gradient(160deg, #161A28 0%, #111520 50%, #0F1322 100%);
+    border-radius: 20px;
+    overflow: visible;
+    border: 1px solid rgba(255,255,255,0.07);
+    box-shadow:
+      0 0 0 1px rgba(202,162,23,0.05),
+      0 30px 70px rgba(0,0,0,0.65),
+      0 8px 20px rgba(0,0,0,0.4),
+      inset 0 1px 0 rgba(255,255,255,0.06);
+    animation: tp-fadeup 0.7s cubic-bezier(0.22,1,0.36,1) 0.2s both;
+  }
+
+  /* Top-edge gold glow */
+  .tp-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 15%; right: 15%; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(202,162,23,0.55), transparent);
+    border-radius: 100%;
+  }
+
+  /* ── Gold confirmed banner ── */
+  .tp-banner {
+    background: linear-gradient(90deg, #92700a 0%, #c9a220 30%, #f0d060 55%, #c9a220 75%, #92700a 100%);
+    padding: 9px 20px;
+    border-radius: 20px 20px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+  /* Shimmer sweep */
+  .tp-banner::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -80%; width: 60%; height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.28), transparent);
+    transform: skewX(-20deg);
+    animation: tp-shimmer 4s ease-in-out infinite;
+  }
+  @keyframes tp-shimmer {
+    0%   { left: -80%; opacity: 0; }
+    20%  { opacity: 1; }
+    60%  { left: 130%; opacity: 0; }
+    100% { left: 130%; }
+  }
+  .tp-banner-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: rgba(15,19,34,0.5);
+    flex-shrink: 0;
+  }
+  .tp-banner-text {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #0f1322;
+    font-family: 'Inter', system-ui, sans-serif;
+    position: relative;
+  }
+
+  /* ── Ticket header ── */
+  .tp-ticket-head {
+    padding: 18px 22px 14px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .tp-org {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(202,162,23,0.65);
+    margin: 0 0 6px;
+  }
+  .tp-event-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: #ede8ff;
+    letter-spacing: -0.02em;
+    margin: 0 0 4px;
+  }
+  .tp-event-meta {
+    font-size: 11.5px;
+    color: rgba(180,170,210,0.5);
+    margin: 0;
+    letter-spacing: 0.02em;
+  }
+
+  /* ── Perforated cut divider ── */
+  .tp-perf {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 0;
+    margin: 0;
+  }
+  .tp-perf-notch {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: #0B0F19;
+    border: 1px solid rgba(255,255,255,0.06);
+    flex-shrink: 0;
+    position: absolute;
+    top: 50%; transform: translateY(-50%);
+    z-index: 2;
+  }
+  .tp-perf-notch.left  { left: -11px; }
+  .tp-perf-notch.right { right: -11px; }
+  .tp-perf-line {
+    flex: 1;
+    border: none;
+    border-top: 1.5px dashed rgba(255,255,255,0.09);
+    margin: 0 16px;
+    height: 1.5px;
+    background: none;
+  }
+  .tp-perf-wrap {
+    position: relative;
+    padding: 14px 0;
+    display: flex;
+    align-items: center;
+  }
+
+  /* ── QR scanner frame ── */
+  .tp-qr-zone {
+    padding: 4px 22px 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .tp-qr-frame {
+    position: relative;
+    padding: 12px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  /* Corner brackets */
+  .tp-qr-frame::before,
+  .tp-qr-frame::after {
+    content: '';
+    position: absolute;
+    width: 16px; height: 16px;
+    border-color: rgba(202,162,23,0.6);
+    border-style: solid;
+  }
+  .tp-qr-frame::before {
+    top: -1px; left: -1px;
+    border-width: 2px 0 0 2px;
+    border-radius: 4px 0 0 0;
+  }
+  .tp-qr-frame::after {
+    bottom: -1px; right: -1px;
+    border-width: 0 2px 2px 0;
+    border-radius: 0 0 4px 0;
+  }
+  /* Extra pseudo brackets via inner spans */
+  .tp-qr-corner-tr,
+  .tp-qr-corner-bl {
+    position: absolute;
+    width: 16px; height: 16px;
+    border-color: rgba(202,162,23,0.6);
+    border-style: solid;
+  }
+  .tp-qr-corner-tr {
+    top: -1px; right: -1px;
+    border-width: 2px 2px 0 0;
+    border-radius: 0 4px 0 0;
+  }
+  .tp-qr-corner-bl {
+    bottom: -1px; left: -1px;
+    border-width: 0 0 2px 2px;
+    border-radius: 0 0 0 4px;
+  }
+  .tp-qr-canvas {
+    border-radius: 6px;
+    display: block;
+  }
+  .tp-qr-hint {
+    font-size: 10.5px;
+    color: rgba(180,170,210,0.4);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: center;
+    font-weight: 500;
+  }
+
+  /* ── Ticket detail rows ── */
+  .tp-details {
+    padding: 6px 22px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .tp-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 9px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .tp-row:last-child { border-bottom: none; }
+  .tp-row-label {
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(180,170,210,0.38);
+  }
+  .tp-row-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(230,225,255,0.85);
+    text-align: right;
+    max-width: 58%;
+    word-break: break-word;
+  }
+  .tp-row-value.mono {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 12px;
+    color: rgba(202,162,23,0.9);
+    letter-spacing: 0.04em;
+  }
+
+  /* Highlight row for seat */
+  .tp-row.highlight .tp-row-value {
+    color: #a78bfa;
+    font-size: 14px;
+  }
+
+  /* ── Bottom strip ── */
+  .tp-foot {
+    border-top: 1px solid rgba(255,255,255,0.05);
+    padding: 12px 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 0 0 20px 20px;
+    background: rgba(255,255,255,0.015);
+  }
+  .tp-foot-text {
+    font-size: 10px;
+    color: rgba(180,170,210,0.3);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .tp-foot-badge {
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(202,162,23,0.55);
+    border: 1px solid rgba(202,162,23,0.2);
+    padding: 2px 8px;
+    border-radius: 20px;
+  }
+
+  /* ── Action buttons ── */
+  .tp-actions {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    animation: tp-fadeup 0.7s cubic-bezier(0.22,1,0.36,1) 0.45s both;
+  }
+  .tp-btn-primary {
+    width: 100%;
+    padding: 12px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    color: rgba(220,215,255,0.8);
+    font-size: 13.5px;
+    font-weight: 500;
+    font-family: 'Inter', system-ui, sans-serif;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .tp-btn-primary:hover {
+    background: rgba(139,92,246,0.15);
+    border-color: rgba(139,92,246,0.35);
+    color: #e2d9ff;
+  }
+  .tp-btn-ghost {
+    width: 100%;
+    padding: 10px;
+    background: none;
+    border: none;
+    color: rgba(180,170,210,0.38);
+    font-size: 12.5px;
+    font-family: 'Inter', system-ui, sans-serif;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: color 0.2s;
+    text-align: center;
+  }
+  .tp-btn-ghost:hover { color: rgba(180,170,210,0.7); }
+
+  @media print {
+    .tp-root { background: #fff; padding: 0; }
+    .tp-actions { display: none; }
+    .tp-header { display: none; }
+    .tp-card {
+      border: 1px solid #ddd;
+      box-shadow: none;
+      border-radius: 12px;
+    }
+    .tp-banner { background: #c9a220; }
+    .tp-banner-text { color: #fff; }
+  }
+`;
+
+function useInjectStyles(css) {
+  useEffect(() => {
+    const id = "zentage-ticket-styles";
+    if (document.getElementById(id)) return;
+    const tag = document.createElement("style");
+    tag.id = id;
+    tag.textContent = css;
+    document.head.appendChild(tag);
+  }, []);
+}
+
+function TicketRow({ label, value, mono, highlight }) {
+  return (
+    <div className={`tp-row${highlight ? " highlight" : ""}`}>
+      <span className="tp-row-label">{label}</span>
+      <span className={`tp-row-value${mono ? " mono" : ""}`}>{value}</span>
+    </div>
+  );
+}
+
+function Perforation() {
+  return (
+    <div className="tp-perf-wrap">
+      <div className="tp-perf-notch left" />
+      <div className="tp-perf-line" />
+      <div className="tp-perf-notch right" />
+    </div>
+  );
+}
 
 export default function TicketPage() {
   const location = useLocation();
@@ -15,7 +446,8 @@ export default function TicketPage() {
   const canvasRef = useRef(null);
   const booking = location.state?.booking;
 
-  // No booking in state — user refreshed or navigated directly.
+  useInjectStyles(STYLES);
+
   if (!booking) {
     return <Navigate to="/" replace />;
   }
@@ -25,107 +457,111 @@ export default function TicketPage() {
     QRCode.toCanvas(canvasRef.current, booking.booking_ref, {
       width: 180,
       margin: 1,
-      color: { dark: "#0f172a", light: "#ffffff" },
+      color: { dark: "#0f1322", light: "#f8f6ff" },
     });
   }, [booking.booking_ref]);
 
   return (
-    <div className="min-h-screen bg-neutral-50 px-4 py-10 flex items-start justify-center">
-      <div className="w-full max-w-sm">
+    <div className="tp-root">
+      <div className="tp-wrapper">
 
-        {/* Success header */}
-        <div className="text-center mb-6">
-          <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-            <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+        {/* ── Success header ─────────────────────────── */}
+        <div className="tp-header">
+          <div className="tp-check-ring">
+            <svg className="tp-check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h1 className="text-xl font-semibold text-neutral-900">Booking confirmed</h1>
-          <p className="text-sm text-neutral-500 mt-1">
-            Your ticket has been sent to your email
-          </p>
+          <h1 className="tp-title">Booking Confirmed</h1>
+          <p className="tp-subtitle">Your ticket has been sent to your email</p>
         </div>
 
-        {/* Ticket card */}
-        <div className="bg-white rounded-2xl overflow-hidden border border-neutral-200 shadow-sm print-ticket">
+        {/* ── Ticket card ─────────────────────────────── */}
+        <div className="tp-card print-ticket">
 
-          {/* Ticket top — dark header */}
-          <div className="bg-neutral-900 px-5 py-4 text-center">
-            <p className="text-xs font-semibold tracking-widest text-neutral-400 uppercase mb-1">
-              Sasnaka Sansada Foundation
-            </p>
-            <p className="text-white font-semibold text-base">{EVENT.name}</p>
+          {/* Gold confirmed banner */}
+          <div className="tp-banner">
+            <span className="tp-banner-dot" />
+            <span className="tp-banner-text">✦ Confirmed ✦</span>
+            <span className="tp-banner-dot" />
           </div>
 
-          {/* Perforated divider */}
-          <div className="relative flex items-center">
-            <div className="absolute -left-3 w-6 h-6 bg-neutral-50 rounded-full border border-neutral-200" />
-            <div className="flex-1 border-t border-dashed border-neutral-300 mx-3" />
-            <div className="absolute -right-3 w-6 h-6 bg-neutral-50 rounded-full border border-neutral-200" />
+          {/* Event header */}
+          <div className="tp-ticket-head">
+            <p className="tp-org">{EVENT.org}</p>
+            <img
+              src={logo}
+              alt="Zentage"
+              style={{
+                height: 44,
+                width: "auto",
+                display: "block",
+                margin: "0 auto 8px",
+                filter: "drop-shadow(0 0 10px rgba(202,162,23,0.3)) brightness(1.05)",
+              }}
+            />
+            <p className="tp-event-name">{EVENT.name}</p>
+            <p className="tp-event-meta">{EVENT.date} · {EVENT.time}</p>
           </div>
 
-          {/* QR code */}
-          <div className="flex justify-center pt-5 pb-3">
-            <canvas ref={canvasRef} className="rounded-lg" />
+          {/* Perforation 1 */}
+          <Perforation />
+
+          {/* QR code scanner zone */}
+          <div className="tp-qr-zone">
+            <div className="tp-qr-frame">
+              {/* Additional corner brackets (pseudo handles top-left & bottom-right) */}
+              <span className="tp-qr-corner-tr" />
+              <span className="tp-qr-corner-bl" />
+              <canvas ref={canvasRef} className="tp-qr-canvas" />
+            </div>
+            <p className="tp-qr-hint">⬡ Scan at entrance ⬡</p>
           </div>
 
-          <p className="text-center text-xs text-neutral-400 pb-4">
-            Show this at the entrance
-          </p>
+          {/* Perforation 2 */}
+          <Perforation />
 
-          {/* Perforated divider */}
-          <div className="relative flex items-center">
-            <div className="absolute -left-3 w-6 h-6 bg-neutral-50 rounded-full border border-neutral-200" />
-            <div className="flex-1 border-t border-dashed border-neutral-300 mx-3" />
-            <div className="absolute -right-3 w-6 h-6 bg-neutral-50 rounded-full border border-neutral-200" />
-          </div>
-
-          {/* Ticket details */}
-          <div className="px-5 py-4 space-y-3">
-            <TicketRow label="Booking ref" value={booking.booking_ref} mono />
-            <TicketRow label="Seat" value={booking.seat_code} />
+          {/* Ticket detail rows */}
+          <div className="tp-details">
+            <TicketRow label="Booking Ref" value={booking.booking_ref} mono />
+            <TicketRow label="Seat" value={booking.seat_code} highlight />
             <TicketRow label="Section" value={booking.section} />
-            <TicketRow label="Date" value={EVENT.date} />
             <TicketRow label="Venue" value={EVENT.venue} />
+            <TicketRow label="Location" value={EVENT.location} />
             <TicketRow label="Price" value={EVENT.price} />
           </div>
 
           {/* Bottom strip */}
-          <div className="bg-neutral-50 border-t border-neutral-200 px-5 py-3 text-center">
-            <p className="text-xs text-neutral-400">
-              One ticket per person · Non-transferable
-            </p>
+          <div className="tp-foot">
+            <span className="tp-foot-text">Non-transferable · 1 person</span>
+            <span className="tp-foot-badge">E-Ticket</span>
           </div>
         </div>
 
-        {/* Actions */}
-        <div className="mt-5 space-y-2">
+        {/* ── Actions ─────────────────────────────────── */}
+        <div className="tp-actions">
           <button
+            id="btn-print"
             onClick={() => window.print()}
-            className="w-full text-sm font-medium py-2.5 rounded-lg border border-neutral-300 bg-white hover:bg-neutral-50 transition text-neutral-700"
+            className="tp-btn-primary"
           >
+            <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="6 9 6 2 18 2 18 9" />
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+              <rect x="6" y="14" width="12" height="8" />
+            </svg>
             Print / Save as PDF
           </button>
           <button
+            id="btn-back"
             onClick={() => navigate("/")}
-            className="w-full text-sm text-neutral-400 py-2 hover:text-neutral-600 transition"
+            className="tp-btn-ghost"
           >
-            Back to seat map
+            ← Back to seat map
           </button>
         </div>
 
       </div>
-    </div>
-  );
-}
-
-function TicketRow({ label, value, mono = false }) {
-  return (
-    <div className="flex justify-between items-baseline">
-      <span className="text-xs text-neutral-500">{label}</span>
-      <span className={`text-sm font-medium text-neutral-900 ${mono ? "font-mono" : ""}`}>
-        {value}
-      </span>
     </div>
   );
 }
