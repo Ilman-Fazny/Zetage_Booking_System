@@ -68,7 +68,12 @@ def cancel_booking(db: Session, user: User) -> None:
     db.commit()
 
 def get_my_booking(db: Session, user: User) -> Booking | None:
-    return user.booking
+    booking = user.booking
+    if not booking or booking.status == BookingStatus.CANCELLED:
+        return None
+    # force-load the seat relationship
+    _ = booking.seat
+    return booking
 
 
 def list_bookings(

@@ -8,6 +8,7 @@ import LoginPage from "./pages/LoginPage";
 import SeatSelectionPage from "./pages/SeatSelectionPage";
 import AttendeeDetailsPage from "./pages/AttendeeDetailsPage";
 import TicketPage from "./pages/TicketPage";
+import MyTicketPage from "./pages/MyTicketPage";
 import AdminDashboard from "./pages/AdminDashboard";
 
 // ─── Cinematic page transition config ──────────────────────────────────────
@@ -42,7 +43,7 @@ export default function App() {
   }, []);
 
   const isFullScreen =
-    ["/login", "/", "/ticket", "/admin", "/details"]
+    ["/login", "/", "/ticket", "/my-ticket", "/admin", "/details"]
       .includes(location.pathname);
 
   return (
@@ -87,6 +88,14 @@ export default function App() {
                 element={
                   <ProtectedRoute>
                     <PageShell><TicketPage /></PageShell>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/my-ticket"
+                element={
+                  <ProtectedRoute>
+                    <PageShell><MyTicketPage /></PageShell>
                   </ProtectedRoute>
                 }
               />

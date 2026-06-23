@@ -29,6 +29,8 @@ class BookingOut(BaseModel):
     is_entered:        bool
     entered_at:        Optional[datetime] = None
     email_sent:        bool
+    phone:             str | None = None
+    created_at:        datetime
 
     model_config = {"from_attributes": True}
 

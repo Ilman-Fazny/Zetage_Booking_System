@@ -7,5 +7,10 @@ export async function createBooking({ seatCode, district, isSasnakaMember, phone
     is_sasnaka_member: isSasnakaMember,
     phone: phone || null,
   });
-  return data; // BookingOut: { id, booking_ref, seat_code, section, attendee_name, district, is_sasnaka_member, status }
+  return data;
+}
+
+export async function fetchMyBooking() {
+  const { data } = await api.get("/bookings/me");
+  return data;
 }

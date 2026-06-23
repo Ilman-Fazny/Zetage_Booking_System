@@ -1,5 +1,5 @@
 // src/pages/SeatSelectionPage.jsx
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useSeatMap } from "../lib/useSeatMap";
 import { useAuth } from "../context/AuthContext";
@@ -7,6 +7,7 @@ import TheatreMap from "../components/seat-map/TheatreMap";
 import SeatLegend from "../components/seat-map/SeatLegend";
 import SeatSummaryBar from "../components/seat-map/SeatSummaryBar";
 import logo from "../assets/zentage-TS.png";
+import { fetchMyBooking } from "../lib/bookings";
 
 const EVENT_PRICE = 500; // LKR
 
@@ -68,6 +69,15 @@ export default function SeatSelectionPage() {
   const { sections, selectedSeat, selectSeat, loading, error } = useSeatMap();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [hasBooking, setHasBooking] = useState(false);
+
+  useEffect(() => {
+    fetchMyBooking()
+      .then((data) => {
+        if (data) setHasBooking(true);
+      })
+      .catch(() => {});
+  }, []);
 
   function handleContinue() {
     if (!selectedSeat) return;
@@ -97,28 +107,47 @@ export default function SeatSelectionPage() {
     <div className="ssp-root">
       <div className="ssp-inner">
 
-        {/* ── Admin Link ──────────────────────────────────────── */}
-        {user?.is_admin && (
-          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
+        {/* ── Top Bar Links ──────────────────────────────────── */}
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: "16px", marginBottom: 8 }}>
+          {hasBooking && (
+            <Link
+              to="/my-ticket"
+              style={{
+                fontSize: 11,
+                color: "rgba(52, 211, 153, 0.75)",
+                textDecoration: "none",
+                letterSpacing: "0.04em",
+                fontWeight: 600,
+                borderBottom: "1px solid rgba(52, 211, 153, 0.3)",
+                paddingBottom: 1,
+                transition: "color 0.15s",
+              }}
+              onMouseEnter={e => e.currentTarget.style.color = "rgba(52, 211, 153, 1)"}
+              onMouseLeave={e => e.currentTarget.style.color = "rgba(52, 211, 153, 0.75)"}
+            >
+              My Ticket →
+            </Link>
+          )}
+          {user?.is_admin && (
             <Link
               to="/admin"
               style={{
                 fontSize: 11,
-                color: "rgba(167,139,250,0.6)",
+                color: "rgba(167, 139, 250, 0.6)",
                 textDecoration: "none",
                 letterSpacing: "0.04em",
                 fontWeight: 500,
-                borderBottom: "1px solid rgba(167,139,250,0.25)",
+                borderBottom: "1px solid rgba(167, 139, 250, 0.25)",
                 paddingBottom: 1,
                 transition: "color 0.15s",
               }}
-              onMouseEnter={e => e.currentTarget.style.color = "rgba(167,139,250,0.9)"}
-              onMouseLeave={e => e.currentTarget.style.color = "rgba(167,139,250,0.6)"}
+              onMouseEnter={e => e.currentTarget.style.color = "rgba(167, 139, 250, 0.9)"}
+              onMouseLeave={e => e.currentTarget.style.color = "rgba(167, 139, 250, 0.6)"}
             >
               Admin panel →
             </Link>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* ── Header: Logo + Title ─────────────────────────────── */}
         <div style={{

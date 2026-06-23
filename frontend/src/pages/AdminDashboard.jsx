@@ -634,29 +634,69 @@ const STYLES = `
     box-shadow: 0 0 10px rgba(139, 92, 246, 0.15);
   }
 
+  .adm-email-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .adm-badge-delivered {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #34d399;
+    border: 1px solid rgba(52, 211, 153, 0.2);
+    padding: 2.5px 8px;
+    border-radius: 20px;
+    background: rgba(52, 211, 153, 0.06);
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    box-shadow: 0 0 8px rgba(52, 211, 153, 0.12);
+  }
+
+  .adm-badge-failed {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    padding: 2.5px 8px;
+    border-radius: 20px;
+    background: rgba(239, 68, 68, 0.06);
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.12);
+  }
+
   /* ── Resend Button ── */
   .adm-btn-resend {
     font-family: 'Inter', system-ui, sans-serif;
-    font-size: 10px;
+    font-size: 9.5px;
     font-weight: 600;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
     color: #a78bfa;
-    background: rgba(167, 139, 250, 0.08);
-    border: 1px solid rgba(167, 139, 250, 0.25);
+    background: rgba(167, 139, 250, 0.06);
+    border: 1px solid rgba(167, 139, 250, 0.2);
     padding: 3px 8px;
-    border-radius: 20px;
+    border-radius: 6px;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+    transition: all 0.2s ease-in-out;
     outline: none;
   }
   .adm-btn-resend:hover {
-    background: rgba(167, 139, 250, 0.16);
-    color: #fff;
+    background: rgba(167, 139, 250, 0.15);
+    color: #ffffff;
     border-color: rgba(167, 139, 250, 0.45);
+    box-shadow: 0 0 8px rgba(167, 139, 250, 0.3);
   }
 `;
 
@@ -1053,7 +1093,7 @@ function BookingsTab({
             <table className="adm-table">
               <thead>
                 <tr>
-                  {["Ref", "Name", "Email", "Seat", "Section", "District", "Sasnaka", "Email Sent", "Attendance", "Date"].map((h) => (
+                  {["Ref", "Name", "Email", "Seat", "Section", "District", "Sasnaka", "Email Status", "Attendance", "Date"].map((h) => (
                     <th key={h}>{h}</th>
                   ))}
                 </tr>
@@ -1077,17 +1117,22 @@ function BookingsTab({
                         : <span className="adm-badge-no">No</span>}
                     </td>
                     <td>
-                      <div style={{ display: "flex", flexDirection: "column", gap: "6px", alignItems: "flex-start" }}>
+                      <div className="adm-email-cell">
                         {b.email_sent ? (
-                          <span className="adm-badge-member" style={{ color: "#34d399", borderColor: "rgba(52, 211, 153, 0.2)", display: "inline-flex" }}>Delivered ✓</span>
+                          <span className="adm-badge-delivered">Delivered</span>
                         ) : (
-                          <span className="adm-badge-no" style={{ color: "rgba(239, 68, 68, 0.85)", borderColor: "rgba(239, 68, 68, 0.25)", background: "rgba(239, 68, 68, 0.06)", display: "inline-flex" }}>Failed</span>
+                          <span className="adm-badge-failed">Failed</span>
                         )}
                         <button
                           onClick={() => onResendEmail(b.id, b.user_email)}
                           className="adm-btn-resend"
+                          title="Resend ticket email"
                         >
-                          Resend ✉️
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                            <polyline points="22,6 12,13 2,6" />
+                          </svg>
+                          Resend
                         </button>
                       </div>
                     </td>
