@@ -1,6 +1,6 @@
 # models/seat.py
 import enum
-from sqlalchemy import Column, Integer, String, Enum as SAEnum, UniqueConstraint
+from sqlalchemy import Column, Integer, String, Enum as SAEnum, UniqueConstraint, Boolean, DateTime
 from sqlalchemy.orm import relationship
 from app.db.session import Base
 
@@ -30,5 +30,7 @@ class Seat(Base):
     row         = Column(String, nullable=True)     # "A", "B", "C" etc — NULL for named blocks
     number      = Column(Integer, nullable=False)
     status      = Column(SAEnum(SeatStatus), default=SeatStatus.AVAILABLE, nullable=False)
+    attended    = Column(Boolean, default=False, nullable=False)
+    attended_at = Column(DateTime(timezone=True), nullable=True)
 
     booking = relationship("Booking", back_populates="seat", uselist=False)

@@ -4,8 +4,9 @@ from app.dependencies.dependencies import get_db, get_admin_user
 from app.services.booking_service import list_bookings, get_booking_stats
 from app.services.seat_service import get_seat_map
 from app.schemas.booking import AdminBookingOut, BookingStats
-from app.schemas.seat import SeatMapSection
+from app.schemas.seat import SeatMapSection, ScanRequest, ScanResponse
 from app.models.user import User
+from app.services.admin_service import scan_entrance
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -52,3 +53,17 @@ def admin_seat_overview(
 ):
     """Same shape as the public seat map, but admin-gated — useful for an admin dashboard view."""
     return get_seat_map(db)
+
+
+@router.post("/scan", response_model=ScanResponse)
+def scan_qr_entrance(
+    payload: ScanRequest,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_admin_user),
+):
+    """
+    Scan a QR code at the entrance.
+    Marks the seat as attended (one-time only).
+    Requires admin JWT.
+    """
+    return scan_entrance(payload.booking_ref, db)
