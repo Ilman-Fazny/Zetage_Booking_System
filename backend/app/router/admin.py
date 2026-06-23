@@ -33,6 +33,8 @@ def admin_list_bookings(
             created_at=b.created_at,
             user_email=b.user.email,
             user_name=b.user.name,
+            is_entered=b.is_entered,
+            entered_at=b.entered_at,
         )
         for b in bookings
     ]

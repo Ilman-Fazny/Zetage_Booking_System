@@ -3,6 +3,7 @@ import { Html5Qrcode } from "html5-qrcode";
 import api from "../lib/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { popVariants, microSpring } from "../lib/motionVariants";
+import debounce from "lodash.debounce";
 
 const SCANNER_ID = "qr-reader";
 
@@ -220,8 +221,24 @@ function useInjectStyles(css) {
   }, []);
 }
 
+// Add pulse overlay CSS to existing styles
+const PULSE_CSS = `
+.scanner-pulse {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #00ffb3, #00d994);
+  animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+  0% { opacity:.2; transform:scaleY(1); }
+  50% { opacity:.8; transform:scaleY(1.2); }
+  100% { opacity:.2; transform:scaleY(1); }
+}`;
+
+
 export default function QrScannerModal({ onClose }) {
-  useInjectStyles(STYLES);
+  useInjectStyles(`${STYLES}\n${PULSE_CSS}`);
 
   const [result, setResult] = useState(null); // { success, message, seat_code, section, attended_at }
   const [error, setError] = useState(null);
@@ -234,6 +251,12 @@ export default function QrScannerModal({ onClose }) {
     setResult(null);
     setScanning(true);
     didScan.current = false;
+    // Ensure any previous instance is cleared
+    if (scannerRef.current) {
+      try {
+        scannerRef.current.clear();
+      } catch (_) {}
+    }
 
     const html5QrCode = new Html5Qrcode(SCANNER_ID);
     scannerRef.current = html5QrCode;
@@ -242,25 +265,27 @@ export default function QrScannerModal({ onClose }) {
       .start(
         { facingMode: "environment" },
         { fps: 10, qrbox: { width: 250, height: 250 } },
-        async (decodedText) => {
+        // Debounced scan handler to prevent duplicate calls
+        debounce(async (decodedText) => {
           if (didScan.current) return;
           didScan.current = true;
           setScanning(false);
-
-          try {
-            await html5QrCode.stop();
-          } catch (err) {
-            console.error("Error stopping camera feed:", err);
-          }
-
+          // Pause scanner to avoid further frames
+          try { await html5QrCode.pause(); } catch (_) {}
           try {
             const res = await api.post("/admin/scan", { booking_ref: decodedText });
             setResult({ success: true, ...res.data });
           } catch (err) {
             const detail = err.response?.data?.detail || "Scan failed";
             setResult({ success: false, message: detail });
+          } finally {
+            // Resume after short delay to allow next scan
+            setTimeout(() => {
+              didScan.current = false;
+              html5QrCode.resume();
+            }, 1200);
           }
-        },
+        }, 200, { leading: true, trailing: false }),
         () => {} // suppress verbose camera frame-processing logs
       )
       .catch((err) => {
@@ -275,11 +300,21 @@ export default function QrScannerModal({ onClose }) {
 
     return () => {
       if (scannerRef.current) {
-        // attempt to synchronously shut down the camera if open
+        // attempt to shut down the camera if open
         if (scannerRef.current.isScanning) {
-          scannerRef.current.stop().catch((err) => {
-            console.error("Error during scanning teardown:", err);
-          });
+          scannerRef.current.stop()
+            .then(() => {
+              try {
+                scannerRef.current.clear();
+              } catch (_) {}
+            })
+            .catch((err) => {
+              console.error("Error during scanning teardown:", err);
+            });
+        } else {
+          try {
+            scannerRef.current.clear();
+          } catch (_) {}
         }
       }
     };
@@ -306,17 +341,19 @@ export default function QrScannerModal({ onClose }) {
           </button>
         </div>
 
-        {/* Viewfinder when active */}
-        {scanning && !error && (
-          <div className="qsm-body">
-            <p className="qsm-hint">
-              Align the attendee's ticket QR code inside the bounding box
-            </p>
-            <div className="qsm-viewfinder-wrapper">
-              <div id={SCANNER_ID} className="qsm-viewfinder" />
-            </div>
+        {/* Viewfinder - kept in DOM to prevent html5-qrcode crash, but hidden when inactive/error */}
+        <div
+          className="qsm-body"
+          style={{ display: scanning && !error ? "block" : "none" }}
+        >
+          <p className="qsm-hint">
+            Align the attendee's ticket QR code inside the bounding box
+          </p>
+          <div className="qsm-viewfinder-wrapper" style={{ position: "relative" }}>
+            <div id={SCANNER_ID} className="qsm-viewfinder" />
+            <div className="scanner-pulse" />
           </div>
-        )}
+        </div>
 
         {/* Camera error state */}
         {error && (

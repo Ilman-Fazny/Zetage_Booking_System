@@ -1,6 +1,7 @@
 from pydantic import BaseModel, field_validator
 from app.models.booking import BookingStatus
 from datetime import datetime
+from typing import Optional
 
 class BookingCreate(BaseModel):
     seat_code:         str
@@ -24,6 +25,9 @@ class BookingOut(BaseModel):
     district:          str
     is_sasnaka_member: bool
     status:            BookingStatus
+    # New attendance fields
+    is_entered:        bool
+    entered_at:        Optional[datetime] = None
 
     model_config = {"from_attributes": True}
 
@@ -36,9 +40,11 @@ class AdminBookingOut(BaseModel):
     district:          str
     is_sasnaka_member: bool
     status:            BookingStatus
-    created_at:         datetime
+    created_at:        datetime
     user_email:        str
-    user_name:          str | None
+    user_name:         str | None
+    is_entered:        bool
+    entered_at:        Optional[datetime] = None
 
     model_config = {"from_attributes": True}
 

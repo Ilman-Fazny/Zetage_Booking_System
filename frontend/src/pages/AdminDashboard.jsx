@@ -948,7 +948,7 @@ function BookingsTab({
             <table className="adm-table">
               <thead>
                 <tr>
-                  {["Ref", "Name", "Email", "Seat", "Section", "District", "Sasnaka", "Date"].map((h) => (
+                  {["Ref", "Name", "Email", "Seat", "Section", "District", "Sasnaka", "Attendance", "Date"].map((h) => (
                     <th key={h}>{h}</th>
                   ))}
                 </tr>
@@ -970,6 +970,22 @@ function BookingsTab({
                       {b.is_sasnaka_member
                         ? <span className="adm-badge-member">Member</span>
                         : <span className="adm-badge-no">No</span>}
+                    </td>
+                    <td>
+                      {b.is_entered ? (
+                        <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                          <span className="adm-badge-member">Checked In</span>
+                          {b.entered_at && (
+                            <span style={{ fontSize: "10px", color: "rgba(52, 211, 153, 0.7)" }}>
+                              {new Date(b.entered_at).toLocaleTimeString("en-LK", {
+                                hour: "2-digit", minute: "2-digit",
+                              })}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="adm-badge-no" style={{ color: "rgba(180, 170, 210, 0.45)", borderColor: "rgba(180, 170, 210, 0.15)", background: "rgba(180, 170, 210, 0.02)" }}>Pending</span>
+                      )}
                     </td>
                     <td className="adm-td-date">
                       {new Date(b.created_at).toLocaleDateString("en-GB", {

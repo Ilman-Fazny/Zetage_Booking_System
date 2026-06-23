@@ -28,14 +28,14 @@ def scan_entrance(booking_ref: str, db: Session) -> ScanResponse:
         if booking_exists.status != BookingStatus.CONFIRMED:
             raise HTTPException(
                 status_code=400,
-                detail="Booking is not confirmed (booking is cancelled)"
+                detail=f"Booking is not confirmed (status: {booking_exists.status.value})"
             )
         raise HTTPException(status_code=404, detail="Invalid QR code — booking not found")
 
     if seat.status != SeatStatus.BOOKED:
         raise HTTPException(
             status_code=400,
-            detail="Booking is not confirmed (payment may be incomplete)"
+            detail="Booking is not confirmed (seat not marked as booked)"
         )
 
     if seat.attended:
@@ -44,11 +44,19 @@ def scan_entrance(booking_ref: str, db: Session) -> ScanResponse:
             detail=f"Already checked in at {seat.attended_at.strftime('%I:%M %p') if seat.attended_at else 'earlier'}"
         )
 
-    # Mark attendance
+    # Mark attendance on seat and booking
+    now_utc = datetime.now(timezone.utc)
     seat.attended = True
-    seat.attended_at = datetime.now(timezone.utc)
+    seat.attended_at = now_utc
+    # Update booking attendance fields
+    booking = seat.booking
+    if booking:
+        booking.is_entered = True
+        booking.entered_at = now_utc
     db.commit()
     db.refresh(seat)
+    if booking:
+        db.refresh(booking)
 
     return ScanResponse(
         success=True,

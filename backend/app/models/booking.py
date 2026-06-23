@@ -33,6 +33,9 @@ class Booking(Base):
     status             = Column(SAEnum(BookingStatus, values_callable=lambda x: [e.value for e in x]),
                                 default=BookingStatus.CONFIRMED, nullable=False)
     created_at         = Column(DateTime(timezone=True), server_default=func.now())
+    # New attendance tracking fields
+    is_entered         = Column(Boolean, default=False, nullable=False)
+    entered_at         = Column(DateTime(timezone=True), nullable=True)
 
     user = relationship("User", back_populates="booking")
     seat = relationship("Seat", back_populates="booking")
