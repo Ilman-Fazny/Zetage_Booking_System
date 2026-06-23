@@ -223,6 +223,81 @@ export default function TheatreMap({ sections, selectedSeat, onSelect }) {
           </text>
 
           {/* ════════════════════════════════════════════
+              STRUCTURAL ELEMENTS — Sound/Light Unit, pillars
+          ════════════════════════════════════════════ */}
+
+          {/* Sound & Light Control Unit — center gap, rows O-Q
+              Ground floor center block x=470-642, rows O (y=376) – Q (y=420) */}
+          <rect
+            x={455} y={380}
+            width={218} height={72}
+            rx={5}
+            fill="rgba(18,12,42,0.72)"
+            stroke="rgba(109,40,217,0.32)"
+            strokeWidth={0.8}
+            strokeDasharray="4 2.5"
+          />
+          <text
+            x={564} y={410}
+            textAnchor="middle" dominantBaseline="central"
+            fontSize={7.5} fontWeight={600}
+            fill="rgba(167,139,250,0.55)"
+            fontFamily="'Inter',system-ui,sans-serif"
+            style={{ letterSpacing: "0.07em" }}
+          >
+            SOUND &amp; LIGHT
+          </text>
+          <text
+            x={564} y={426}
+            textAnchor="middle" dominantBaseline="central"
+            fontSize={6.5}
+            fill="rgba(139,92,246,0.38)"
+            fontFamily="'Inter',system-ui,sans-serif"
+            style={{ letterSpacing: "0.05em" }}
+          >
+            CONTROL UNIT
+          </text>
+
+          {/* ── Left side structural gap (between UL1 y≈154 and UL9 y=180) ── */}
+          <rect x={130} y={155} width={40} height={23}
+            rx={2}
+            fill="rgba(14,10,30,0.82)"
+            stroke="rgba(139,92,246,0.08)" strokeWidth={0.5}
+          />
+
+          {/* ── Right side structural gap (between UR1 y≈176 and UR10 y=202) ── */}
+          <rect x={918} y={177} width={40} height={23}
+            rx={2}
+            fill="rgba(14,10,30,0.82)"
+            stroke="rgba(139,92,246,0.08)" strokeWidth={0.5}
+          />
+
+          {/* ════════════════════════════════════════════
+              ZONE IDENTIFICATION LABELS
+          ════════════════════════════════════════════ */}
+          <text
+            x={545} y={540}
+            textAnchor="middle" dominantBaseline="central"
+            fontSize={52} fontWeight={800}
+            fill="rgba(255,255,255,0.03)"
+            fontFamily="'Inter',system-ui,sans-serif"
+            style={{ letterSpacing: "0.4em", pointerEvents: "none" }}
+          >
+            BALCONY
+          </text>
+          
+          <text
+            x={545} y={240}
+            textAnchor="middle" dominantBaseline="central"
+            fontSize={64} fontWeight={800}
+            fill="rgba(255,255,255,0.02)"
+            fontFamily="'Inter',system-ui,sans-serif"
+            style={{ letterSpacing: "0.3em", pointerEvents: "none" }}
+          >
+            GROUND FLOOR
+          </text>
+
+          {/* ════════════════════════════════════════════
               SEAT SECTIONS — all interactive, no metadata
           ════════════════════════════════════════════ */}
           {Object.entries(blockSeats).map(([blockKey, seats]) => {

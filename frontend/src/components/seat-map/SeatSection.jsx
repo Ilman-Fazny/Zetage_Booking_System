@@ -19,9 +19,6 @@ function getLeftStripCoords(row, number) {
     let idx = 0;
     if (row === "UL13") {
       idx = number - 17; 
-      if (number === 19 || number === 20) {
-        col = -1;
-      }
     } else { 
       const map = { 19: 0, 20: 1, 15: 2, 16: 3 };
       idx = map[number] !== undefined ? map[number] : 0;
@@ -31,9 +28,6 @@ function getLeftStripCoords(row, number) {
     let idx = 0;
     if (row === "UL31") {
       idx = number - 25; 
-      if (number === 27 || number === 28) {
-        col = -1;
-      }
     } else { 
       const map = { 22: 0, 23: 1, 24: 2, 29: 3 };
       idx = map[number] !== undefined ? map[number] : 0;
@@ -43,9 +37,6 @@ function getLeftStripCoords(row, number) {
     let idx = 0;
     if (row === "UL29") {
       idx = number - 33; 
-      if (number === 35 || number === 36) {
-        col = -1;
-      }
     } else { 
       const map = { 30: 0, 31: 1, 32: 2, 29: 3 };
       idx = map[number] !== undefined ? map[number] : 0;
@@ -75,9 +66,6 @@ function getRightStripCoords(row, number) {
     let idx = 0;
     if (row === "UR14") {
       idx = number - 15; 
-      if (number === 17 || number === 18) {
-        col = -1;
-      }
     } else {
       const map = { 14: 0, 19: 1, 20: 2, 21: 3 };
       idx = map[number] !== undefined ? map[number] : 0;
@@ -87,9 +75,6 @@ function getRightStripCoords(row, number) {
     let idx = 0;
     if (row === "UR22") {
       idx = number - 23; 
-      if (number === 25 || number === 26) {
-        col = -1;
-      }
     } else {
       const map = { 22: 0, 27: 1, 28: 2, 29: 3 };
       idx = map[number] !== undefined ? map[number] : 0;
@@ -99,9 +84,6 @@ function getRightStripCoords(row, number) {
     let idx = 0;
     if (row === "UR30") {
       idx = number - 31; 
-      if (number === 33 || number === 34) {
-        col = -1;
-      }
     } else {
       const map = { 30: 0, 35: 1, 36: 2, 37: 3 };
       idx = map[number] !== undefined ? map[number] : 0;
@@ -114,65 +96,54 @@ function getRightStripCoords(row, number) {
   return { col, y };
 }
 
-// ── Balcony Front Staggered Aisle Helper ───────────────────────────
-function getFrontAisleOffset(row, number) {
-  const aisle = 24;
-  if (row.startsWith("UA")) {
-    let offset = 0;
-    if (number >= 6) offset += aisle;
-    if (number >= 19) offset += aisle;
-    return offset;
-  }
-  if (row.startsWith("UB")) {
-    let offset = 0;
-    if (number >= 7) offset += aisle;
-    if (number >= 19) offset += aisle;
-    return offset;
-  }
-  if (row.startsWith("UC")) {
-    let offset = 0;
-    if (number >= 8) offset += aisle;
-    if (number >= 20) offset += aisle;
-    return offset;
-  }
-  if (row.startsWith("UD")) {
-    let offset = 0;
-    if (number >= 7) offset += aisle;
-    if (number >= 19) offset += aisle;
-    return offset;
-  }
-  if (row.startsWith("UE")) {
-    let offset = 0;
-    if (number >= 8) offset += aisle;
-    if (number >= 20) offset += aisle;
-    return offset;
-  }
-  return 0;
+// ── Balcony Front Col & Aisle Helper ───────────────────────────
+function getBalconyFrontColIndex(row, number) {
+  if (row.startsWith("UA")) return number + 1;
+  if (row.startsWith("UB")) return number;
+  if (row.startsWith("UC")) return number - 1;
+  if (row.startsWith("UD")) return number;
+  if (row.startsWith("UE")) return number - 1;
+  return number - 1;
 }
 
-// ── Balcony Bottom Staggered Aisle Helper ──────────────────────────
-function getBottomAisleOffset(row, number) {
+function getFrontAisleOffset(colIndex) {
   const aisle = 24;
-  if (row.startsWith("UF")) {
-    if (number >= 6) return aisle;
-  }
+  let offset = 0;
+  if (colIndex >= 7) offset += aisle;
+  if (colIndex >= 19) offset += aisle;
+  return offset;
+}
+
+
+// ── Balcony Bottom Col & Aisle Helper ──────────────────────────
+function getBalconyBottomColIndex(row, number) {
+  if (row.startsWith("UF")) return number;
+  if (row.startsWith("UG") || row === "UH22") return number - 1;
+  if (row.startsWith("UH")) return number - 1;
+  if (row.startsWith("UI")) return number - 1;
+  return number - 1;
+}
+
+function getBottomAisleOffset(row, number, colIndex) {
+  const aisle = 24;
+  if (row.startsWith("UF")) return 0; // continuous block
+  
   if (row.startsWith("UG") || row === "UH22") {
     let offset = 0;
-    if (number >= 11) offset += aisle;
-    if (number >= 16) offset += aisle;
-    if (number >= 22) offset += aisle;
+    if (colIndex >= 10) offset += aisle;
+    if (colIndex >= 15) offset += aisle;
     return offset;
   }
   if (row.startsWith("UH")) {
     let offset = 0;
-    if (number >= 11) offset += aisle;
-    if (number >= 22) offset += aisle;
+    if (colIndex >= 10) offset += aisle;
+    if (colIndex >= 21) offset += aisle;
     return offset;
   }
   if (row.startsWith("UI")) {
     let offset = 0;
-    if (number >= 6) offset += aisle;
-    if (number >= 25) offset += aisle;
+    if (colIndex >= 5) offset += aisle;
+    if (colIndex >= 24) offset += aisle;
     return offset;
   }
   return 0;
@@ -274,7 +245,8 @@ export default function SeatSection({ seats, blockKey, blockX, blockY, selectedS
                 {rowLabel}
               </text>
               {rowSeats.map((seat) => {
-                const sx = blockX + (seat.number - 1) * step + getFrontAisleOffset(seat.row, seat.number);
+                const colIndex = getBalconyFrontColIndex(seat.row, seat.number);
+                const sx = blockX + colIndex * step + getFrontAisleOffset(colIndex);
                 return (
                   <Seat
                     key={seat.seat_code}
@@ -328,7 +300,8 @@ export default function SeatSection({ seats, blockKey, blockX, blockY, selectedS
                 {rowLabel}
               </text>
               {rowSeats.map((seat) => {
-                const sx = blockX + (seat.number - 1) * step + getBottomAisleOffset(seat.row, seat.number);
+                const colIndex = getBalconyBottomColIndex(seat.row, seat.number);
+                const sx = blockX + colIndex * step + getBottomAisleOffset(seat.row, seat.number, colIndex);
                 return (
                   <Seat
                     key={seat.seat_code}

@@ -20,12 +20,10 @@ export const SECTION_BLOCKS = {
   groundFloor:        { x: 280, y: 68 },
 
   // Left side strips (2 columns: outer col=0 at blockX, inner col=1 at blockX+step)
-  // Inner col at 175+22=197. Ground floor at 280. Gap ≈ 65px (theatre gangway).
-  balconyLeftStrips:  { x: 175, y: 68 },
+  balconyLeftStrips:  { x: 130, y: 68 },
 
   // Right side strips (2 columns: outer col=0 at blockX, inner col=1 at blockX-step)
-  // Inner col at 890-22=868. Ground floor right at 832. Gap ≈ 36px.
-  balconyRightStrips: { x: 890, y: 68 },
+  balconyRightStrips: { x: 940, y: 68 },
 
   // Lower balcony front rows UA-UE
   balconyFront:       { x: 248, y: 600 },
