@@ -599,6 +599,40 @@ const STYLES = `
   .adm-scan-btn:active {
     transform: translateY(0);
   }
+
+  /* ── Search Input ── */
+  .adm-input-wrapper {
+    position: relative;
+    margin-bottom: 16px;
+  }
+  .adm-input-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(180, 170, 210, 0.4);
+    font-size: 14px;
+    pointer-events: none;
+  }
+  .adm-input {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 13px;
+    color: #ede8ff;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 10px;
+    padding: 10px 14px 10px 38px;
+    outline: none;
+    width: 100%;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .adm-input::placeholder {
+    color: rgba(180, 170, 210, 0.35);
+  }
+  .adm-input:focus {
+    border-color: rgba(139, 92, 246, 0.45);
+    box-shadow: 0 0 10px rgba(139, 92, 246, 0.15);
+  }
 `;
 
 function useInjectStyles(css) {
@@ -887,11 +921,39 @@ function BookingsTab({
   filterSection, setFilterSection,
   onApplyFilters,
 }) {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredBookings = bookings.filter((b) => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return true;
+    return (
+      (b.booking_ref && b.booking_ref.toLowerCase().includes(query)) ||
+      (b.attendee_name && b.attendee_name.toLowerCase().includes(query)) ||
+      (b.user_email && b.user_email.toLowerCase().includes(query)) ||
+      (b.seat_code && b.seat_code.toLowerCase().includes(query)) ||
+      (b.district && b.district.toLowerCase().includes(query)) ||
+      (b.section && b.section.toLowerCase().includes(query))
+    );
+  });
+
   return (
     <div>
       {/* Filter panel */}
       <div className="adm-filter-panel">
-        <p className="adm-filter-title">⊟ Filters</p>
+        <p className="adm-filter-title">⊟ Filters & Search</p>
+        
+        {/* Search bar input */}
+        <div className="adm-input-wrapper">
+          <span className="adm-input-icon">🔍</span>
+          <input
+            type="text"
+            className="adm-input"
+            placeholder="Search by name, email, booking ref, seat, section, district..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+
         <div className="adm-filter-grid">
           <select
             value={filterDistrict}
@@ -934,13 +996,17 @@ function BookingsTab({
       <p className="adm-results-count">
         {loading
           ? "Loading…"
-          : `${bookings.length} booking${bookings.length !== 1 ? "s" : ""} found`}
+          : `${filteredBookings.length} booking${filteredBookings.length !== 1 ? "s" : ""} found${searchQuery ? ` matching "${searchQuery}"` : ""}`}
       </p>
 
       {/* Table */}
-      {!loading && bookings.length === 0 ? (
+      {!loading && filteredBookings.length === 0 ? (
         <div className="adm-table-wrap">
-          <p className="adm-no-results">No bookings match the current filters.</p>
+          <p className="adm-no-results">
+            {bookings.length === 0
+              ? "No bookings match the current filters."
+              : "No bookings match your search query."}
+          </p>
         </div>
       ) : (
         <div className="adm-table-wrap">
@@ -958,7 +1024,7 @@ function BookingsTab({
                 initial="initial"
                 animate="animate"
               >
-                {bookings.map((b) => (
+                {filteredBookings.map((b) => (
                   <motion.tr key={b.id} variants={listItemVariants}>
                     <td className="adm-td-ref">{b.booking_ref}</td>
                     <td>{b.attendee_name || "—"}</td>
