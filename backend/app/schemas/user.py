@@ -32,3 +32,6 @@ class TokenResponse(BaseModel):
 
 class GoogleAuthRequest(BaseModel):
     code: str    # OAuth authorization code from Google
+
+class PromoteRequest(BaseModel):
+    email: str

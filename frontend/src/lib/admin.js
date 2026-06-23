@@ -19,3 +19,13 @@ export async function fetchSeatOverview() {
   const { data } = await api.get("/admin/seats");
   return data;
 }
+
+export async function fetchAdmins() {
+  const { data } = await api.get("/admin/admins");
+  return data;
+}
+
+export async function promoteUser(email) {
+  const { data } = await api.post("/admin/promote", { email });
+  return data;
+}

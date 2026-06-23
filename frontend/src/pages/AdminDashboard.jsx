@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { fetchStats, fetchBookings } from "../lib/admin";
+import { fetchStats, fetchBookings, fetchAdmins, promoteUser } from "../lib/admin";
 import { DISTRICTS } from "../lib/districts";
 import { listContainerVariants, listItemVariants, microSpring } from "../lib/motionVariants";
 import logo from "../assets/zentage-TS.png";
@@ -727,13 +727,13 @@ export default function AdminDashboard() {
 
       {/* ── Tab bar ─────────────────────────────────────── */}
       <div className="adm-tabs">
-        {["overview", "bookings"].map((t) => (
+        {["overview", "bookings", "admins"].map((t) => (
           <button
             key={t}
             className={`adm-tab ${tab === t ? "active" : ""}`}
             onClick={() => setTab(t)}
           >
-            {t === "overview" ? "⬡ Overview" : "⊞ Bookings"}
+            {t === "overview" ? "⬡ Overview" : t === "bookings" ? "⊞ Bookings" : "🛡 Admins"}
           </button>
         ))}
       </div>
@@ -755,6 +755,9 @@ export default function AdminDashboard() {
             setFilterSection={setFilterSection}
             onApplyFilters={loadBookings}
           />
+        )}
+        {tab === "admins" && (
+          <AdminsTab />
         )}
       </div>
 
@@ -1065,6 +1068,150 @@ function BookingsTab({
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+/* ─── Admins tab ────────────────────────────────────────────────────────────── */
+function AdminsTab() {
+  const [admins, setAdmins] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [promoteEmail, setPromoteEmail] = useState("");
+  const [promoting, setPromoting] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const loadAdmins = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await fetchAdmins();
+      setAdmins(data);
+    } catch (err) {
+      console.error("Failed to fetch admins:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadAdmins();
+  }, [loadAdmins]);
+
+  const handlePromote = async (e) => {
+    e.preventDefault();
+    if (!promoteEmail.trim()) return;
+
+    setPromoting(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      const res = await promoteUser(promoteEmail);
+      setSuccess(`Successfully promoted ${res.email} to Admin!`);
+      setPromoteEmail("");
+      // Refetch
+      const updatedAdmins = await fetchAdmins();
+      setAdmins(updatedAdmins);
+    } catch (err) {
+      const msg = err.response?.data?.detail || "Failed to promote user to Admin.";
+      setError(msg);
+    } finally {
+      setPromoting(false);
+    }
+  };
+
+  return (
+    <div>
+      <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+        {/* Promote Form */}
+        <div className="adm-panel">
+          <p className="adm-panel-title">🛡 Promote User to Admin</p>
+          <form onSubmit={handlePromote} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", alignItems: "center" }}>
+              <div className="adm-input-wrapper" style={{ flexGrow: 1, marginBottom: 0 }}>
+                <span className="adm-input-icon">✉️</span>
+                <input
+                  type="email"
+                  className="adm-input"
+                  placeholder="Enter user email address..."
+                  value={promoteEmail}
+                  onChange={(e) => setPromoteEmail(e.target.value)}
+                  disabled={promoting}
+                  required
+                />
+              </div>
+              <motion.button
+                type="submit"
+                className="adm-apply-btn"
+                style={{ marginTop: 0, padding: "10px 24px" }}
+                disabled={promoting}
+                whileHover={{ scale: 1.02, y: -0.5 }}
+                whileTap={{ scale: 0.98 }}
+                transition={microSpring}
+              >
+                {promoting ? "Promoting..." : "Promote Admin 🛡"}
+              </motion.button>
+            </div>
+            {error && (
+              <p style={{ color: "#ef4444", fontSize: "13px", fontWeight: "500", margin: "4px 0 0" }}>
+                ❌ {error}
+              </p>
+            )}
+            {success && (
+              <p style={{ color: "#34d399", fontSize: "13px", fontWeight: "500", margin: "4px 0 0" }}>
+                ✅ {success}
+              </p>
+            )}
+          </form>
+        </div>
+
+        {/* Admins List */}
+        <div className="adm-panel">
+          <p className="adm-panel-title">📋 Current Admins List</p>
+          {loading ? (
+            <div className="adm-loading">
+              <span className="adm-loading-dot" />
+              Loading administrators…
+            </div>
+          ) : admins.length === 0 ? (
+            <p style={{ fontSize: "13px", color: "rgba(180,170,210,0.35)", textAlign: "center", padding: "20px 0" }}>
+              No admins found.
+            </p>
+          ) : (
+            <div className="adm-table-wrap">
+              <div className="adm-table-scroll">
+                <table className="adm-table">
+                  <thead>
+                    <tr>
+                      {["ID", "Name", "Email", "Role"].map((h) => (
+                        <th key={h}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <motion.tbody
+                    variants={listContainerVariants}
+                    initial="initial"
+                    animate="animate"
+                  >
+                    {admins.map((admin) => (
+                      <motion.tr key={admin.id} variants={listItemVariants}>
+                        <td className="adm-td-ref">#{admin.id}</td>
+                        <td>{admin.name || "—"}</td>
+                        <td className="adm-td-email">{admin.email}</td>
+                        <td>
+                          <span className="adm-admin-badge" style={{ fontSize: "9.5px", padding: "2px 8px" }}>
+                            Admin
+                          </span>
+                        </td>
+                      </motion.tr>
+                    ))}
+                  </motion.tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

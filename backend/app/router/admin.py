@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
 from app.dependencies.dependencies import get_db, get_admin_user
 from app.services.booking_service import list_bookings, get_booking_stats
 from app.services.seat_service import get_seat_map
 from app.schemas.booking import AdminBookingOut, BookingStats
 from app.schemas.seat import SeatMapSection, ScanRequest, ScanResponse
+from app.schemas.user import UserOut, PromoteRequest
 from app.models.user import User
 from app.services.admin_service import scan_entrance
 
@@ -69,3 +70,33 @@ def scan_qr_entrance(
     Requires admin JWT.
     """
     return scan_entrance(payload.booking_ref, db)
+
+
+@router.get("/admins", response_model=list[UserOut])
+def list_admins(
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_admin_user),
+):
+    """List all users who have is_admin = True"""
+    return db.query(User).filter(User.is_admin == True).order_by(User.id).all()
+
+
+@router.post("/promote", response_model=UserOut)
+def promote_user_to_admin(
+    payload: PromoteRequest,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_admin_user),
+):
+    """Promote a user by email to be an admin."""
+    email_normalized = payload.email.strip().lower()
+    user = db.query(User).filter(User.email == email_normalized).first()
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail=f"User with email '{payload.email}' not found"
+        )
+    
+    user.is_admin = True
+    db.commit()
+    db.refresh(user)
+    return user
