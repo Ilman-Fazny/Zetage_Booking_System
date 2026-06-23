@@ -7,7 +7,9 @@ from app.schemas.booking import AdminBookingOut, BookingStats
 from app.schemas.seat import SeatMapSection, ScanRequest, ScanResponse
 from app.schemas.user import UserOut, PromoteRequest
 from app.models.user import User
+from app.models.booking import Booking
 from app.services.admin_service import scan_entrance
+from app.services.email_service import send_ticket_email_raise
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -36,6 +38,7 @@ def admin_list_bookings(
             user_name=b.user.name,
             is_entered=b.is_entered,
             entered_at=b.entered_at,
+            email_sent=b.email_sent,
         )
         for b in bookings
     ]
@@ -128,3 +131,33 @@ def demote_user_from_admin(
     db.commit()
     db.refresh(user)
     return user
+
+
+@router.post("/bookings/{booking_id}/resend-email")
+def resend_booking_email(
+    booking_id: int,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_admin_user),
+):
+    """
+    Manually resend the ticket email.
+    Attempts synchronous delivery; propagates errors to the frontend.
+    """
+    booking = db.query(Booking).filter(Booking.id == booking_id).first()
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+
+    user = db.query(User).filter(User.id == booking.user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    try:
+        send_ticket_email_raise(user, booking, db)
+    except Exception as e:
+        # Catch and return specific Resend API or configuration error
+        raise HTTPException(
+            status_code=400,
+            detail=f"Email delivery failed: {str(e)}"
+        )
+
+    return {"detail": "Email resent successfully", "email_sent": True}

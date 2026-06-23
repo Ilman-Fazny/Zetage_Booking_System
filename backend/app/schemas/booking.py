@@ -28,6 +28,7 @@ class BookingOut(BaseModel):
     # New attendance fields
     is_entered:        bool
     entered_at:        Optional[datetime] = None
+    email_sent:        bool
 
     model_config = {"from_attributes": True}
 
@@ -45,6 +46,7 @@ class AdminBookingOut(BaseModel):
     user_name:         str | None
     is_entered:        bool
     entered_at:        Optional[datetime] = None
+    email_sent:        bool
 
     model_config = {"from_attributes": True}
 

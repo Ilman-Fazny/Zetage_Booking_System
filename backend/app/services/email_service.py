@@ -97,9 +97,34 @@ def send_ticket_email(user_id: int, booking_id: int) -> None:
                 }
             ]
         })
+        booking.email_sent = True
+        db.commit()
     except Exception as e:
         # Never let email failure break the booking - just log it
         print(f"[email_service] Failed to send ticket email for booking ID "
               f"{booking_id}: {e}")
     finally:
         db.close()
+
+
+def send_ticket_email_raise(user: User, booking: Booking, db: SessionLocal) -> None:
+    """Sends ticket email synchronously, raising any exceptions to the caller."""
+    qr_base64 = _generate_qr_base64(booking.booking_ref)
+    html = _build_ticket_html(user, booking, qr_base64)
+
+    recipient = f"{user.name} <{user.email}>" if user.name else user.email
+    resend.Emails.send({
+        "from":    settings.from_email,
+        "to":      [recipient],
+        "subject": f"Your {settings.event_name} ticket - {booking.booking_ref}",
+        "html":    html,
+        "attachments": [
+            {
+                "content": qr_base64,
+                "filename": f"qr_{booking.booking_ref}.png",
+                "content_id": "ticket-qr"
+            }
+        ]
+    })
+    booking.email_sent = True
+    db.commit()

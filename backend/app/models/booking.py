@@ -36,6 +36,7 @@ class Booking(Base):
     # New attendance tracking fields
     is_entered         = Column(Boolean, default=False, nullable=False)
     entered_at         = Column(DateTime(timezone=True), nullable=True)
+    email_sent         = Column(Boolean, default=False, nullable=False)
 
     user = relationship("User", back_populates="booking")
     seat = relationship("Seat", back_populates="booking")

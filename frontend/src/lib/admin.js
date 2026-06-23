@@ -34,3 +34,8 @@ export async function demoteUser(email) {
   const { data } = await api.post("/admin/demote", { email });
   return data;
 }
+
+export async function resendBookingEmail(bookingId) {
+  const { data } = await api.post(`/admin/bookings/${bookingId}/resend-email`);
+  return data;
+}

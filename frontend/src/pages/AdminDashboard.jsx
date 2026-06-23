@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { fetchStats, fetchBookings, fetchAdmins, promoteUser, demoteUser } from "../lib/admin";
+import { fetchStats, fetchBookings, fetchAdmins, promoteUser, demoteUser, resendBookingEmail } from "../lib/admin";
 import { DISTRICTS } from "../lib/districts";
 import { listContainerVariants, listItemVariants, microSpring } from "../lib/motionVariants";
 import logo from "../assets/zentage-TS.png";
@@ -633,6 +633,31 @@ const STYLES = `
     border-color: rgba(139, 92, 246, 0.45);
     box-shadow: 0 0 10px rgba(139, 92, 246, 0.15);
   }
+
+  /* ── Resend Button ── */
+  .adm-btn-resend {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #a78bfa;
+    background: rgba(167, 139, 250, 0.08);
+    border: 1px solid rgba(167, 139, 250, 0.25);
+    padding: 3px 8px;
+    border-radius: 20px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+    outline: none;
+  }
+  .adm-btn-resend:hover {
+    background: rgba(167, 139, 250, 0.16);
+    color: #fff;
+    border-color: rgba(167, 139, 250, 0.45);
+  }
 `;
 
 function useInjectStyles(css) {
@@ -939,6 +964,17 @@ function BookingsTab({
     );
   });
 
+  const onResendEmail = async (bookingId, email) => {
+    try {
+      await resendBookingEmail(bookingId);
+      alert(`Email resent successfully to ${email}!`);
+      onApplyFilters();
+    } catch (err) {
+      const msg = err.response?.data?.detail || "Failed to resend email.";
+      alert(`Error: ${msg}`);
+    }
+  };
+
   return (
     <div>
       {/* Filter panel */}
@@ -1017,7 +1053,7 @@ function BookingsTab({
             <table className="adm-table">
               <thead>
                 <tr>
-                  {["Ref", "Name", "Email", "Seat", "Section", "District", "Sasnaka", "Attendance", "Date"].map((h) => (
+                  {["Ref", "Name", "Email", "Seat", "Section", "District", "Sasnaka", "Email Sent", "Attendance", "Date"].map((h) => (
                     <th key={h}>{h}</th>
                   ))}
                 </tr>
@@ -1039,6 +1075,21 @@ function BookingsTab({
                       {b.is_sasnaka_member
                         ? <span className="adm-badge-member">Member</span>
                         : <span className="adm-badge-no">No</span>}
+                    </td>
+                    <td>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "6px", alignItems: "flex-start" }}>
+                        {b.email_sent ? (
+                          <span className="adm-badge-member" style={{ color: "#34d399", borderColor: "rgba(52, 211, 153, 0.2)", display: "inline-flex" }}>Delivered ✓</span>
+                        ) : (
+                          <span className="adm-badge-no" style={{ color: "rgba(239, 68, 68, 0.85)", borderColor: "rgba(239, 68, 68, 0.25)", background: "rgba(239, 68, 68, 0.06)", display: "inline-flex" }}>Failed</span>
+                        )}
+                        <button
+                          onClick={() => onResendEmail(b.id, b.user_email)}
+                          className="adm-btn-resend"
+                        >
+                          Resend ✉️
+                        </button>
+                      </div>
                     </td>
                     <td>
                       {b.is_entered ? (
