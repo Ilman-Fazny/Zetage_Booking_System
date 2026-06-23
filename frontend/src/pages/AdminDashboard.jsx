@@ -5,6 +5,7 @@ import { fetchStats, fetchBookings } from "../lib/admin";
 import { DISTRICTS } from "../lib/districts";
 import { listContainerVariants, listItemVariants, microSpring } from "../lib/motionVariants";
 import logo from "../assets/zentage-TS.png";
+import QrScannerModal from "../components/QrScannerModal";
 
 /* ─────────────────────────────────────────────────────────────────────────────
    Scoped styles — self-contained, no Tailwind conflicts
@@ -569,6 +570,35 @@ const STYLES = `
     color: rgba(180,170,210,0.35);
     letter-spacing: 0.02em;
   }
+  .adm-topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .adm-scan-btn {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    border: none;
+    border-radius: 20px;
+    padding: 6px 14px;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 0 12px rgba(37,99,235,0.3);
+    transition: transform 0.15s, box-shadow 0.15s, background-color 0.2s;
+    outline: none;
+  }
+  .adm-scan-btn:hover {
+    box-shadow: 0 0 18px rgba(37,99,235,0.5);
+  }
+  .adm-scan-btn:active {
+    transform: translateY(0);
+  }
 `;
 
 function useInjectStyles(css) {
@@ -599,6 +629,7 @@ export default function AdminDashboard() {
   const [loadingStats, setLoadingStats] = useState(true);
   const [loadingBookings, setLoadingBookings] = useState(true);
   const [tab, setTab] = useState("overview");
+  const [showScanner, setShowScanner] = useState(false);
   const navigate = useNavigate();
 
   const [filterDistrict, setFilterDistrict] = useState("");
@@ -646,7 +677,18 @@ export default function AdminDashboard() {
             </div>
           </div>
         </div>
-        <span className="adm-admin-badge">Admin</span>
+        <div className="adm-topbar-right">
+          <motion.button
+            className="adm-scan-btn"
+            onClick={() => setShowScanner(true)}
+            whileHover={{ scale: 1.03, y: -0.5 }}
+            whileTap={{ scale: 0.97 }}
+            transition={microSpring}
+          >
+            <span>📷</span> Scan Entrance
+          </motion.button>
+          <span className="adm-admin-badge">Admin</span>
+        </div>
       </div>
 
       {/* ── Tab bar ─────────────────────────────────────── */}
@@ -681,6 +723,12 @@ export default function AdminDashboard() {
           />
         )}
       </div>
+
+      <AnimatePresence>
+        {showScanner && (
+          <QrScannerModal onClose={() => setShowScanner(false)} />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
