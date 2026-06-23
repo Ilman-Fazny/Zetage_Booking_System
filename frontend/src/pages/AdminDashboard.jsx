@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { fetchStats, fetchBookings, fetchAdmins, promoteUser } from "../lib/admin";
+import { fetchStats, fetchBookings, fetchAdmins, promoteUser, demoteUser } from "../lib/admin";
 import { DISTRICTS } from "../lib/districts";
 import { listContainerVariants, listItemVariants, microSpring } from "../lib/motionVariants";
 import logo from "../assets/zentage-TS.png";
@@ -1120,6 +1120,32 @@ function AdminsTab() {
     }
   };
 
+  const handleDemote = async (email) => {
+    const isSuperAdmin = email.toLowerCase() === "ilmanfazny123@gmail.com";
+    if (isSuperAdmin) {
+      alert("Cannot demote the superadmin user.");
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to dismiss ${email} from the administrator role?`)) {
+      return;
+    }
+
+    setError("");
+    setSuccess("");
+
+    try {
+      await demoteUser(email);
+      setSuccess(`Successfully dismissed ${email} from Admin role.`);
+      // Refetch
+      const updatedAdmins = await fetchAdmins();
+      setAdmins(updatedAdmins);
+    } catch (err) {
+      const msg = err.response?.data?.detail || "Failed to dismiss administrator.";
+      setError(msg);
+    }
+  };
+
   return (
     <div>
       <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
@@ -1183,7 +1209,7 @@ function AdminsTab() {
                 <table className="adm-table">
                   <thead>
                     <tr>
-                      {["ID", "Name", "Email", "Role"].map((h) => (
+                      {["ID", "Name", "Email", "Role", "Actions"].map((h) => (
                         <th key={h}>{h}</th>
                       ))}
                     </tr>
@@ -1193,18 +1219,52 @@ function AdminsTab() {
                     initial="initial"
                     animate="animate"
                   >
-                    {admins.map((admin) => (
-                      <motion.tr key={admin.id} variants={listItemVariants}>
-                        <td className="adm-td-ref">#{admin.id}</td>
-                        <td>{admin.name || "—"}</td>
-                        <td className="adm-td-email">{admin.email}</td>
-                        <td>
-                          <span className="adm-admin-badge" style={{ fontSize: "9.5px", padding: "2px 8px" }}>
-                            Admin
-                          </span>
-                        </td>
-                      </motion.tr>
-                    ))}
+                    {admins.map((admin) => {
+                      const isSuperAdmin = admin.email.toLowerCase() === "ilmanfazny123@gmail.com";
+                      return (
+                        <motion.tr key={admin.id} variants={listItemVariants}>
+                          <td className="adm-td-ref">#{admin.id}</td>
+                          <td>{admin.name || "—"}</td>
+                          <td className="adm-td-email">{admin.email}</td>
+                          <td>
+                            {isSuperAdmin ? (
+                              <span className="adm-admin-badge" style={{ fontSize: "9.5px", padding: "2px 8px", color: "#fbbf24", borderColor: "rgba(251, 191, 36, 0.35)", background: "rgba(251, 191, 36, 0.08)" }}>
+                                Super Admin 👑
+                              </span>
+                            ) : (
+                              <span className="adm-admin-badge" style={{ fontSize: "9.5px", padding: "2px 8px" }}>
+                                Admin
+                              </span>
+                            )}
+                          </td>
+                          <td>
+                            {!isSuperAdmin ? (
+                              <motion.button
+                                onClick={() => handleDemote(admin.email)}
+                                className="adm-scan-btn"
+                                style={{
+                                  background: "rgba(239, 68, 68, 0.08)",
+                                  border: "1px solid rgba(239, 68, 68, 0.25)",
+                                  color: "#ef4444",
+                                  padding: "4px 10px",
+                                  fontSize: "11.5px",
+                                  boxShadow: "none",
+                                  borderRadius: "6px",
+                                  display: "inline-flex"
+                                }}
+                                whileHover={{ scale: 1.03, background: "rgba(239, 68, 68, 0.15)" }}
+                                whileTap={{ scale: 0.97 }}
+                                transition={microSpring}
+                              >
+                                Dismiss ⛔
+                              </motion.button>
+                            ) : (
+                              <span style={{ fontSize: "11.5px", color: "rgba(180, 170, 210, 0.35)", fontWeight: "500", letterSpacing: "0.02em" }}>🔒 Permanent</span>
+                            )}
+                          </td>
+                        </motion.tr>
+                      );
+                    })}
                   </motion.tbody>
                 </table>
               </div>

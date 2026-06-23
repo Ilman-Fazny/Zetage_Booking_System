@@ -29,3 +29,8 @@ export async function promoteUser(email) {
   const { data } = await api.post("/admin/promote", { email });
   return data;
 }
+
+export async function demoteUser(email) {
+  const { data } = await api.post("/admin/demote", { email });
+  return data;
+}

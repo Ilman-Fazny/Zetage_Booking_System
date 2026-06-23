@@ -100,3 +100,31 @@ def promote_user_to_admin(
     db.commit()
     db.refresh(user)
     return user
+
+
+@router.post("/demote", response_model=UserOut)
+def demote_user_from_admin(
+    payload: PromoteRequest,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_admin_user),
+):
+    """Demote a user from being an admin (remove is_admin)."""
+    email_normalized = payload.email.strip().lower()
+    
+    if email_normalized == "ilmanfazny123@gmail.com":
+        raise HTTPException(
+            status_code=403,
+            detail="Cannot demote the superadmin user"
+        )
+        
+    user = db.query(User).filter(User.email == email_normalized).first()
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail=f"User with email '{payload.email}' not found"
+        )
+    
+    user.is_admin = False
+    db.commit()
+    db.refresh(user)
+    return user
