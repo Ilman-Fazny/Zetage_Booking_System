@@ -2,7 +2,7 @@
 
 Welcome to the frontend application for the **Zentage Talent Show** booking ecosystem, proudly organized for the **Sasnaka Sansada Foundation**.
 
-This portal provides a high-performance, cinematic dark-mode user experience that allows attendees to view live seating availability at the **Elphinstone Theatre**, securely select seats via an interactive SVG matrix grid, and instantly receive their entry pass tickets embedded with digital validation QR codes.
+This portal provides a high performance, cinematic dark mode user experience that allows attendees to view live seating availability at the **Elphinstone Theatre**, securely select seats via an interactive SVG matrix grid, and instantly receive their entry pass tickets embedded with digital validation QR codes.
 
 ---
 
