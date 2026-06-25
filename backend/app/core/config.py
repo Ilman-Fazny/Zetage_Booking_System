@@ -19,6 +19,13 @@ class Settings(BaseSettings):
     event_venue: str = "Elphinstone Theatre, Maradana"
     event_price: int = 500   # LKR
 
+    # PayHere Integration
+    PAYHERE_MERCHANT_ID:     str = ""
+    PAYHERE_MERCHANT_SECRET: str = ""
+    PAYHERE_BASE_URL:        str = "https://sandbox.payhere.lk/pay/checkout"
+    EVENT_PRICE:             int = 500   # fix from 5000 → 500 LKR
+    FRONTEND_URL:            str = "http://localhost:5173"
+
     # Resend Email
     resend_api_key: str = ""
     from_email: str = "onboarding@resend.dev"
