@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { fetchStats, fetchBookings, fetchAdmins, promoteUser, demoteUser, resendBookingEmail, adminBookSeats } from "../lib/admin";
+import { fetchStats, fetchBookings, fetchAdmins, promoteUser, demoteUser, resendBookingEmail, adminBookSeats, fetchUsers, deleteBooking, deleteUser } from "../lib/admin";
 import { DISTRICTS } from "../lib/districts";
 import { listContainerVariants, listItemVariants, microSpring } from "../lib/motionVariants";
 import logo from "../assets/zentage-TS.png";
@@ -792,13 +792,13 @@ export default function AdminDashboard() {
 
       {/* ── Tab bar ─────────────────────────────────────── */}
       <div className="adm-tabs">
-        {["overview", "bookings", "book", "admins"].map((t) => (
+        {["overview", "bookings", "users", "book", "admins"].map((t) => (
           <button
             key={t}
             className={`adm-tab ${tab === t ? "active" : ""}`}
             onClick={() => setTab(t)}
           >
-            {t === "overview" ? "⬡ Overview" : t === "bookings" ? "⊞ Bookings" : t === "book" ? "📝 Book a Seat" : "🛡 Admins"}
+            {t === "overview" ? "⬡ Overview" : t === "bookings" ? "⊞ Bookings" : t === "users" ? "👥 Users" : t === "book" ? "📝 Book a Seat" : "🛡 Admins"}
           </button>
         ))}
       </div>
@@ -820,6 +820,9 @@ export default function AdminDashboard() {
             setFilterSection={setFilterSection}
             onApplyFilters={loadBookings}
           />
+        )}
+        {tab === "users" && (
+          <UsersTab />
         )}
         {tab === "book" && (
           <BookSeatTab />
@@ -1498,6 +1501,269 @@ function BookSeatTab() {
           )}
         </form>
       </div>
+    </div>
+  );
+}
+
+/* ─── Users tab ────────────────────────────────────────────────────────────── */
+function UsersTab() {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filterHasBooking, setFilterHasBooking] = useState("");
+  const [filterSection, setFilterSection] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  const loadUsers = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await fetchUsers({
+        hasBooking: filterHasBooking === "" ? undefined : filterHasBooking === "yes",
+        section: filterSection || undefined,
+      });
+      setUsers(data);
+    } catch (err) {
+      console.error("Failed to fetch users:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [filterHasBooking, filterSection]);
+
+  useEffect(() => {
+    loadUsers();
+  }, [loadUsers]);
+
+  // Search input debouncer (300ms)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchInput);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  // Client-side search filtering by name/email
+  const filteredUsers = users.filter((u) => {
+    const query = debouncedSearch.trim().toLowerCase();
+    if (!query) return true;
+    return (
+      (u.name && u.name.toLowerCase().includes(query)) ||
+      (u.email && u.email.toLowerCase().includes(query))
+    );
+  });
+
+  const handleCancelBooking = async (bookingRef) => {
+    if (!window.confirm(`Are you sure you want to cancel booking ${bookingRef}? This will release the seat.`)) {
+      return;
+    }
+    try {
+      await deleteBooking(bookingRef);
+      alert(`Booking ${bookingRef} cancelled successfully!`);
+      loadUsers();
+    } catch (err) {
+      const msg = err.response?.data?.detail || "Failed to cancel booking.";
+      alert(`Error: ${msg}`);
+    }
+  };
+
+  const handleDeleteUser = async (userId, email) => {
+    if (email.toLowerCase() === "ilmanfazny123@gmail.com") {
+      alert("Cannot delete the superadmin user.");
+      return;
+    }
+    if (!window.confirm(`WARNING: Are you sure you want to delete user ${email}? This will permanently remove their account and release all of their booked seats.`)) {
+      return;
+    }
+    try {
+      await deleteUser(userId);
+      alert(`User ${email} deleted successfully!`);
+      loadUsers();
+    } catch (err) {
+      const msg = err.response?.data?.detail || "Failed to delete user.";
+      alert(`Error: ${msg}`);
+    }
+  };
+
+  return (
+    <div>
+      {/* Filter panel */}
+      <div className="adm-filter-panel">
+        <p className="adm-filter-title">👥 User Filters & Search</p>
+        
+        {/* Search bar input */}
+        <div className="adm-input-wrapper">
+          <span className="adm-input-icon">🔍</span>
+          <input
+            type="text"
+            className="adm-input"
+            placeholder="Search by user name or email..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+          />
+        </div>
+
+        <div className="adm-filter-grid">
+          <select
+            value={filterHasBooking}
+            onChange={(e) => setFilterHasBooking(e.target.value)}
+            className="adm-select"
+          >
+            <option value="">All Users</option>
+            <option value="yes">Has booking</option>
+            <option value="no">No booking</option>
+          </select>
+          
+          <select
+            value={filterSection}
+            onChange={(e) => setFilterSection(e.target.value)}
+            className="adm-select"
+          >
+            <option value="">All Sections</option>
+            {SECTIONS.map((s) => <option key={s}>{s}</option>)}
+          </select>
+        </div>
+      </div>
+
+      {/* Results count */}
+      <p className="adm-results-count">
+        {loading
+          ? "Loading…"
+          : `${filteredUsers.length} user${filteredUsers.length !== 1 ? "s" : ""} found${debouncedSearch ? ` matching "${debouncedSearch}"` : ""}`}
+      </p>
+
+      {/* Table */}
+      {!loading && filteredUsers.length === 0 ? (
+        <div className="adm-table-wrap">
+          <p className="adm-no-results">
+            {users.length === 0
+              ? "No users match the current filters."
+              : "No users match your search query."}
+          </p>
+        </div>
+      ) : (
+        <div className="adm-table-wrap">
+          <div className="adm-table-scroll">
+            <table className="adm-table">
+              <thead>
+                <tr>
+                  {["Name", "Email", "Seats Booked", "Booking Refs", "Joined Date", "Actions"].map((h) => (
+                    <th key={h}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <motion.tbody
+                variants={listContainerVariants}
+                initial="initial"
+                animate="animate"
+              >
+                {filteredUsers.map((user) => (
+                  <motion.tr key={user.id} variants={listItemVariants}>
+                    <td>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <span style={{ fontWeight: 600 }}>{user.name || "—"}</span>
+                        {user.is_admin && (
+                          <span className="adm-admin-badge" style={{ fontSize: "9px", padding: "2.5px 6px" }}>
+                            Admin
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="adm-td-email">{user.email}</td>
+                    <td>
+                      {user.booking_count > 0 ? (
+                        <span className="adm-badge-member" style={{ fontSize: "11px", padding: "2.5px 8px" }}>
+                          {user.booking_count}
+                        </span>
+                      ) : (
+                        <span className="adm-badge-no" style={{ fontSize: "11px", padding: "2.5px 8px", color: "rgba(180, 170, 210, 0.5)", borderColor: "rgba(180, 170, 210, 0.2)", background: "rgba(180, 170, 210, 0.04)" }}>
+                          0
+                        </span>
+                      )}
+                    </td>
+                    <td>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", alignItems: "center" }}>
+                        {user.bookings && user.bookings.length > 0 ? (
+                          user.bookings.map((b) => (
+                            <div
+                              key={b.booking_ref}
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "6px",
+                                background: "rgba(255, 255, 255, 0.03)",
+                                border: "1px solid rgba(255, 255, 255, 0.08)",
+                                borderRadius: "6px",
+                                padding: "3px 8px",
+                              }}
+                            >
+                              <span className="adm-td-ref" style={{ fontSize: "11px" }}>
+                                {b.booking_ref} ({b.seat_code})
+                              </span>
+                              <motion.button
+                                onClick={() => handleCancelBooking(b.booking_ref)}
+                                style={{
+                                  background: "rgba(239, 68, 68, 0.08)",
+                                  border: "1px solid rgba(239, 68, 68, 0.25)",
+                                  color: "#ef4444",
+                                  cursor: "pointer",
+                                  fontSize: "10px",
+                                  padding: "2px 6px",
+                                  borderRadius: "4px",
+                                  fontWeight: "500",
+                                  display: "inline-flex",
+                                  alignItems: "center"
+                                }}
+                                whileHover={{ scale: 1.05, background: "rgba(239, 68, 68, 0.15)" }}
+                                whileTap={{ scale: 0.95 }}
+                                transition={microSpring}
+                                title={`Cancel booking ${b.booking_ref}`}
+                              >
+                                Cancel
+                              </motion.button>
+                            </div>
+                          ))
+                        ) : (
+                          <span style={{ color: "rgba(180, 170, 210, 0.3)" }}>—</span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="adm-td-date">
+                      {new Date(user.created_at).toLocaleDateString("en-GB", {
+                        day: "2-digit", month: "short", year: "numeric",
+                      })}
+                    </td>
+                    <td>
+                      {user.email.toLowerCase() !== "ilmanfazny123@gmail.com" ? (
+                        <motion.button
+                          onClick={() => handleDeleteUser(user.id, user.email)}
+                          className="adm-scan-btn"
+                          style={{
+                            background: "rgba(239, 68, 68, 0.08)",
+                            border: "1px solid rgba(239, 68, 68, 0.25)",
+                            color: "#ef4444",
+                            padding: "4px 10px",
+                            fontSize: "11.5px",
+                            boxShadow: "none",
+                            borderRadius: "6px",
+                            display: "inline-flex"
+                          }}
+                          whileHover={{ scale: 1.03, background: "rgba(239, 68, 68, 0.15)" }}
+                          whileTap={{ scale: 0.97 }}
+                          transition={microSpring}
+                          title={`Delete user ${user.email}`}
+                        >
+                          Delete 🗑
+                        </motion.button>
+                      ) : (
+                        <span style={{ fontSize: "11.5px", color: "rgba(180, 170, 210, 0.35)", fontWeight: "500" }}>🔒 Permanent</span>
+                      )}
+                    </td>
+                  </motion.tr>
+                ))}
+              </motion.tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

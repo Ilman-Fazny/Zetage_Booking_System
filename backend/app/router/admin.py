@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, Query, HTTPException, BackgroundTasks
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import select
 import uuid
 from app.dependencies.dependencies import get_db, get_admin_user
@@ -7,7 +7,7 @@ from app.services.booking_service import list_bookings, get_booking_stats
 from app.services.seat_service import get_seat_map
 from app.schemas.booking import AdminBookingOut, BookingStats, AdminBookingCreate
 from app.schemas.seat import SeatMapSection, ScanRequest, ScanResponse
-from app.schemas.user import UserOut, PromoteRequest
+from app.schemas.user import UserOut, PromoteRequest, AdminUserSummaryOut, AdminUserBookingOut
 from app.models.user import User
 from app.models.booking import Booking, BookingStatus
 from app.models.seat import Seat, SeatStatus
@@ -234,4 +234,112 @@ def admin_book_seats(
             booking.id
         )
 
-    return {"detail": f"Successfully booked {len(data.seat_codes)} seat(s) for {user.email}."}
+    return {"detail": f"Successfully booked {len(data.seat_codes)} seat(s) for {user.email}."}
+
+@router.get("/users", response_model=list[AdminUserSummaryOut])
+def admin_list_users(
+    search: str | None = Query(None, description="Search by name or email"),
+    has_booking: bool | None = Query(None, description="Filter by booking status"),
+    section: str | None = Query(None, description="Filter by seat section"),
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_admin_user),
+):
+    query = db.query(User).options(
+        joinedload(User.bookings).joinedload(Booking.seat)
+    )
+
+    if search:
+        search_val = f"%{search.strip()}%"
+        query = query.filter(
+            (User.name.ilike(search_val)) | (User.email.ilike(search_val))
+        )
+
+    if has_booking is not None:
+        if has_booking:
+            query = query.filter(User.bookings.any())
+        else:
+            query = query.filter(~User.bookings.any())
+
+    if section:
+        query = query.filter(User.bookings.any(Booking.seat.has(Seat.section == section)))
+
+    users = query.order_by(User.id).all()
+
+    results = []
+    for u in users:
+        user_bookings = []
+        for b in u.bookings:
+            if b.seat:
+                user_bookings.append(
+                    AdminUserBookingOut(
+                        booking_ref=b.booking_ref,
+                        seat_code=b.seat.seat_code,
+                        section=b.seat.section.value,
+                        status=b.status
+                    )
+                )
+        results.append(
+            AdminUserSummaryOut(
+                id=u.id,
+                name=u.name,
+                email=u.email,
+                is_admin=u.is_admin,
+                created_at=u.created_at,
+                booking_count=len(user_bookings),
+                bookings=user_bookings
+            )
+        )
+    return results
+
+@router.delete("/bookings/{booking_ref}")
+def admin_cancel_booking(
+    booking_ref: str,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_admin_user),
+):
+    """
+    Cancel a booking by booking_ref, set booking status to CANCELLED,
+    and release the associated seat back to AVAILABLE.
+    """
+    booking = db.query(Booking).filter(Booking.booking_ref == booking_ref).first()
+    if not booking:
+        raise HTTPException(status_code=404, detail=f"Booking with ref '{booking_ref}' not found")
+
+    seat = db.query(Seat).filter(Seat.id == booking.seat_id).first()
+    if seat:
+        seat.status = SeatStatus.AVAILABLE
+    
+    booking.status = BookingStatus.CANCELLED
+    db.commit()
+    return {"detail": f"Booking {booking_ref} successfully cancelled and seat released."}
+
+@router.delete("/users/{user_id}")
+def admin_delete_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_admin_user),
+):
+    """
+    Delete a user by user_id, releasing their booked seats and removing their bookings first.
+    """
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if user.email == "ilmanfazny123@gmail.com":
+        raise HTTPException(status_code=403, detail="Cannot delete the superadmin user")
+
+    if user.id == _admin.id:
+        raise HTTPException(status_code=403, detail="Cannot delete yourself")
+
+    # Release seats and delete bookings
+    bookings = db.query(Booking).filter(Booking.user_id == user_id).all()
+    for b in bookings:
+        seat = db.query(Seat).filter(Seat.id == b.seat_id).first()
+        if seat:
+            seat.status = SeatStatus.AVAILABLE
+        db.delete(b)
+
+    db.delete(user)
+    db.commit()
+    return {"detail": f"User {user.email} and their bookings successfully deleted."}

@@ -1,4 +1,6 @@
 from pydantic import BaseModel, EmailStr
+from datetime import datetime
+from app.models.booking import BookingStatus
 
 class UserRegister(BaseModel):
     email:    EmailStr
@@ -35,3 +37,20 @@ class GoogleAuthRequest(BaseModel):
 
 class PromoteRequest(BaseModel):
     email: str
+
+class AdminUserBookingOut(BaseModel):
+    booking_ref: str
+    seat_code: str
+    section: str
+    status: BookingStatus
+
+class AdminUserSummaryOut(BaseModel):
+    id: int
+    name: str | None
+    email: str
+    is_admin: bool
+    created_at: datetime
+    booking_count: int
+    bookings: list[AdminUserBookingOut]
+
+    model_config = {"from_attributes": True}

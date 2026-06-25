@@ -44,3 +44,23 @@ export async function adminBookSeats(payload) {
   const { data } = await api.post("/admin/book", payload);
   return data;
 }
+
+export async function fetchUsers({ search, hasBooking, section } = {}) {
+  const params = new URLSearchParams();
+  if (search) params.set("search", search);
+  if (hasBooking !== null && hasBooking !== undefined)
+    params.set("has_booking", hasBooking);
+  if (section) params.set("section", section);
+  const { data } = await api.get(`/admin/users?${params.toString()}`);
+  return data;
+}
+
+export async function deleteBooking(bookingRef) {
+  const { data } = await api.delete(`/admin/bookings/${bookingRef}`);
+  return data;
+}
+
+export async function deleteUser(userId) {
+  const { data } = await api.delete(`/admin/users/${userId}`);
+  return data;
+}
