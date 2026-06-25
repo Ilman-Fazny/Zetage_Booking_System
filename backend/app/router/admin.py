@@ -1,15 +1,18 @@
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, Query, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
+from sqlalchemy import select
+import uuid
 from app.dependencies.dependencies import get_db, get_admin_user
 from app.services.booking_service import list_bookings, get_booking_stats
 from app.services.seat_service import get_seat_map
-from app.schemas.booking import AdminBookingOut, BookingStats
+from app.schemas.booking import AdminBookingOut, BookingStats, AdminBookingCreate
 from app.schemas.seat import SeatMapSection, ScanRequest, ScanResponse
 from app.schemas.user import UserOut, PromoteRequest
 from app.models.user import User
-from app.models.booking import Booking
+from app.models.booking import Booking, BookingStatus
+from app.models.seat import Seat, SeatStatus
 from app.services.admin_service import scan_entrance
-from app.services.email_service import send_ticket_email_raise
+from app.services.email_service import send_ticket_email_raise, send_ticket_email
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -161,3 +164,74 @@ def resend_booking_email(
         )
 
     return {"detail": "Email resent successfully", "email_sent": True}
+
+@router.post("/book")
+def admin_book_seats(
+    data: AdminBookingCreate,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_admin_user),
+):
+    """
+    Instantly book seats for an existing user without payment.
+    Marks seats as BOOKED, creates CONFIRMED bookings.
+    """
+    email_normalized = data.user_email.strip().lower()
+    user = db.query(User).filter(User.email == email_normalized).first()
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail=f"User with email '{data.user_email}' not found."
+        )
+
+    order_id = str(uuid.uuid4())[:12].upper()
+    confirmed_bookings = []
+
+    for seat_code in data.seat_codes:
+        seat = (
+            db.execute(
+                select(Seat)
+                .where(Seat.seat_code == seat_code)
+                .with_for_update()
+            )
+            .scalars()
+            .first()
+        )
+
+        if not seat:
+            db.rollback()
+            raise HTTPException(status_code=404, detail=f"Seat {seat_code} not found.")
+
+        if seat.status != SeatStatus.AVAILABLE:
+            db.rollback()
+            raise HTTPException(
+                status_code=409,
+                detail=f"Seat {seat_code} is no longer available."
+            )
+
+        seat.status = SeatStatus.BOOKED
+        booking = Booking(
+            user_id=user.id,
+            seat_id=seat.id,
+            attendee_name=user.name or user.email or "Unknown",
+            district=data.district,
+            is_sasnaka_member=data.is_sasnaka_member,
+            phone=None,
+            status=BookingStatus.CONFIRMED,
+            order_id=order_id,
+        )
+        db.add(booking)
+        confirmed_bookings.append(booking)
+
+    db.commit()
+
+    # Fire background emails for each confirmed booking
+    for booking in confirmed_bookings:
+        db.refresh(booking)
+        background_tasks.add_task(
+            send_ticket_email,
+            booking.user_id,
+            booking.id
+        )
+
+    return {"detail": f"Successfully booked {len(data.seat_codes)} seat(s) for {user.email}."}

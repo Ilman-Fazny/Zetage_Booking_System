@@ -71,3 +71,16 @@ class BookingStats(BaseModel):
 class BookingListOut(BaseModel):
     bookings: list[BookingOut]
     total:    int
+
+class AdminBookingCreate(BaseModel):
+    seat_codes:        list[str]
+    user_email:        str
+    district:          str
+    is_sasnaka_member: bool
+
+    @field_validator("seat_codes")
+    @classmethod
+    def at_least_one(cls, v: list[str]) -> list[str]:
+        if not v:
+            raise ValueError("Select at least one seat.")
+        return v

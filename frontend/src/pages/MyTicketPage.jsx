@@ -478,6 +478,12 @@ export default function MyTicketPage() {
           </p>
         </div>
 
+        {bookings.some(b => b.status === "pending" || b.status === "PENDING") && (
+          <div style={{ background: "rgba(251,146,60,0.1)", border: "1px solid rgba(251,146,60,0.3)", borderRadius: "12px", padding: "12px", marginBottom: "20px", textAlign: "center", color: "#fb923c", fontSize: "13px", fontWeight: "500" }}>
+            ⚠️ Your seat is held for 1 minute — complete payment quickly.
+          </div>
+        )}
+
         {/* ── Ticket cards scroll list ────────────────── */}
         <div className="tp-tickets-list" style={{ maxHeight: "65vh", overflowY: "auto", paddingRight: 4, paddingBottom: 16 }}>
           {bookings.map((booking) => (

@@ -39,3 +39,8 @@ export async function resendBookingEmail(bookingId) {
   const { data } = await api.post(`/admin/bookings/${bookingId}/resend-email`);
   return data;
 }
+
+export async function adminBookSeats(payload) {
+  const { data } = await api.post("/admin/book", payload);
+  return data;
+}

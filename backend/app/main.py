@@ -9,10 +9,10 @@ from app.db.init_db import init_db
 from app.models import User, Seat, Booking
 
 async def release_expired_holds():
-    """Runs every 5 minutes. Releases seats held > 15 minutes with no payment."""
+    """Runs every 30 seconds. Releases seats held > 1 minute with no payment."""
     while True:
         try:
-            await asyncio.sleep(300)  # 5 minutes
+            await asyncio.sleep(30)  # 30 seconds
             from app.db.session import SessionLocal
             from app.models.booking import Booking, BookingStatus
             from app.models.seat import Seat, SeatStatus
@@ -29,9 +29,9 @@ async def release_expired_holds():
                     if not b_time:
                         continue
                     if b_time.tzinfo is None:
-                        compare_time = datetime.utcnow() - timedelta(minutes=15)
+                        compare_time = datetime.utcnow() - timedelta(minutes=1)
                     else:
-                        compare_time = datetime.now(timezone.utc) - timedelta(minutes=15)
+                        compare_time = datetime.now(timezone.utc) - timedelta(minutes=1)
 
                     if b_time < compare_time:
                         seat = db.query(Seat).filter(Seat.id == booking.seat_id).first()

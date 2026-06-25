@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { fetchStats, fetchBookings, fetchAdmins, promoteUser, demoteUser, resendBookingEmail } from "../lib/admin";
+import { fetchStats, fetchBookings, fetchAdmins, promoteUser, demoteUser, resendBookingEmail, adminBookSeats } from "../lib/admin";
 import { DISTRICTS } from "../lib/districts";
 import { listContainerVariants, listItemVariants, microSpring } from "../lib/motionVariants";
 import logo from "../assets/zentage-TS.png";
@@ -792,13 +792,13 @@ export default function AdminDashboard() {
 
       {/* ── Tab bar ─────────────────────────────────────── */}
       <div className="adm-tabs">
-        {["overview", "bookings", "admins"].map((t) => (
+        {["overview", "bookings", "book", "admins"].map((t) => (
           <button
             key={t}
             className={`adm-tab ${tab === t ? "active" : ""}`}
             onClick={() => setTab(t)}
           >
-            {t === "overview" ? "⬡ Overview" : t === "bookings" ? "⊞ Bookings" : "🛡 Admins"}
+            {t === "overview" ? "⬡ Overview" : t === "bookings" ? "⊞ Bookings" : t === "book" ? "📝 Book a Seat" : "🛡 Admins"}
           </button>
         ))}
       </div>
@@ -820,6 +820,9 @@ export default function AdminDashboard() {
             setFilterSection={setFilterSection}
             onApplyFilters={loadBookings}
           />
+        )}
+        {tab === "book" && (
+          <BookSeatTab />
         )}
         {tab === "admins" && (
           <AdminsTab />
@@ -1372,6 +1375,128 @@ function AdminsTab() {
             </div>
           )}
         </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Book Seat tab ────────────────────────────────────────────────────────────── */
+function BookSeatTab() {
+  const [email, setEmail] = useState("");
+  const [seatCodes, setSeatCodes] = useState("");
+  const [district, setDistrict] = useState("");
+  const [isSasnaka, setIsSasnaka] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const handleBook = async (e) => {
+    e.preventDefault();
+    if (!email.trim() || !seatCodes.trim() || !district) return;
+
+    setSubmitting(true);
+    setError("");
+    setSuccess("");
+
+    const seats = seatCodes.split(",").map(s => s.trim()).filter(Boolean);
+
+    try {
+      const res = await adminBookSeats({
+        seat_codes: seats,
+        user_email: email,
+        district: district,
+        is_sasnaka_member: isSasnaka === "yes",
+      });
+      setSuccess(res.detail || "Seats successfully booked!");
+      setEmail("");
+      setSeatCodes("");
+      setDistrict("");
+      setIsSasnaka("");
+    } catch (err) {
+      const msg = err.response?.data?.detail || "Failed to book seats.";
+      setError(msg);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div>
+      <div className="adm-panel" style={{ maxWidth: 600, margin: "0 auto" }}>
+        <p className="adm-panel-title">📝 Admin Direct Booking</p>
+        <form onSubmit={handleBook} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          
+          <div className="adm-input-wrapper" style={{ marginBottom: 0 }}>
+            <span className="adm-input-icon">✉️</span>
+            <input
+              type="email"
+              className="adm-input"
+              placeholder="User Email Address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={submitting}
+              required
+            />
+          </div>
+
+          <div className="adm-input-wrapper" style={{ marginBottom: 0 }}>
+            <span className="adm-input-icon">🎟️</span>
+            <input
+              type="text"
+              className="adm-input"
+              placeholder="Seat Codes (comma-separated, e.g. UH22b-29, UH22b-30)"
+              value={seatCodes}
+              onChange={(e) => setSeatCodes(e.target.value)}
+              disabled={submitting}
+              required
+            />
+          </div>
+
+          <select
+            className="adm-select"
+            value={district}
+            onChange={(e) => setDistrict(e.target.value)}
+            disabled={submitting}
+            required
+          >
+            <option value="" disabled>Select District</option>
+            {DISTRICTS.map((d) => <option key={d}>{d}</option>)}
+          </select>
+
+          <select
+            className="adm-select"
+            value={isSasnaka}
+            onChange={(e) => setIsSasnaka(e.target.value)}
+            disabled={submitting}
+            required
+          >
+            <option value="" disabled>Sasnaka Member?</option>
+            <option value="yes">Yes, I am a member</option>
+            <option value="no">No, I am not</option>
+          </select>
+
+          <motion.button
+            type="submit"
+            className="adm-apply-btn"
+            disabled={submitting}
+            whileHover={{ scale: 1.02, y: -1 }}
+            whileTap={{ scale: 0.98 }}
+            transition={microSpring}
+          >
+            {submitting ? "Booking..." : "Confirm Free Booking 🎫"}
+          </motion.button>
+
+          {error && (
+            <p style={{ color: "#ef4444", fontSize: "13px", fontWeight: "500", marginTop: "8px" }}>
+              ❌ {error}
+            </p>
+          )}
+          {success && (
+            <p style={{ color: "#34d399", fontSize: "13px", fontWeight: "500", marginTop: "8px" }}>
+              ✅ {success}
+            </p>
+          )}
+        </form>
       </div>
     </div>
   );
