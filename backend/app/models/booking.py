@@ -15,8 +15,8 @@ class BookingStatus(str, enum.Enum):
 class Booking(Base):
     __tablename__ = "bookings"
     __table_args__ = (
-        # one booking per user, enforced at DB level
-        UniqueConstraint("user_id", name="uq_one_booking_per_user"),
+        # one booking per seat, enforced at DB level
+        UniqueConstraint("seat_id", name="uq_one_booking_per_seat"),
     )
 
     id                 = Column(Integer, primary_key=True, index=True)
@@ -40,7 +40,7 @@ class Booking(Base):
     entered_at         = Column(DateTime(timezone=True), nullable=True)
     email_sent         = Column(Boolean, default=False, nullable=False)
 
-    user = relationship("User", back_populates="booking")
+    user = relationship("User", back_populates="bookings")
     seat = relationship("Seat", back_populates="booking")
 
     @property

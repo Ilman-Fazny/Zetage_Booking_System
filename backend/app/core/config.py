@@ -25,10 +25,17 @@ class Settings(BaseSettings):
     PAYHERE_BASE_URL:        str = "https://sandbox.payhere.lk/pay/checkout"
     EVENT_PRICE:             int = 500   # fix from 5000 → 500 LKR
     FRONTEND_URL:            str = "http://localhost:5173"
+    PAYHERE_NOTIFY_URL:      str = "http://localhost:8000"
 
     # Resend Email
     resend_api_key: str = ""
     from_email: str = "onboarding@resend.dev"
+    EMAIL_FROM: str = "onboarding@resend.dev"
+
+    # Event Upper Case Aliases (used in multi-booking templates)
+    EVENT_NAME: str = "Zentage Talent Show"
+    EVENT_DATE: str = "September 6, 2026"
+    EVENT_VENUE: str = "Elphinstone Theatre, Maradana"
 
     model_config = SettingsConfigDict(
         env_file=".env",

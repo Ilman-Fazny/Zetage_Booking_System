@@ -61,50 +61,73 @@ def _build_ticket_html(user: User, booking: Booking, qr_base64: str) -> str:
     """
 
 
-def send_ticket_email(user_id: int, booking_id: int) -> None:
-    """Called via BackgroundTasks - failures are logged, never raised to the request."""
-    from app.db.session import SessionLocal
-    from sqlalchemy.orm import joinedload
-
-    db = SessionLocal()
+def send_ticket_email(user: User, bookings: list) -> None:
     try:
-        booking = (
-            db.query(Booking)
-            .options(joinedload(Booking.seat))
-            .filter(Booking.id == booking_id)
-            .first()
-        )
-        user = db.query(User).filter(User.id == user_id).first()
+        ticket_blocks = ""
+        for booking in bookings:
+            qr_b64 = _generate_qr_base64(booking.booking_ref)
+            seat    = booking.seat
+            ticket_blocks += f"""
+            <div style="border:1px solid #2a2d35;border-radius:12px;padding:20px;
+                        margin-bottom:20px;background:#1a1d24">
+              <div style="text-align:center;margin-bottom:16px">
+                <img src="data:image/png;base64,{qr_b64}" width="140" height="140"
+                     alt="QR code {booking.booking_ref}"
+                     style="border-radius:8px;background:#fff;padding:6px"/>
+              </div>
+              <table style="width:100%;font-size:13px;color:#d6d9de">
+                <tr><td style="color:#9aa0ab;padding:4px 0">Ref</td>
+                    <td style="text-align:right;font-weight:600;font-family:monospace">
+                        {booking.booking_ref}</td></tr>
+                <tr><td style="color:#9aa0ab;padding:4px 0">Seat</td>
+                    <td style="text-align:right">{seat.seat_code}</td></tr>
+                <tr><td style="color:#9aa0ab;padding:4px 0">Section</td>
+                    <td style="text-align:right">{seat.section.value}</td></tr>
+              </table>
+            </div>
+            """
 
-        if not user or not booking:
-            print(f"[email_service] User {user_id} or booking {booking_id} not found in DB.")
-            return
+        html = f"""
+        <div style="font-family:system-ui,sans-serif;max-width:480px;margin:0 auto;
+                    background:#0f1115;color:#fff;border-radius:16px;overflow:hidden;padding:24px">
+          <div style="text-align:center;margin-bottom:24px">
+            <p style="font-size:11px;letter-spacing:.08em;color:#9aa0ab;margin:0 0 4px">
+              SASNAKA SANSADA FOUNDATION
+            </p>
+            <h1 style="font-size:18px;margin:0">{settings.EVENT_NAME}</h1>
+            <p style="font-size:13px;color:#9aa0ab;margin:6px 0 0">
+              {settings.EVENT_DATE} · {settings.EVENT_VENUE}
+            </p>
+            <p style="font-size:13px;color:#9aa0ab;margin:4px 0 0">
+              {len(bookings)} seat{'s' if len(bookings) > 1 else ''} booked
+            </p>
+          </div>
+          {ticket_blocks}
+          <p style="font-size:11px;color:#6b7280;text-align:center;margin-top:8px">
+            Present each QR code at the entrance. One scan per seat.
+          </p>
+        </div>
+        """
 
-        qr_base64 = _generate_qr_base64(booking.booking_ref)
-        html = _build_ticket_html(user, booking, qr_base64)
-
-        recipient = f"{user.name} <{user.email}>" if user.name else user.email
         resend.Emails.send({
-            "from":    settings.from_email,
-            "to":      [recipient],
-            "subject": f"Your {settings.event_name} ticket - {booking.booking_ref}",
+            "from":    settings.EMAIL_FROM,
+            "to":      [user.email],
+            "subject": f"Your {settings.EVENT_NAME} tickets — {len(bookings)} seat{'s' if len(bookings)>1 else ''}",
             "html":    html,
-            "attachments": [
-                {
-                    "content": qr_base64,
-                    "filename": f"qr_{booking.booking_ref}.png",
-                    "content_id": "ticket-qr"
-                }
-            ]
         })
-        booking.email_sent = True
-        db.commit()
+        
+        # update email_sent status
+        from app.db.session import SessionLocal
+        db = SessionLocal()
+        try:
+            for b in bookings:
+                db_booking = db.merge(b)
+                db_booking.email_sent = True
+            db.commit()
+        finally:
+            db.close()
     except Exception as e:
-        # Never let email failure break the booking - just log it
-        print(f"[email_service] Failed to send ticket email for booking ID "
-              f"{booking_id}: {e}")
-    finally:
-        db.close()
+        print(f"[email_service] Failed to send: {e}")
 
 
 def send_ticket_email_raise(user: User, booking: Booking, db: SessionLocal) -> None:

@@ -9,71 +9,80 @@ from sqlalchemy import func
 from app.models.user import User as UserModel
 
 
-def create_booking(db: Session, user: User, data: BookingCreate) -> Booking:
-    # 1. Reject if user already has a booking
-    if user.booking:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="You already have a booking. One seat per person."
+def create_booking(db: Session, user: User, data: BookingCreate) -> list[Booking]:
+    if not data.seat_codes:
+        raise HTTPException(status_code=400, detail="No seats selected.")
+
+    # Deduplicate in case frontend sends duplicates
+    seat_codes = list(dict.fromkeys(data.seat_codes))
+    new_bookings = []
+
+    for seat_code in seat_codes:
+        # Lock each seat row individually — SELECT FOR UPDATE
+        seat = (
+            db.execute(
+                select(Seat)
+                .where(Seat.seat_code == seat_code)
+                .with_for_update()
+            )
+            .scalars()
+            .first()
         )
+        if not seat:
+            db.rollback()
+            raise HTTPException(status_code=404, detail=f"Seat {seat_code} not found.")
 
-    # 2. Lock the seat row - SELECT FOR UPDATE prevents double-booking
-    seat = (
-        db.execute(
-            select(Seat)
-            .where(Seat.seat_code == data.seat_code)
-            .with_for_update()
+        if seat.status != SeatStatus.AVAILABLE:
+            db.rollback()
+            raise HTTPException(
+                status_code=409,
+                detail=f"Seat {seat_code} is no longer available."
+            )
+
+        seat.status = SeatStatus.HELD
+        booking = Booking(
+            user_id=user.id,
+            seat_id=seat.id,
+            attendee_name=user.name or user.email or "Unknown",
+            district=data.district,
+            is_sasnaka_member=data.is_sasnaka_member,
+            phone=data.phone,
+            status=BookingStatus.PENDING,
         )
-        .scalars()
-        .first()
-    )
+        db.add(booking)
+        new_bookings.append((booking, seat))
 
-    if not seat:
-        raise HTTPException(status_code=404, detail="Seat not found")
-
-    if seat.status != SeatStatus.AVAILABLE:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="That seat was just taken. Please choose another."
-        )
-
-    # 3. Mark seat booked + create booking record - single transaction
-    seat.status = SeatStatus.BOOKED
-    booking = Booking(
-        user_id=user.id,
-        seat_id=seat.id,
-        attendee_name=user.name or user.email or "Unknown",
-        district=data.district,
-        is_sasnaka_member=data.is_sasnaka_member,
-        phone=data.phone,
-    )
-    db.add(booking)
     db.commit()
-    db.refresh(booking)
-    db.refresh(seat)
-    _ = booking.seat   # force-load the relationship while the session is still open
-    return booking
+    for booking, seat in new_bookings:
+        db.refresh(booking)
+        db.refresh(seat)
+        _ = booking.seat  # force-load relationship
 
-def cancel_booking(db: Session, user: User) -> None:
-    booking = user.booking
+    return [b for b, _ in new_bookings]
+
+def cancel_booking(db: Session, user: User, booking_ref: str) -> None:
+    booking = next(
+        (b for b in user.bookings if b.booking_ref == booking_ref),
+        None
+    )
     if not booking or booking.status == BookingStatus.CANCELLED:
-        raise HTTPException(status_code=404, detail="No active booking found")
+        raise HTTPException(status_code=404, detail="Booking not found.")
 
     # Release seat atomically
     seat = db.query(Seat).filter(Seat.id == booking.seat_id).first()
     if seat:
         seat.status = SeatStatus.AVAILABLE
-
     booking.status = BookingStatus.CANCELLED
     db.commit()
 
-def get_my_booking(db: Session, user: User) -> Booking | None:
-    booking = user.booking
-    if not booking or booking.status == BookingStatus.CANCELLED:
-        return None
-    # force-load the seat relationship
-    _ = booking.seat
-    return booking
+def get_my_bookings(db: Session, user: User) -> list[Booking]:
+    from app.models.booking import BookingStatus
+    for b in user.bookings:
+        _ = b.seat
+    return [
+        b for b in user.bookings
+        if b.status != BookingStatus.CANCELLED
+    ]
 
 
 def list_bookings(

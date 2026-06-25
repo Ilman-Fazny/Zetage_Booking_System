@@ -42,11 +42,11 @@ async def payhere_notify(
 
     if status_code == 2:
         # Payment successful
-        booking = confirm_payment(db, order_id)
+        bookings = confirm_payment(db, order_id)
         background_tasks.add_task(
             send_ticket_email,
-            booking.user_id,
-            booking.id
+            bookings[0].user,
+            bookings
         )
     elif status_code in (-1, -2):
         # Payment cancelled or failed — release the held seat

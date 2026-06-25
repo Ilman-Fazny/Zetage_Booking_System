@@ -16,4 +16,4 @@ class User(Base):
     is_admin         = Column(Boolean, default=False)
     created_at       = Column(DateTime(timezone=True), server_default=func.now())
 
-    booking = relationship("Booking", back_populates="user", uselist=False)
+    bookings = relationship("Booking", back_populates="user", uselist=True)

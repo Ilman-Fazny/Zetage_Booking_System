@@ -4,10 +4,17 @@ from datetime import datetime
 from typing import Optional
 
 class BookingCreate(BaseModel):
-    seat_code:         str
+    seat_codes:        list[str]      # was: seat_code: str
     district:          str
     is_sasnaka_member: bool
     phone:             str | None = None
+
+    @field_validator("seat_codes")
+    @classmethod
+    def at_least_one(cls, v: list[str]) -> list[str]:
+        if not v:
+            raise ValueError("Select at least one seat.")
+        return v
 
     @field_validator("district")
     @classmethod
@@ -60,3 +67,7 @@ class BookingStats(BaseModel):
     sasnaka_member_count: int
     by_district:          dict[str, int]
     by_section:            dict[str, int]   # booked count per section
+
+class BookingListOut(BaseModel):
+    bookings: list[BookingOut]
+    total:    int
