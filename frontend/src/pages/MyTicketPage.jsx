@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { fetchMyBooking } from "../lib/bookings";
 import { popVariants, fadeUpVariants, microSpring } from "../lib/motionVariants";
@@ -403,15 +403,11 @@ export default function MyTicketPage() {
   useEffect(() => {
     fetchMyBooking()
       .then((data) => {
-        if (!data || data.length === 0) {
-          navigate("/", { replace: true });
-        } else {
-          setBookings(data);
-        }
+        setBookings(data || []);
       })
       .catch((err) => {
         console.error(err);
-        setError("Couldn't load your tickets. Please try again.");
+        navigate("/", { replace: true });
       })
       .finally(() => setLoading(false));
   }, [navigate]);
@@ -462,7 +458,45 @@ export default function MyTicketPage() {
     );
   }
 
-  if (!bookings || bookings.length === 0) return null;
+  if (!bookings || bookings.length === 0) {
+    return (
+      <div className="tp-root" style={{ alignItems: "center" }}>
+        <div className="tp-wrapper">
+          <div className="tp-card" style={{ padding: "40px 24px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: "20px" }}>
+            <div className="tp-check-ring" style={{ marginBottom: 0 }}>
+              <span style={{ fontSize: "20px" }}>🎫</span>
+            </div>
+            <div style={{ fontSize: "18px", fontWeight: "600", color: "#ede8ff" }}>
+              No tickets booked yet
+            </div>
+            <Link
+              to="/"
+              style={{
+                fontSize: "14px",
+                color: "#a78bfa",
+                textDecoration: "none",
+                fontWeight: "600",
+                letterSpacing: "0.02em",
+                borderBottom: "1px solid rgba(167, 139, 250, 0.3)",
+                paddingBottom: 2,
+                transition: "all 0.2s"
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.color = "#c084fc";
+                e.currentTarget.style.borderColor = "rgba(192, 132, 252, 0.5)";
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.color = "#a78bfa";
+                e.currentTarget.style.borderColor = "rgba(167, 139, 250, 0.3)";
+              }}
+            >
+              Browse seats →
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="tp-root">
