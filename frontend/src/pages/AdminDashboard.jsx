@@ -1093,7 +1093,7 @@ function BookingsTab({
             <table className="adm-table">
               <thead>
                 <tr>
-                  {["Ref", "Name", "Email", "Seat", "Section", "District", "Sasnaka", "Email Status", "Attendance", "Date"].map((h) => (
+                  {["Ref", "Name", "Email", "Seat", "Section", "District", "Sasnaka", "Status", "Email Status", "Attendance", "Date"].map((h) => (
                     <th key={h}>{h}</th>
                   ))}
                 </tr>
@@ -1115,6 +1115,11 @@ function BookingsTab({
                       {b.is_sasnaka_member
                         ? <span className="adm-badge-member">Member</span>
                         : <span className="adm-badge-no">No</span>}
+                    </td>
+                    <td>
+                      {b.status === "confirmed" || b.status === "CONFIRMED"
+                        ? <span className="adm-badge-member" style={{borderColor: "rgba(52,211,153,0.2)", color: "#34d399"}}>Confirmed</span>
+                        : <span className="adm-badge-no" style={{borderColor: "rgba(251,146,60,0.2)", color: "#fb923c"}}>Pending</span>}
                     </td>
                     <td>
                       <div className="adm-email-cell">

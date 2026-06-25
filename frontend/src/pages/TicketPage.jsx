@@ -1,5 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate, Navigate } from "react-router-dom";
+import { fetchMyBooking } from "../lib/bookings";
 import { motion } from "framer-motion";
 import { fadeUpVariants, microSpring } from "../lib/motionVariants";
 import TicketCard from "../components/shared/TicketCard";
@@ -421,9 +422,33 @@ function useInjectStyles(css) {
 export default function TicketPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const bookings = location.state?.bookings;
+  const [bookings, setBookings] = useState(location.state?.bookings || []);
+  const [loading, setLoading] = useState(!location.state?.bookings);
 
   useInjectStyles(STYLES);
+
+  useEffect(() => {
+    if (loading) {
+      fetchMyBooking()
+        .then((data) => {
+          if (data && data.length > 0) {
+            setBookings(data);
+          } else {
+            navigate("/", { replace: true });
+          }
+        })
+        .catch(() => navigate("/", { replace: true }))
+        .finally(() => setLoading(false));
+    }
+  }, [loading, navigate]);
+
+  if (loading) {
+    return (
+      <div className="tp-root">
+        <div style={{ color: "#ede8ff", marginTop: "20vh" }}>Loading your tickets...</div>
+      </div>
+    );
+  }
 
   if (!bookings || bookings.length === 0) {
     return <Navigate to="/" replace />;

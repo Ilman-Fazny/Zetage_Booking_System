@@ -33,7 +33,7 @@ class Booking(Base):
 
     status             = Column(SAEnum(BookingStatus, values_callable=lambda x: [e.value for e in x]),
                                 default=BookingStatus.PENDING, nullable=False)
-    order_id           = Column(String, unique=True, nullable=True, index=True)
+    order_id           = Column(String, nullable=True, index=True)
     created_at         = Column(DateTime(timezone=True), server_default=func.now())
     # New attendance tracking fields
     is_entered         = Column(Boolean, default=False, nullable=False)

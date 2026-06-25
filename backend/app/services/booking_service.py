@@ -95,7 +95,7 @@ def list_bookings(
         db.query(Booking)
         .join(UserModel, Booking.user_id == UserModel.id)
         .join(Seat, Booking.seat_id == Seat.id)
-        .filter(Booking.status == BookingStatus.CONFIRMED)
+        .filter(Booking.status.in_([BookingStatus.CONFIRMED, BookingStatus.PENDING]))
     )
 
     if district:
