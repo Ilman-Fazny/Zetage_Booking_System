@@ -10,6 +10,7 @@ import AttendeeDetailsPage from "./pages/AttendeeDetailsPage";
 import TicketPage from "./pages/TicketPage";
 import MyTicketPage from "./pages/MyTicketPage";
 import AdminDashboard from "./pages/AdminDashboard";
+import PaymentCancelledPage from "./pages/PaymentCancelledPage";
 
 // ─── Cinematic page transition config ──────────────────────────────────────
 const PAGE_TRANSITION = {
@@ -43,7 +44,7 @@ export default function App() {
   }, []);
 
   const isFullScreen =
-    ["/login", "/", "/ticket", "/my-ticket", "/admin", "/details"]
+    ["/login", "/", "/ticket", "/my-ticket", "/admin", "/details", "/payment-cancelled"]
       .includes(location.pathname);
 
   return (
@@ -104,6 +105,14 @@ export default function App() {
                 element={
                   <ProtectedRoute adminOnly>
                     <PageShell><AdminDashboard /></PageShell>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/payment-cancelled"
+                element={
+                  <ProtectedRoute>
+                    <PageShell><PaymentCancelledPage /></PageShell>
                   </ProtectedRoute>
                 }
               />

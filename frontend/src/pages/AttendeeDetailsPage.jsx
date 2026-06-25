@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate, Navigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { createBooking } from "../lib/bookings";
+import { initiatePayment } from "../lib/payments";
 import { DISTRICTS } from "../lib/districts";
 import MotionButton from "../components/shared/MotionButton";
 import MotionInput from "../components/shared/MotionInput";
@@ -507,13 +507,28 @@ export default function AttendeeDetailsPage() {
 
     setLoading(true);
     try {
-      const booking = await createBooking({
+      const params = await initiatePayment({
         seatCode: seat.seat_code,
         district,
         isSasnakaMember,
         phone,
       });
-      navigate("/ticket", { state: { booking } });
+
+      // Build a hidden form and submit it to PayHere
+      const form = document.createElement("form");
+      form.method = "POST";
+      form.action = import.meta.env.VITE_PAYHERE_URL;
+
+      Object.entries(params).forEach(([key, value]) => {
+        const input = document.createElement("input");
+        input.type  = "hidden";
+        input.name  = key;
+        input.value = value;
+        form.appendChild(input);
+      });
+
+      document.body.appendChild(form);
+      form.submit();   // user leaves your site, goes to PayHere's hosted page
     } catch (err) {
       const detail = err.response?.data?.detail;
       if (err.response?.status === 409) {
@@ -521,7 +536,6 @@ export default function AttendeeDetailsPage() {
       } else {
         setError(detail || "Something went wrong. Please try again.");
       }
-    } finally {
       setLoading(false);
     }
   }
