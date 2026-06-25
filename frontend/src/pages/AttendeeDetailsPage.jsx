@@ -474,7 +474,7 @@ export default function AttendeeDetailsPage() {
 
   const location = useLocation();
   const navigate = useNavigate();
-  const seat = location.state?.seat;
+  const seats = location.state?.seats;
 
   const [district, setDistrict] = useState("");
   const [isSasnakaMember, setIsSasnakaMember] = useState(null);
@@ -482,7 +482,7 @@ export default function AttendeeDetailsPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  if (!seat) return <Navigate to="/" replace />;
+  if (!seats || seats.length === 0) return <Navigate to="/" replace />;
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -508,7 +508,7 @@ export default function AttendeeDetailsPage() {
     setLoading(true);
     try {
       const params = await initiatePayment({
-        seatCode: seat.seat_code,
+        seatCodes: seats.map(s => s.seat_code),
         district,
         isSasnakaMember,
         phone,
@@ -541,7 +541,7 @@ export default function AttendeeDetailsPage() {
   }
 
   function handleBack() {
-    navigate("/", { state: { seat } });
+    navigate("/");
   }
 
   return (
@@ -563,13 +563,30 @@ export default function AttendeeDetailsPage() {
           {/* Eyebrow */}
           <div className="adp-stub-eyebrow">
             <img src={logo} alt="Zentage" className="adp-stub-logo" />
-            <span className="adp-stub-tag">Selected Seat</span>
+            <span className="adp-stub-tag">Selected Seats</span>
           </div>
 
-          {/* Seat + section */}
-          <div className="adp-stub-main">
-            <div className="adp-stub-seat">{seat.seat_code}</div>
-            <div className="adp-stub-section">{seat.section}</div>
+          {/* Seats list */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 14, position: "relative", zIndex: 1 }}>
+            {seats.map((s) => (
+              <span
+                key={s.seat_code}
+                style={{
+                  fontSize: 13,
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontWeight: 700,
+                  color: "#e2d9ff",
+                  background: "rgba(139,92,246,0.22)",
+                  border: "1px solid rgba(139,92,246,0.4)",
+                  padding: "4px 10px",
+                  borderRadius: 6,
+                  display: "inline-block",
+                  letterSpacing: "-0.01em",
+                }}
+              >
+                {s.seat_code}
+              </span>
+            ))}
           </div>
 
           {/* Perforation */}
@@ -586,12 +603,12 @@ export default function AttendeeDetailsPage() {
               <span className="adp-stub-meta-val">Zentage Talent Show</span>
             </div>
             <div className="adp-stub-meta" style={{ textAlign: "center" }}>
-              <span className="adp-stub-meta-label">Date</span>
-              <span className="adp-stub-meta-val">Sep 6, 2026</span>
+              <span className="adp-stub-meta-label">Seats</span>
+              <span className="adp-stub-meta-val">{seats.length} Ticket{seats.length > 1 ? "s" : ""}</span>
             </div>
             <div className="adp-price-tag">
-              <span className="adp-price-label">Ticket Price</span>
-              <span className="adp-price-val">LKR {EVENT_PRICE.toLocaleString()}</span>
+              <span className="adp-price-label">Total Price</span>
+              <span className="adp-price-val">LKR {(seats.length * EVENT_PRICE).toLocaleString()}</span>
             </div>
           </div>
         </motion.div>

@@ -1,10 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import QRCode from "qrcode";
-import logo from "../assets/zentage-TS.png";
 import { fetchMyBooking } from "../lib/bookings";
 import { popVariants, fadeUpVariants, microSpring } from "../lib/motionVariants";
+import TicketCard from "../components/shared/TicketCard";
 
 const EVENT = {
   name: "Zentage Talent Show",
@@ -366,10 +365,16 @@ const STYLES = `
     .tp-root { background: #fff; padding: 0; }
     .tp-actions { display: none; }
     .tp-header { display: none; }
+    .tp-tickets-list {
+      max-height: none !important;
+      overflow-y: visible !important;
+      padding-right: 0 !important;
+    }
     .tp-card {
       border: 1px solid #ddd;
       box-shadow: none;
       border-radius: 12px;
+      page-break-inside: avoid;
     }
     .tp-banner { background: #c9a220; }
     .tp-banner-text { color: #fff; }
@@ -387,30 +392,10 @@ function useInjectStyles(css) {
   }, []);
 }
 
-function TicketRow({ label, value, mono, highlight }) {
-  return (
-    <div className={`tp-row${highlight ? " highlight" : ""}`}>
-      <span className="tp-row-label">{label}</span>
-      <span className={`tp-row-value${mono ? " mono" : ""}`}>{value}</span>
-    </div>
-  );
-}
-
-function Perforation() {
-  return (
-    <div className="tp-perf-wrap">
-      <div className="tp-perf-notch left" />
-      <div className="tp-perf-line" />
-      <div className="tp-perf-notch right" />
-    </div>
-  );
-}
-
 export default function MyTicketPage() {
-  const [booking, setBooking] = useState(null);
+  const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const canvasRef = useRef(null);
   const navigate = useNavigate();
 
   useInjectStyles(STYLES);
@@ -418,27 +403,18 @@ export default function MyTicketPage() {
   useEffect(() => {
     fetchMyBooking()
       .then((data) => {
-        if (!data) {
+        if (!data || data.length === 0) {
           navigate("/", { replace: true });
         } else {
-          setBooking(data);
+          setBookings(data);
         }
       })
       .catch((err) => {
         console.error(err);
-        setError("Couldn't load your ticket. Please try again.");
+        setError("Couldn't load your tickets. Please try again.");
       })
       .finally(() => setLoading(false));
   }, [navigate]);
-
-  useEffect(() => {
-    if (!booking || !canvasRef.current) return;
-    QRCode.toCanvas(canvasRef.current, booking.booking_ref, {
-      width: 180,
-      margin: 1,
-      color: { dark: "#0f1322", light: "#f8f6ff" },
-    });
-  }, [booking]);
 
   if (loading) {
     return (
@@ -456,7 +432,7 @@ export default function MyTicketPage() {
               50% { transform: scale(0.6); opacity: 0.3; }
             }
           `}</style>
-          Loading your ticket…
+          Loading your tickets…
         </div>
       </div>
     );
@@ -486,7 +462,7 @@ export default function MyTicketPage() {
     );
   }
 
-  if (!booking) return null;
+  if (!bookings || bookings.length === 0) return null;
 
   return (
     <div className="tp-root">
@@ -496,80 +472,18 @@ export default function MyTicketPage() {
           <div className="tp-check-ring">
             <span style={{ fontSize: "20px" }}>🎫</span>
           </div>
-          <h1 className="tp-title">Your E-Ticket</h1>
-          <p className="tp-subtitle">Present this code at the entrance</p>
+          <h1 className="tp-title">Your E-Ticket{bookings.length > 1 ? "s" : ""}</h1>
+          <p className="tp-subtitle">
+            Present {bookings.length > 1 ? "these codes" : "this code"} at the entrance
+          </p>
         </div>
 
-        {/* ── Ticket card ─────────────────────────────── */}
-        <motion.div
-          className="tp-card print-ticket"
-          variants={popVariants}
-          initial="initial"
-          animate="animate"
-          exit="exit"
-        >
-          {/* Gold confirmed banner */}
-          <div className="tp-banner">
-            <span className="tp-banner-dot" />
-            <span className="tp-banner-text">✦ Confirmed ✦</span>
-            <span className="tp-banner-dot" />
-          </div>
-
-          {/* Event header */}
-          <div className="tp-ticket-head">
-            <p className="tp-org">{EVENT.org}</p>
-            <img
-              src={logo}
-              alt="Zentage"
-              style={{
-                height: 44,
-                width: "auto",
-                display: "block",
-                margin: "0 auto 8px",
-                filter: "drop-shadow(0 0 10px rgba(202,162,23,0.3)) brightness(1.05)",
-              }}
-            />
-            <p className="tp-event-name">{EVENT.name}</p>
-            <p className="tp-event-meta">{EVENT.date} · {EVENT.time}</p>
-          </div>
-
-          {/* Perforation 1 */}
-          <Perforation />
-
-          {/* QR code scanner zone */}
-          <motion.div
-            className="tp-qr-zone"
-            initial={{ opacity: 0, scale: 0.8, rotate: -2 }}
-            animate={{ opacity: 1, scale: 1, rotate: 0 }}
-            transition={{ delay: 0.28, duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <div className="tp-qr-frame">
-              <span className="tp-qr-corner-tr" />
-              <span className="tp-qr-corner-bl" />
-              <canvas ref={canvasRef} className="tp-qr-canvas" />
-            </div>
-            <p className="tp-qr-hint">⬡ Scan at entrance ⬡</p>
-          </motion.div>
-
-          {/* Perforation 2 */}
-          <Perforation />
-
-          {/* Ticket detail rows */}
-          <div className="tp-details">
-            <TicketRow label="Booking Ref" value={booking.booking_ref} mono />
-            <TicketRow label="Seat" value={booking.seat_code} highlight />
-            <TicketRow label="Section" value={booking.section} />
-            <TicketRow label="Venue" value={EVENT.venue} />
-            <TicketRow label="Location" value={EVENT.location} />
-            <TicketRow label="Price" value={EVENT.price} />
-          </div>
-
-          {/* Bottom strip */}
-          <div className="tp-foot">
-            <span className="tp-foot-text">Non-transferable · 1 person</span>
-            <span className="tp-foot-badge">E-Ticket</span>
-          </div>
-        </motion.div>
+        {/* ── Ticket cards scroll list ────────────────── */}
+        <div className="tp-tickets-list" style={{ maxHeight: "65vh", overflowY: "auto", paddingRight: 4, paddingBottom: 16 }}>
+          {bookings.map((booking) => (
+            <TicketCard key={booking.booking_ref} booking={booking} />
+          ))}
+        </div>
 
         {/* ── Actions ─────────────────────────────────── */}
         <motion.div

@@ -180,7 +180,7 @@ function getGroundFloorAisleOffset(colIndex) {
 }
 
 
-export default function SeatSection({ seats, blockKey, blockX, blockY, selectedSeat, onSelect }) {
+export default function SeatSection({ seats, blockKey, blockX, blockY, selectedSeats, onSelect }) {
   const step = SEAT_SIZE + SEAT_GAP;
 
   // 1. Position logic for Rotated Strips (Left / Right Balcony)
@@ -204,7 +204,7 @@ export default function SeatSection({ seats, blockKey, blockX, blockY, selectedS
               x={sx}
               y={y}
               size={SEAT_SIZE}
-              isSelected={selectedSeat?.seat_code === seat.seat_code}
+              isSelected={selectedSeats?.some(s => s.seat_code === seat.seat_code)}
               onSelect={onSelect}
             />
           );
@@ -254,7 +254,7 @@ export default function SeatSection({ seats, blockKey, blockX, blockY, selectedS
                     x={sx}
                     y={rowY}
                     size={SEAT_SIZE}
-                    isSelected={selectedSeat?.seat_code === seat.seat_code}
+                    isSelected={selectedSeats?.some(s => s.seat_code === seat.seat_code)}
                     onSelect={onSelect}
                   />
                 );
@@ -309,7 +309,7 @@ export default function SeatSection({ seats, blockKey, blockX, blockY, selectedS
                     x={sx}
                     y={rowY}
                     size={SEAT_SIZE}
-                    isSelected={selectedSeat?.seat_code === seat.seat_code}
+                    isSelected={selectedSeats?.some(s => s.seat_code === seat.seat_code)}
                     onSelect={onSelect}
                   />
                 );
@@ -363,7 +363,7 @@ export default function SeatSection({ seats, blockKey, blockX, blockY, selectedS
                   x={sx}
                   y={rowY}
                   size={SEAT_SIZE}
-                  isSelected={selectedSeat?.seat_code === seat.seat_code}
+                  isSelected={selectedSeats?.some(s => s.seat_code === seat.seat_code)}
                   onSelect={onSelect}
                 />
               );

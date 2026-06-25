@@ -1,19 +1,8 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useLocation, useNavigate, Navigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import QRCode from "qrcode";
-import logo from "../assets/zentage-TS.png";
-import { popVariants, fadeUpVariants, microSpring } from "../lib/motionVariants";
-
-const EVENT = {
-  name: "Zentage Talent Show",
-  date: "September 6, 2026",
-  time: "6:00 PM onwards",
-  venue: "Elphinstone Theatre",
-  location: "Maradana, Colombo",
-  price: "LKR 500",
-  org: "Sasnaka Sansada Foundation",
-};
+import { fadeUpVariants, microSpring } from "../lib/motionVariants";
+import TicketCard from "../components/shared/TicketCard";
 
 /* ─── Injected scoped styles ─── */
 const STYLES = `
@@ -402,10 +391,16 @@ const STYLES = `
     .tp-root { background: #fff; padding: 0; }
     .tp-actions { display: none; }
     .tp-header { display: none; }
+    .tp-tickets-list {
+      max-height: none !important;
+      overflow-y: visible !important;
+      padding-right: 0 !important;
+    }
     .tp-card {
       border: 1px solid #ddd;
       box-shadow: none;
       border-radius: 12px;
+      page-break-inside: avoid;
     }
     .tp-banner { background: #c9a220; }
     .tp-banner-text { color: #fff; }
@@ -423,45 +418,16 @@ function useInjectStyles(css) {
   }, []);
 }
 
-function TicketRow({ label, value, mono, highlight }) {
-  return (
-    <div className={`tp-row${highlight ? " highlight" : ""}`}>
-      <span className="tp-row-label">{label}</span>
-      <span className={`tp-row-value${mono ? " mono" : ""}`}>{value}</span>
-    </div>
-  );
-}
-
-function Perforation() {
-  return (
-    <div className="tp-perf-wrap">
-      <div className="tp-perf-notch left" />
-      <div className="tp-perf-line" />
-      <div className="tp-perf-notch right" />
-    </div>
-  );
-}
-
 export default function TicketPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const canvasRef = useRef(null);
-  const booking = location.state?.booking;
+  const bookings = location.state?.bookings;
 
   useInjectStyles(STYLES);
 
-  if (!booking) {
+  if (!bookings || bookings.length === 0) {
     return <Navigate to="/" replace />;
   }
-
-  useEffect(() => {
-    if (!canvasRef.current) return;
-    QRCode.toCanvas(canvasRef.current, booking.booking_ref, {
-      width: 180,
-      margin: 1,
-      color: { dark: "#0f1322", light: "#f8f6ff" },
-    });
-  }, [booking.booking_ref]);
 
   return (
     <div className="tp-root">
@@ -475,81 +441,17 @@ export default function TicketPage() {
             </svg>
           </div>
           <h1 className="tp-title">Booking Confirmed</h1>
-          <p className="tp-subtitle">Your ticket has been sent to your email</p>
+          <p className="tp-subtitle">
+            {bookings.length} ticket{bookings.length > 1 ? "s have" : " has"} been sent to your email
+          </p>
         </div>
 
-        {/* ── Ticket card ─────────────────────────────── */}
-        <motion.div
-          className="tp-card print-ticket"
-          variants={popVariants}
-          initial="initial"
-          animate="animate"
-          exit="exit"
-        >
-
-          {/* Gold confirmed banner */}
-          <div className="tp-banner">
-            <span className="tp-banner-dot" />
-            <span className="tp-banner-text">✦ Confirmed ✦</span>
-            <span className="tp-banner-dot" />
-          </div>
-
-          {/* Event header */}
-          <div className="tp-ticket-head">
-            <p className="tp-org">{EVENT.org}</p>
-            <img
-              src={logo}
-              alt="Zentage"
-              style={{
-                height: 44,
-                width: "auto",
-                display: "block",
-                margin: "0 auto 8px",
-                filter: "drop-shadow(0 0 10px rgba(202,162,23,0.3)) brightness(1.05)",
-              }}
-            />
-            <p className="tp-event-name">{EVENT.name}</p>
-            <p className="tp-event-meta">{EVENT.date} · {EVENT.time}</p>
-          </div>
-
-          {/* Perforation 1 */}
-          <Perforation />
-
-          {/* QR code scanner zone */}
-          <motion.div
-            className="tp-qr-zone"
-            initial={{ opacity: 0, scale: 0.8, rotate: -2 }}
-            animate={{ opacity: 1, scale: 1, rotate: 0 }}
-            transition={{ delay: 0.28, duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <div className="tp-qr-frame">
-              {/* Additional corner brackets (pseudo handles top-left & bottom-right) */}
-              <span className="tp-qr-corner-tr" />
-              <span className="tp-qr-corner-bl" />
-              <canvas ref={canvasRef} className="tp-qr-canvas" />
-            </div>
-            <p className="tp-qr-hint">⬡ Scan at entrance ⬡</p>
-          </motion.div>
-
-          {/* Perforation 2 */}
-          <Perforation />
-
-          {/* Ticket detail rows */}
-          <div className="tp-details">
-            <TicketRow label="Booking Ref" value={booking.booking_ref} mono />
-            <TicketRow label="Seat" value={booking.seat_code} highlight />
-            <TicketRow label="Section" value={booking.section} />
-            <TicketRow label="Venue" value={EVENT.venue} />
-            <TicketRow label="Location" value={EVENT.location} />
-            <TicketRow label="Price" value={EVENT.price} />
-          </div>
-
-          {/* Bottom strip */}
-          <div className="tp-foot">
-            <span className="tp-foot-text">Non-transferable · 1 person</span>
-            <span className="tp-foot-badge">E-Ticket</span>
-          </div>
-        </motion.div>
+        {/* ── Ticket cards scroll list ────────────────── */}
+        <div className="tp-tickets-list" style={{ maxHeight: "65vh", overflowY: "auto", paddingRight: 4, paddingBottom: 16 }}>
+          {bookings.map((booking) => (
+            <TicketCard key={booking.booking_ref} booking={booking} />
+          ))}
+        </div>
 
         {/* ── Actions ─────────────────────────────────── */}
         <motion.div

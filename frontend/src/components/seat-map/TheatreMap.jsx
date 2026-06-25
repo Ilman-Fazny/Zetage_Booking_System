@@ -27,7 +27,7 @@ function getBlockForSeat(seat) {
   return "groundFloor";
 }
 
-export default function TheatreMap({ sections, selectedSeat, onSelect }) {
+export default function TheatreMap({ sections, selectedSeats, onSelect }) {
   const [scale, setScale] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const dragRef = useRef(null);
@@ -310,7 +310,7 @@ export default function TheatreMap({ sections, selectedSeat, onSelect }) {
                 seats={seats}
                 blockX={block.x}
                 blockY={block.y}
-                selectedSeat={selectedSeat}
+                selectedSeats={selectedSeats}
                 onSelect={onSelect}
               />
             );

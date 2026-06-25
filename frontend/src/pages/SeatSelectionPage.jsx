@@ -66,7 +66,7 @@ function useInjectStyles(css) {
 export default function SeatSelectionPage() {
   useInjectStyles(SEAT_PAGE_STYLES);
 
-  const { sections, selectedSeat, selectSeat, loading, error } = useSeatMap();
+  const { sections, selectedSeats, selectSeat, loading, error } = useSeatMap();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [hasBooking, setHasBooking] = useState(false);
@@ -74,14 +74,14 @@ export default function SeatSelectionPage() {
   useEffect(() => {
     fetchMyBooking()
       .then((data) => {
-        if (data) setHasBooking(true);
+        if (data && data.length > 0) setHasBooking(true);
       })
       .catch(() => {});
   }, []);
 
   function handleContinue() {
-    if (!selectedSeat) return;
-    navigate("/details", { state: { seat: selectedSeat } });
+    if (!selectedSeats.length) return;
+    navigate("/details", { state: { seats: selectedSeats } });
   }
 
   if (loading) {
@@ -220,14 +220,13 @@ export default function SeatSelectionPage() {
         {/* ── Theatre Map ─────────────────────────────────────── */}
         <TheatreMap
           sections={sections}
-          selectedSeat={selectedSeat}
+          selectedSeats={selectedSeats}
           onSelect={selectSeat}
         />
 
         {/* ── Floating Summary Drawer ──────────────────────────── */}
         <SeatSummaryBar
-          selectedSeat={selectedSeat}
-          price={EVENT_PRICE}
+          selectedSeats={selectedSeats}
           onContinue={handleContinue}
         />
       </div>

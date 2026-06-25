@@ -4,7 +4,7 @@ import api from "./api";
 
 export function useSeatMap() {
   const [sections, setSections] = useState([]);
-  const [selectedSeat, setSelectedSeat] = useState(null);
+  const [selectedSeats, setSelectedSeats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -27,8 +27,16 @@ export function useSeatMap() {
 
   function selectSeat(seat) {
     if (seat.status !== "available") return;
-    setSelectedSeat((prev) => (prev?.seat_code === seat.seat_code ? null : seat));
+    setSelectedSeats((prev) => {
+      const exists = prev.find((s) => s.seat_code === seat.seat_code);
+      if (exists) return prev.filter((s) => s.seat_code !== seat.seat_code);
+      return [...prev, seat];
+    });
   }
 
-  return { sections, selectedSeat, selectSeat, loading, error, refetch: fetchSeats };
+  function clearSelection() {
+    setSelectedSeats([]);
+  }
+
+  return { sections, selectedSeats, selectSeat, clearSelection, loading, error, refetch: fetchSeats };
 }
