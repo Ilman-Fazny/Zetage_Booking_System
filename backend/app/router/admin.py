@@ -184,7 +184,7 @@ def admin_book_seats(
             detail=f"User with email '{data.user_email}' not found."
         )
 
-    order_id = str(uuid.uuid4())[:12].upper()
+    order_id = "FREE-" + str(uuid.uuid4())[:12].upper()
     confirmed_bookings = []
 
     for seat_code in data.seat_codes:
@@ -256,12 +256,12 @@ def admin_list_users(
 
     if has_booking is not None:
         if has_booking:
-            query = query.filter(User.bookings.any())
+            query = query.filter(User.bookings.any(Booking.status != BookingStatus.CANCELLED))
         else:
-            query = query.filter(~User.bookings.any())
+            query = query.filter(~User.bookings.any(Booking.status != BookingStatus.CANCELLED))
 
     if section:
-        query = query.filter(User.bookings.any(Booking.seat.has(Seat.section == section)))
+        query = query.filter(User.bookings.any((Booking.status != BookingStatus.CANCELLED) & Booking.seat.has(Seat.section == section)))
 
     users = query.order_by(User.id).all()
 
@@ -269,7 +269,7 @@ def admin_list_users(
     for u in users:
         user_bookings = []
         for b in u.bookings:
-            if b.seat:
+            if b.seat and b.status != BookingStatus.CANCELLED:
                 user_bookings.append(
                     AdminUserBookingOut(
                         booking_ref=b.booking_ref,

@@ -3,6 +3,7 @@ import { useLocation, useNavigate, Navigate } from "react-router-dom";
 import { fetchMyBooking } from "../lib/bookings";
 import { motion } from "framer-motion";
 import { fadeUpVariants, microSpring } from "../lib/motionVariants";
+import { useDocumentTitle } from "../lib/useDocumentTitle";
 import TicketCard from "../components/shared/TicketCard";
 
 /* ─── Injected scoped styles ─── */
@@ -351,10 +352,10 @@ const STYLES = `
   }
   .tp-btn-primary {
     width: 100%;
-    padding: 12px;
+    padding: 10px;
     background: rgba(255,255,255,0.05);
     border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 12px;
+    border-radius: 8px;
     color: rgba(220,215,255,0.8);
     font-size: 13.5px;
     font-weight: 500;
@@ -378,6 +379,7 @@ const STYLES = `
     padding: 10px;
     background: none;
     border: none;
+    border-radius: 8px;
     color: rgba(180,170,210,0.38);
     font-size: 12.5px;
     font-family: 'Inter', system-ui, sans-serif;
@@ -426,6 +428,7 @@ export default function TicketPage() {
   const [loading, setLoading] = useState(!location.state?.bookings);
 
   useInjectStyles(STYLES);
+  useDocumentTitle("Booking Confirmed");
 
   useEffect(() => {
     if (loading) {

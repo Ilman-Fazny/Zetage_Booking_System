@@ -130,11 +130,15 @@ def get_booking_stats(db: Session) -> dict:
 
     from app.core.config import settings
 
+    paid_bookings_count = confirmed.filter(
+        (Booking.order_id == None) | (~Booking.order_id.like("FREE-%"))
+    ).count()
+
     return {
         "total_seats":          total_seats,
         "booked_seats":         booked_seats,
         "available_seats":       total_seats - booked_seats,
-        "total_revenue":         booked_seats * settings.event_price,
+        "total_revenue":         paid_bookings_count * settings.event_price,
         "sasnaka_member_count":  sasnaka_count,
         "by_district":            {d: c for d, c in by_district_rows},
         "by_section":              {s.value: c for s, c in by_section_rows},

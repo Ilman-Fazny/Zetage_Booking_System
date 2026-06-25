@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { fetchStats, fetchBookings, fetchAdmins, promoteUser, demoteUser, resendBookingEmail, adminBookSeats, fetchUsers, deleteBooking, deleteUser } from "../lib/admin";
 import { DISTRICTS } from "../lib/districts";
 import { listContainerVariants, listItemVariants, microSpring } from "../lib/motionVariants";
+import { useDocumentTitle } from "../lib/useDocumentTitle";
 import logo from "../assets/zentage-TS.png";
 import QrScannerModal from "../components/QrScannerModal";
 
@@ -722,24 +723,36 @@ const SECTIONS = [
 
 export default function AdminDashboard() {
   useInjectStyles(STYLES);
-
+  useDocumentTitle("Admin Dashboard");
+  const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [bookings, setBookings] = useState([]);
   const [loadingStats, setLoadingStats] = useState(true);
   const [loadingBookings, setLoadingBookings] = useState(true);
   const [tab, setTab] = useState("overview");
   const [showScanner, setShowScanner] = useState(false);
-  const navigate = useNavigate();
 
   const [filterDistrict, setFilterDistrict] = useState("");
   const [filterSasnaka, setFilterSasnaka] = useState("");
   const [filterSection, setFilterSection] = useState("");
 
-  useEffect(() => {
-    fetchStats()
-      .then(setStats)
-      .finally(() => setLoadingStats(false));
+  const loadStats = useCallback(async (isPolling = false) => {
+    if (!isPolling) setLoadingStats(true);
+    try {
+      const data = await fetchStats();
+      setStats(data);
+    } finally {
+      if (!isPolling) setLoadingStats(false);
+    }
   }, []);
+
+  useEffect(() => {
+    if (tab === "overview") {
+      loadStats();
+      const interval = setInterval(() => loadStats(true), 5000);
+      return () => clearInterval(interval);
+    }
+  }, [tab, loadStats]);
 
   const loadBookings = useCallback(async () => {
     setLoadingBookings(true);

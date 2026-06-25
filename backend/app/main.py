@@ -73,9 +73,10 @@ app = FastAPI(
 )
 
 # CORS Configuration
+# NOTE: For production, set FRONTEND_URL in .env to your actual domain.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[settings.FRONTEND_URL] if settings.FRONTEND_URL else ["http://localhost:5173"],
     allow_methods=["*"], 
     allow_headers=["*"],
     allow_credentials=True,

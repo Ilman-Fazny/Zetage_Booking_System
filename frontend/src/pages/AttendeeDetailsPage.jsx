@@ -6,6 +6,7 @@ import { DISTRICTS } from "../lib/districts";
 import MotionButton from "../components/shared/MotionButton";
 import MotionInput from "../components/shared/MotionInput";
 import { floatingCardVariants, fadeUpVariants } from "../lib/motionVariants";
+import { useDocumentTitle } from "../lib/useDocumentTitle";
 import logo from "../assets/zentage-TS.png";
 
 const EVENT_PRICE = 500;
@@ -66,7 +67,7 @@ const STYLES = `
     position: relative;
     background: linear-gradient(135deg, rgba(109,40,217,0.2) 0%, rgba(79,30,157,0.12) 50%, rgba(30,20,60,0.3) 100%);
     border: 1px solid rgba(139,92,246,0.25);
-    border-radius: 18px;
+    border-radius: 12px;
     padding: 20px 22px;
     margin-bottom: 14px;
     overflow: hidden;
@@ -206,7 +207,7 @@ const STYLES = `
     position: relative;
     background: rgba(255,255,255,0.035);
     border: 1px solid rgba(255,255,255,0.07);
-    border-radius: 20px;
+    border-radius: 16px;
     padding: 26px 26px 28px;
     backdrop-filter: blur(16px);
     box-shadow:
@@ -262,7 +263,7 @@ const STYLES = `
     color: #e2d9ff;
     background: rgba(255,255,255,0.04);
     border: 1px solid rgba(255,255,255,0.09);
-    border-radius: 11px;
+    border-radius: 8px;
     outline: none;
     transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
     -webkit-appearance: none;
@@ -305,12 +306,12 @@ const STYLES = `
   }
   .adp-toggle-btn {
     flex: 1;
-    padding: 11px 0;
+    padding: 10px 0;
     font-family: 'Inter', system-ui, sans-serif;
     font-size: 13px;
     font-weight: 600;
     letter-spacing: 0.04em;
-    border-radius: 11px;
+    border-radius: 8px;
     border: 1px solid rgba(255,255,255,0.09);
     background: rgba(255,255,255,0.035);
     color: rgba(180,170,210,0.45);
@@ -360,7 +361,7 @@ const STYLES = `
   .adp-error {
     background: rgba(248,113,113,0.07);
     border: 1px solid rgba(248,113,113,0.2);
-    border-radius: 10px;
+    border-radius: 8px;
     padding: 10px 14px;
     font-size: 13px;
     color: #fca5a5;
@@ -375,7 +376,7 @@ const STYLES = `
   /* ── Submit button ── */
   .adp-submit {
     width: 100%;
-    padding: 13px;
+    padding: 10px;
     font-family: 'Inter', system-ui, sans-serif;
     font-size: 14px;
     font-weight: 700;
@@ -383,7 +384,7 @@ const STYLES = `
     color: #fff;
     background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 45%, #5b21b6 100%);
     border: none;
-    border-radius: 12px;
+    border-radius: 8px;
     cursor: pointer;
     position: relative;
     overflow: hidden;
@@ -471,6 +472,7 @@ function useInjectStyles(css) {
 
 export default function AttendeeDetailsPage() {
   useInjectStyles(STYLES);
+  useDocumentTitle("Your Details");
 
   const location = useLocation();
   const navigate = useNavigate();

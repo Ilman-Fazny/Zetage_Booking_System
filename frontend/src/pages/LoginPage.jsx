@@ -5,6 +5,8 @@ import { loginWithPassword, registerWithPassword, loginWithGoogle } from "../lib
 import GoogleButton from "../components/shared/GoogleButton";
 import MotionButton from "../components/shared/MotionButton";
 import MotionInput from "../components/shared/MotionInput";
+import MotionPasswordInput from "../components/shared/MotionPasswordInput";
+import { useDocumentTitle } from "../lib/useDocumentTitle";
 import logo from "../assets/zentage-TS.png";
 
 /* ─────────────────────────────────────────────
@@ -391,6 +393,7 @@ export default function LoginPage() {
   const [fieldsKey, setFieldsKey] = useState(0); // re-triggers slide animation on tab switch
 
   useInjectStyles(STYLES);
+  useDocumentTitle("Log In or Register");
 
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -490,7 +493,7 @@ export default function LoginPage() {
             <div className="lp-divider-line" />
           </div>
 
-          {/* Form — key forces re-mount (re-runs slide animation) */}
+          {/* Form - key forces re-mount (re-runs slide animation) */}
           <form key={fieldsKey} onSubmit={handleSubmit}>
             <div className="lp-fields">
               {mode === "register" && (
@@ -513,7 +516,7 @@ export default function LoginPage() {
                 required
                 className="lp-input"
               />
-              <MotionInput
+              <MotionPasswordInput
                 id="input-password"
                 type="password"
                 placeholder="Password"

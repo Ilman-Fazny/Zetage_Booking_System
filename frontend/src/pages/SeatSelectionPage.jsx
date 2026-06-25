@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useSeatMap } from "../lib/useSeatMap";
 import { useAuth } from "../context/AuthContext";
+import { useDocumentTitle } from "../lib/useDocumentTitle";
 import TheatreMap from "../components/seat-map/TheatreMap";
 import SeatLegend from "../components/seat-map/SeatLegend";
 import SeatSummaryBar from "../components/seat-map/SeatSummaryBar";
@@ -64,6 +65,7 @@ function useInjectStyles(css) {
 
 export default function SeatSelectionPage() {
   useInjectStyles(SEAT_PAGE_STYLES);
+  useDocumentTitle("Select Your Seat");
 
   const { sections, selectedSeats, selectSeat, loading, error } = useSeatMap();
   const { user } = useAuth();
@@ -188,7 +190,7 @@ export default function SeatSelectionPage() {
               textTransform: "uppercase",
               fontWeight: 500,
             }}>
-              Zentage Talent Show · September 6, 2026 · Elphinstone Theatre
+              Zentage Talent Show - September 6, 2026 - Elphinstone Theatre
             </p>
           </div>
         </div>

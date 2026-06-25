@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { floatingCardVariants } from "../lib/motionVariants";
+import { useDocumentTitle } from "../lib/useDocumentTitle";
 
 const STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -31,7 +32,7 @@ const STYLES = `
     backdrop-filter: blur(20px) saturate(1.4);
     -webkit-backdrop-filter: blur(20px) saturate(1.4);
     border: 1px solid rgba(255, 255, 255, 0.07);
-    border-radius: 20px;
+    border-radius: 16px;
     padding: 36px 28px;
     box-shadow:
       0 0 0 1px rgba(239, 68, 68, 0.05),
@@ -93,7 +94,7 @@ const STYLES = `
     color: #fff;
     background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 10px;
+    border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s;
     box-shadow:
@@ -128,6 +129,7 @@ function useInjectStyles(css) {
 
 export default function PaymentCancelledPage() {
   useInjectStyles(STYLES);
+  useDocumentTitle("Payment Cancelled");
   const navigate = useNavigate();
 
   return (
@@ -154,7 +156,7 @@ export default function PaymentCancelledPage() {
           onClick={() => navigate("/")}
           className="pcp-btn"
         >
-          Choose a Seat
+          ← Back to seat map
         </button>
       </motion.div>
     </div>

@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { fetchMyBooking } from "../lib/bookings";
 import { popVariants, fadeUpVariants, microSpring } from "../lib/motionVariants";
+import { useDocumentTitle } from "../lib/useDocumentTitle";
 import TicketCard from "../components/shared/TicketCard";
 
 const EVENT = {
@@ -324,10 +325,10 @@ const STYLES = `
   }
   .tp-btn-primary {
     width: 100%;
-    padding: 12px;
+    padding: 10px;
     background: rgba(255,255,255,0.05);
     border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 12px;
+    border-radius: 8px;
     color: rgba(220,215,255,0.8);
     font-size: 13.5px;
     font-weight: 500;
@@ -351,6 +352,7 @@ const STYLES = `
     padding: 10px;
     background: none;
     border: none;
+    border-radius: 8px;
     color: rgba(180,170,210,0.38);
     font-size: 12.5px;
     font-family: 'Inter', system-ui, sans-serif;
@@ -399,6 +401,7 @@ export default function MyTicketPage() {
   const navigate = useNavigate();
 
   useInjectStyles(STYLES);
+  useDocumentTitle("My Tickets");
 
   useEffect(() => {
     fetchMyBooking()
@@ -514,7 +517,7 @@ export default function MyTicketPage() {
 
         {bookings.some(b => b.status === "pending" || b.status === "PENDING") && (
           <div style={{ background: "rgba(251,146,60,0.1)", border: "1px solid rgba(251,146,60,0.3)", borderRadius: "12px", padding: "12px", marginBottom: "20px", textAlign: "center", color: "#fb923c", fontSize: "13px", fontWeight: "500" }}>
-            ⚠️ Your seat is held for 1 minute — complete payment quickly.
+            ⚠️ Your seat is held for 1 minute - complete payment quickly.
           </div>
         )}
 

@@ -8,21 +8,23 @@ export function useSeatMap() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const fetchSeats = useCallback(async () => {
-    setLoading(true);
-    setError("");
+  const fetchSeats = useCallback(async (isPolling = false) => {
+    if (!isPolling) setLoading(true);
+    if (!isPolling) setError("");
     try {
       const { data } = await api.get("/seats");
       setSections(data);
     } catch (err) {
-      setError("Couldn't load the seat map. Please refresh.");
+      if (!isPolling) setError("Couldn't load the seat map. Please refresh.");
     } finally {
-      setLoading(false);
+      if (!isPolling) setLoading(false);
     }
   }, []);
 
   useEffect(() => {
     fetchSeats();
+    const interval = setInterval(() => fetchSeats(true), 5000);
+    return () => clearInterval(interval);
   }, [fetchSeats]);
 
   function selectSeat(seat) {
