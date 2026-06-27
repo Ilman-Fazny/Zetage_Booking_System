@@ -179,10 +179,13 @@ def admin_book_seats(
     email_normalized = data.user_email.strip().lower()
     user = db.query(User).filter(User.email == email_normalized).first()
     if not user:
-        raise HTTPException(
-            status_code=404,
-            detail=f"User with email '{data.user_email}' not found."
+        user = User(
+            email=email_normalized,
+            name=email_normalized.split("@")[0].title(),
+            is_admin=False
         )
+        db.add(user)
+        db.flush()
 
     order_id = "FREE-" + str(uuid.uuid4())[:12].upper()
     confirmed_bookings = []
@@ -225,14 +228,14 @@ def admin_book_seats(
 
     db.commit()
 
-    # Fire background emails for each confirmed booking
+    # Fire background email with all confirmed bookings
     for booking in confirmed_bookings:
         db.refresh(booking)
-        background_tasks.add_task(
-            send_ticket_email,
-            booking.user_id,
-            booking.id
-        )
+    background_tasks.add_task(
+        send_ticket_email,
+        user,
+        confirmed_bookings
+    )
 
     return {"detail": f"Successfully booked {len(data.seat_codes)} seat(s) for {user.email}."}
 
