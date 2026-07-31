@@ -1,8 +1,9 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDocumentTitle } from "../lib/useDocumentTitle";
+import { useAuth } from "../context/AuthContext";
 
-/* ─── Reuse same visual style as PrivacyPolicyPage ─────────────────────── */
+/* Scoped styles */
 const STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
@@ -254,24 +255,33 @@ export default function TermsPage() {
     return () => el.remove();
   }, []);
 
+  const { token } = useAuth();
   const navigate = useNavigate();
+
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate(token ? "/" : "/login");
+    }
+  };
 
   return (
     <div className="pol-root">
-      {/* ── Sticky Header ── */}
+      {/* Header */}
       <header className="pol-header">
-        <button className="pol-back-btn" onClick={() => navigate(-1)} aria-label="Go back">
+        <button className="pol-back-btn" onClick={handleBack} aria-label="Go back">
           ← Back
         </button>
         <span className="pol-header-title">Terms &amp; Conditions</span>
       </header>
 
-      {/* ── Content ── */}
+      {/* Content */}
       <main className="pol-container">
-        <div className="pol-badge">📋 Legal</div>
+        <div className="pol-badge">Legal</div>
         <h1 className="pol-title">Terms &amp; Conditions</h1>
         <p className="pol-subtitle">
-          Sasnaka Sansada Talent Show 2026 — Zentage Booking System
+          Sasnaka Sansada Talent Show 2026 - Zentage Booking System
         </p>
         <p className="pol-updated">Last updated: August 1, 2026</p>
 
@@ -438,6 +448,7 @@ export default function TermsPage() {
           <h3>Contact Us</h3>
           <p>For any questions regarding these Terms &amp; Conditions, please contact us:</p>
           <p><strong style={{ color: "#c4b9d8" }}>Organization:</strong> Sasnaka Sansada</p>
+          <p><strong style={{ color: "#c4b9d8" }}>Website:</strong> <a href="https://sasnaka.org/" target="_blank" rel="noreferrer">sasnaka.org</a></p>
           <p><strong style={{ color: "#c4b9d8" }}>Event:</strong> Sasnaka Sansada Talent Show 2026</p>
           <p><strong style={{ color: "#c4b9d8" }}>Platform:</strong> Zentage Ticket Booking System</p>
           <p><strong style={{ color: "#c4b9d8" }}>Email:</strong> <a href="mailto:info@sasnaka.org">info@sasnaka.org</a></p>

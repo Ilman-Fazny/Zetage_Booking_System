@@ -1,8 +1,9 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDocumentTitle } from "../lib/useDocumentTitle";
+import { useAuth } from "../context/AuthContext";
 
-/* ─── Reuse same visual style ───────────────────────────────────────────── */
+/* Scoped styles */
 const STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
@@ -285,24 +286,33 @@ export default function ReturnPolicyPage() {
     return () => el.remove();
   }, []);
 
+  const { token } = useAuth();
   const navigate = useNavigate();
+
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate(token ? "/" : "/login");
+    }
+  };
 
   return (
     <div className="pol-root">
-      {/* ── Sticky Header ── */}
+      {/* Header */}
       <header className="pol-header">
-        <button className="pol-back-btn" onClick={() => navigate(-1)} aria-label="Go back">
+        <button className="pol-back-btn" onClick={handleBack} aria-label="Go back">
           ← Back
         </button>
         <span className="pol-header-title">Return &amp; Refund Policy</span>
       </header>
 
-      {/* ── Content ── */}
+      {/* Content */}
       <main className="pol-container">
-        <div className="pol-badge">💳 Refunds</div>
+        <div className="pol-badge">Refunds</div>
         <h1 className="pol-title">Return &amp; Refund Policy</h1>
         <p className="pol-subtitle">
-          Sasnaka Sansada Talent Show 2026 — Zentage Booking System
+          Sasnaka Sansada Talent Show 2026 - Zentage Booking System
         </p>
         <p className="pol-updated">Last updated: August 1, 2026</p>
 
@@ -361,8 +371,8 @@ export default function ReturnPolicyPage() {
           <ul>
             <li>All affected ticket holders will be notified via their registered email address</li>
             <li>Refunds will be processed through the original payment method (PayHere)</li>
-            <li>Processing time may take 7–14 business days depending on your bank or card issuer</li>
-            <li>Refunds will cover the ticket face value only — booking fees are non-refundable</li>
+            <li>Processing time may take 7-14 business days depending on your bank or card issuer</li>
+            <li>Refunds will cover the ticket face value only - booking fees are non-refundable</li>
           </ul>
           <div className="pol-highlight">
             Partial cancellations (e.g., specific performances cancelled but the event continues)
@@ -414,7 +424,7 @@ export default function ReturnPolicyPage() {
             <li>Reason for refund request</li>
           </ul>
           <p>
-            We will respond to all refund inquiries within 3–5 business days.
+            We will respond to all refund inquiries within 3-5 business days.
           </p>
         </div>
 
@@ -423,13 +433,14 @@ export default function ReturnPolicyPage() {
           <h3>Contact Us</h3>
           <p>For refund inquiries or questions about this policy, please reach out to us:</p>
           <p><strong style={{ color: "#c4b9d8" }}>Organization:</strong> Sasnaka Sansada</p>
+          <p><strong style={{ color: "#c4b9d8" }}>Website:</strong> <a href="https://sasnaka.org/" target="_blank" rel="noreferrer">sasnaka.org</a></p>
           <p><strong style={{ color: "#c4b9d8" }}>Event:</strong> Sasnaka Sansada Talent Show 2026</p>
           <p><strong style={{ color: "#c4b9d8" }}>Platform:</strong> Zentage Ticket Booking System</p>
-          <p><strong style={{ color: "#c4b9d8" }}>Email:</strong> <a href="mailto:sasnakasansada@gmail.com">sasnakasansada@gmail.com</a></p>
+          <p><strong style={{ color: "#c4b9d8" }}>Email:</strong> <a href="mailto:info@sasnaka.org">info@sasnaka.org</a></p>
         </div>
 
         <div className="pol-footer">
-          © 2026 Sasnaka Sansada Talent Show — Zentage Booking System. All rights reserved.
+          © 2026 Sasnaka Sansada Talent Show - Zentage Booking System. All rights reserved.
         </div>
       </main>
     </div>
