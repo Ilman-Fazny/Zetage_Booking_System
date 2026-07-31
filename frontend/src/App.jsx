@@ -11,6 +11,9 @@ import TicketPage from "./pages/TicketPage";
 import MyTicketPage from "./pages/MyTicketPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import PaymentCancelledPage from "./pages/PaymentCancelledPage";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
+import TermsPage from "./pages/TermsPage";
+import ReturnPolicyPage from "./pages/ReturnPolicyPage";
 
 // ─── Cinematic page transition config ──────────────────────────────────────
 const PAGE_TRANSITION = {
@@ -44,7 +47,8 @@ export default function App() {
   }, []);
 
   const isFullScreen =
-    ["/login", "/", "/ticket", "/my-ticket", "/admin", "/details", "/payment-cancelled"]
+    ["/login", "/", "/ticket", "/my-ticket", "/admin", "/details", "/payment-cancelled",
+      "/privacy-policy", "/terms", "/return-policy"]
       .includes(location.pathname);
 
   return (
@@ -116,13 +120,31 @@ export default function App() {
                   </ProtectedRoute>
                 }
               />
+              {/* ── Public policy pages (no auth required) ─── */}
+              <Route
+                path="/privacy-policy"
+                element={<PageShell><PrivacyPolicyPage /></PageShell>}
+              />
+              <Route
+                path="/terms"
+                element={<PageShell><TermsPage /></PageShell>}
+              />
+              <Route
+                path="/return-policy"
+                element={<PageShell><ReturnPolicyPage /></PageShell>}
+              />
             </Routes>
           </AnimatePresence>
         </div>
 
         {!isFullScreen && (
           <footer className="py-4 text-center text-xs text-neutral-400 border-t border-neutral-200 bg-neutral-50 print:hidden select-none">
-            © Sasnaka Sansada Talent Show 2026 - Zentage
+            <div>© Sasnaka Sansada Talent Show 2026 - Zentage</div>
+            <div style={{ marginTop: "6px", display: "flex", justifyContent: "center", gap: "16px" }}>
+              <a href="/privacy-policy" style={{ color: "#9ca3af", textDecoration: "none" }}>Privacy Policy</a>
+              <a href="/terms" style={{ color: "#9ca3af", textDecoration: "none" }}>Terms &amp; Conditions</a>
+              <a href="/return-policy" style={{ color: "#9ca3af", textDecoration: "none" }}>Return Policy</a>
+            </div>
           </footer>
         )}
       </div>

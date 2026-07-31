@@ -457,6 +457,42 @@ const STYLES = `
     text-transform: uppercase;
     font-weight: 600;
   }
+
+  /* ── Policy Checkbox ── */
+  .adp-policy-checkbox-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 22px;
+    padding: 6px 4px;
+    cursor: pointer;
+  }
+  .adp-policy-checkbox {
+    width: 17px;
+    height: 17px;
+    accent-color: #7c3aed;
+    border-radius: 4px;
+    border: 1.5px solid rgba(139,92,246,0.3);
+    background: rgba(255,255,255,0.03);
+    cursor: pointer;
+    margin-top: 3px;
+    flex-shrink: 0;
+  }
+  .adp-policy-label {
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: rgba(180,170,210,0.65);
+    user-select: none;
+  }
+  .adp-policy-link {
+    color: #a78bfa;
+    text-decoration: underline;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+  .adp-policy-link:hover {
+    color: #c4b9d8;
+  }
 `;
 
 function useInjectStyles(css) {
@@ -481,6 +517,7 @@ export default function AttendeeDetailsPage() {
   const [district, setDistrict] = useState("");
   const [isSasnakaMember, setIsSasnakaMember] = useState(null);
   const [phone, setPhone] = useState("");
+  const [acceptedPolicies, setAcceptedPolicies] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -504,6 +541,10 @@ export default function AttendeeDetailsPage() {
     }
     if (phone.length !== 10) {
       setError("Phone number must be exactly 10 digits.");
+      return;
+    }
+    if (!acceptedPolicies) {
+      setError("Please agree to the Terms, Privacy Policy, and Return Policy to proceed.");
       return;
     }
 
@@ -685,6 +726,33 @@ export default function AttendeeDetailsPage() {
               <p className="adp-hint">10-digit Sri Lankan mobile number</p>
             </div>
 
+            {/* Privacy Policies tickbox */}
+            <label className="adp-policy-checkbox-container" htmlFor="chk-policies">
+              <input
+                id="chk-policies"
+                type="checkbox"
+                checked={acceptedPolicies}
+                onChange={(e) => setAcceptedPolicies(e.target.checked)}
+                className="adp-policy-checkbox"
+                required
+              />
+              <span className="adp-policy-label">
+                I agree to the{" "}
+                <a href="/terms" target="_blank" rel="noreferrer" className="adp-policy-link" onClick={(e) => e.stopPropagation()}>
+                  Terms &amp; Conditions
+                </a>
+                ,{" "}
+                <a href="/privacy-policy" target="_blank" rel="noreferrer" className="adp-policy-link" onClick={(e) => e.stopPropagation()}>
+                  Privacy Policy
+                </a>
+                , and{" "}
+                <a href="/return-policy" target="_blank" rel="noreferrer" className="adp-policy-link" onClick={(e) => e.stopPropagation()}>
+                  Return Policy
+                </a>
+                . All ticket sales are final and non-refundable.
+              </span>
+            </label>
+
             {/* Error */}
             {error && (
               <div className="adp-error">
@@ -707,7 +775,7 @@ export default function AttendeeDetailsPage() {
             <MotionButton
               id="btn-confirm"
               type="submit"
-              disabled={loading}
+              disabled={loading || !acceptedPolicies}
               className="adp-submit"
             >
               {loading ? (
