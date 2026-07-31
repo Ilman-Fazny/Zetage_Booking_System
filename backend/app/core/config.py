@@ -1,5 +1,6 @@
 # app/core/config.py
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import field_validator
 
 class Settings(BaseSettings):
     app_name: str = "Zetage Booking System"
@@ -36,6 +37,23 @@ class Settings(BaseSettings):
     EVENT_NAME: str = "Zentage Talent Show"
     EVENT_DATE: str = "September 6, 2026"
     EVENT_VENUE: str = "Elphinstone Theatre, Maradana"
+
+    @field_validator("secret_key")
+    @classmethod
+    def secret_key_must_be_strong(cls, v: str) -> str:
+        weak_defaults = {
+            "your-super-secret-key-change-this",
+            "your-super-secret-key-change-in-production",
+            "secret",
+            "changeme",
+            "",
+        }
+        if v.lower() in weak_defaults or len(v) < 32:
+            raise ValueError(
+                "SECRET_KEY is too weak or is a default placeholder. "
+                "Generate one with: python -c \"import secrets; print(secrets.token_hex(32))\""
+            )
+        return v
 
     model_config = SettingsConfigDict(
         env_file=".env",

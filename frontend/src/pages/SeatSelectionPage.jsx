@@ -50,6 +50,56 @@ const SEAT_PAGE_STYLES = `
     font-family: 'Inter', system-ui, sans-serif;
     font-size: 14px;
   }
+  /* Emergency contact widget */
+  .ssp-emergency {
+    margin-top: 24px;
+    padding: 13px 16px;
+    background: linear-gradient(135deg, rgba(239,68,68,0.07) 0%, rgba(239,68,68,0.03) 100%);
+    border: 1px solid rgba(239,68,68,0.22);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .ssp-emergency-icon {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.28);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 14px;
+  }
+  .ssp-emergency-text { flex: 1; }
+  .ssp-emergency-label {
+    font-size: 9.5px; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: rgba(239,68,68,0.75); margin: 0 0 2px;
+  }
+  .ssp-emergency-name {
+    font-size: 12.5px; font-weight: 600;
+    color: rgba(224,214,255,0.9); margin: 0 0 1px;
+  }
+  .ssp-emergency-sub {
+    font-size: 11px; color: rgba(156,163,175,0.5); margin: 0;
+  }
+  .ssp-emergency-link {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 6px 12px;
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.3);
+    border-radius: 7px;
+    color: #fca5a5;
+    font-size: 12.5px; font-weight: 600;
+    font-family: monospace;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .ssp-emergency-link:hover {
+    background: rgba(239,68,68,0.18);
+    transform: translateY(-1px);
+  }
 `;
 
 function useInjectStyles(css) {
@@ -219,6 +269,26 @@ export default function SeatSelectionPage() {
           selectedSeats={selectedSeats}
           onContinue={handleContinue}
         />
+
+        {/* ── Emergency Support Contact ─────────────── */}
+        <div className="ssp-emergency">
+          <div className="ssp-emergency-icon">🆘</div>
+          <div className="ssp-emergency-text">
+            <p className="ssp-emergency-label">Need Help?</p>
+            <p className="ssp-emergency-name">Ilman Fazny &mdash; Talent Show Co.</p>
+            <p className="ssp-emergency-sub">Contact us for any booking issues</p>
+          </div>
+          <a
+            id="ssp-emergency-call"
+            href="tel:+94776702154"
+            className="ssp-emergency-link"
+          >
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+            </svg>
+            0776 702 154
+          </a>
+        </div>
       </div>
     </div>
   );

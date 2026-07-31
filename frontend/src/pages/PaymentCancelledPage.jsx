@@ -114,6 +114,37 @@ const STYLES = `
   .pcp-btn:active {
     transform: translateY(0);
   }
+
+  /* Emergency contact */
+  .pcp-emergency {
+    margin-top: 16px;
+    padding: 12px 14px;
+    background: rgba(239,68,68,0.06);
+    border: 1px solid rgba(239,68,68,0.2);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-align: left;
+  }
+  .pcp-emergency-text { flex: 1; }
+  .pcp-emergency-label {
+    font-size: 9px; font-weight: 700;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: rgba(239,68,68,0.7); margin: 0 0 2px;
+  }
+  .pcp-emergency-name {
+    font-size: 12px; font-weight: 600;
+    color: rgba(240,236,232,0.85); margin: 0 0 1px;
+  }
+  .pcp-emergency-link {
+    font-size: 12.5px; font-weight: 700;
+    font-family: monospace;
+    color: #fca5a5;
+    text-decoration: none;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .pcp-emergency-link:hover { color: #f87171; }
 `;
 
 function useInjectStyles(css) {
@@ -158,6 +189,21 @@ export default function PaymentCancelledPage() {
         >
           ← Back to seat map
         </button>
+
+        {/* Emergency contact */}
+        <div className="pcp-emergency">
+          <span style={{ fontSize: "20px" }}>🆘</span>
+          <div className="pcp-emergency-text">
+            <p className="pcp-emergency-label">Need Help?</p>
+            <p className="pcp-emergency-name">Ilman Fazny &mdash; Talent Show Co.</p>
+            <a id="pcp-emergency-call" href="tel:+94776702154" className="pcp-emergency-link">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+              </svg>
+              0776 702 154
+            </a>
+          </div>
+        </div>
       </motion.div>
     </div>
   );

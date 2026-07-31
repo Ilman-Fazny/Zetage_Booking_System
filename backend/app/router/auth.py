@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 from app.dependencies import get_db, get_current_user
 from app.schemas.user import UserRegister, UserLogin, TokenResponse, GoogleAuthRequest
@@ -7,11 +7,13 @@ from app.models.user import User
 from pydantic import BaseModel
 from app.core.security import create_access_token
 from app.core.config import settings
+from app.main import limiter
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
-def register(data: UserRegister, db: Session = Depends(get_db)):
+@limiter.limit("10/minute")
+def register(request: Request, data: UserRegister, db: Session = Depends(get_db)):
     user = register_user(db, data)
     if not user:
         raise HTTPException(
@@ -21,7 +23,8 @@ def register(data: UserRegister, db: Session = Depends(get_db)):
     return {"message": "Account created", "email": user.email}
 
 @router.post("/login")
-def login(data: UserLogin, db: Session = Depends(get_db)):
+@limiter.limit("5/minute")
+def login(request: Request, data: UserLogin, db: Session = Depends(get_db)):
     token = login_user(db, data.email, data.password)
     if not token:
         raise HTTPException(

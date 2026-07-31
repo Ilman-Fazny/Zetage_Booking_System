@@ -1,12 +1,37 @@
 import asyncio
+import os
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone, timedelta
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from starlette.middleware.base import BaseHTTPMiddleware
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 from app.core.config import settings
 from app.router import auth, bookings, seats, admin, payments
 from app.db.init_db import init_db
 from app.models import User, Seat, Booking
+
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    """Adds security headers to every response to harden the API against
+    clickjacking, MIME-sniffing, cross-origin leakage and info disclosure."""
+
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        # Remove server fingerprinting header if present
+        response.headers.pop("server", None)
+        return response
+
+# Global rate limiter (keyed by client IP)
+limiter = Limiter(key_func=get_remote_address)
 
 async def release_expired_holds():
     """Runs every 30 seconds. Releases seats held > 1 minute with no payment."""
@@ -65,20 +90,33 @@ async def lifespan(app: FastAPI):
     except asyncio.CancelledError:
         pass
 
+# Disable interactive docs in production to reduce attack surface
+_debug = os.getenv("DEBUG", "false").lower() == "true"
+
 app = FastAPI(
     title="Zetage Booking System API",
     description="API for managing bookings in the Zetage Booking System",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
+    docs_url="/docs" if _debug else None,
+    redoc_url="/redoc" if _debug else None,
+    openapi_url="/openapi.json" if _debug else None,
 )
 
-# CORS Configuration
+# Attach rate limiter state and 429 error handler
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# Security headers on every response
+app.add_middleware(SecurityHeadersMiddleware)
+
+# CORS Configuration — only allow the known frontend origin and needed methods
 # NOTE: For production, set FRONTEND_URL in .env to your actual domain.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[settings.FRONTEND_URL] if settings.FRONTEND_URL else ["http://localhost:5173"],
-    allow_methods=["*"], 
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "Accept", "X-Requested-With"],
     allow_credentials=True,
 )
 
@@ -91,11 +129,10 @@ app.include_router(payments.router, prefix="/api")
 
 @app.get("/")
 def read_root():
-    return {
-        "message": "Welcome to the Zetage Booking System API",
-        "docs_url": "/docs"
-    }
+    # Don't leak docs_url in production
+    return {"message": "Zetage Booking System API"}
 
 @app.get("/api/health")
 def health_check():
-    return {"status": "ok", "app": settings.app_name}
+    # Intentionally minimal — do NOT expose version, DB host, or other internals
+    return {"status": "ok"}
