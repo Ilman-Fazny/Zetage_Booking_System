@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { microSpring } from "../../lib/motionVariants";
 
 export default function Seat({ seat, isSelected, onSelect, x, y, size }) {
-  const isBooked = seat.status === "booked";
+  const isBooked = seat.status === "booked" || seat.status === "held";
 
   const cx = x + size / 2;
   const cy = y + size / 2;

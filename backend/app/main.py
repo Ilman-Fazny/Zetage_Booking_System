@@ -9,6 +9,10 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
+
+# Global rate limiter (keyed by client IP)
+limiter = Limiter(key_func=get_remote_address)
+
 from app.core.config import settings
 from app.router import auth, bookings, seats, admin, payments
 from app.db.init_db import init_db
@@ -26,12 +30,10 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
         response.headers["X-XSS-Protection"] = "1; mode=block"
-        # Remove server fingerprinting header if present
-        response.headers.pop("server", None)
+        if "server" in response.headers:
+            del response.headers["server"]
         return response
 
-# Global rate limiter (keyed by client IP)
-limiter = Limiter(key_func=get_remote_address)
 
 async def release_expired_holds():
     """Runs every 30 seconds. Releases seats held > 1 minute with no payment."""

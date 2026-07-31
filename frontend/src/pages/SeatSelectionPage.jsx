@@ -271,23 +271,14 @@ export default function SeatSelectionPage() {
         />
 
         {/* ── Emergency Support Contact ─────────────── */}
-        <div className="ssp-emergency">
-          <div className="ssp-emergency-icon">🆘</div>
-          <div className="ssp-emergency-text">
-            <p className="ssp-emergency-label">Need Help?</p>
-            <p className="ssp-emergency-name">Ilman Fazny &mdash; Talent Show Co.</p>
-            <p className="ssp-emergency-sub">Contact us for any booking issues</p>
-          </div>
-          <a
-            id="ssp-emergency-call"
-            href="tel:+94776702154"
-            className="ssp-emergency-link"
-          >
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-            </svg>
-            0776 702 154
-          </a>
+        <div style={{
+          textAlign: "center",
+          marginTop: "24px",
+          fontSize: "11px",
+          color: "rgba(156, 163, 175, 0.4)",
+          letterSpacing: "0.02em"
+        }}>
+          Emergency support: <a href="tel:+94776702154" style={{ color: "rgba(248, 113, 113, 0.6)", textDecoration: "none", fontWeight: "500" }}>0776 702 154</a> (Ilman Fazny &mdash; Talent Show Co.)
         </div>
       </div>
     </div>

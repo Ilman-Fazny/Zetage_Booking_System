@@ -632,24 +632,15 @@ export default function MyTicketPage() {
           </motion.button>
         </motion.div>
 
-        {/* ── Emergency Support Banner ─────────────────── */}
-        <div className="tp-emergency-banner">
-          <div className="tp-emergency-icon">🆘</div>
-          <div className="tp-emergency-content">
-            <p className="tp-emergency-label">Event Support</p>
-            <p className="tp-emergency-title">Ilman Fazny &mdash; Talent Show Co.</p>
-            <p className="tp-emergency-sub">Having trouble with your booking or ticket? Call us directly.</p>
-            <a
-              id="emergency-call-btn"
-              href="tel:+94776702154"
-              className="tp-emergency-call-btn"
-            >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-              </svg>
-              0776 702 154
-            </a>
-          </div>
+        {/* ── Emergency Support Link ─────────────────── */}
+        <div style={{
+          textAlign: "center",
+          marginTop: "24px",
+          fontSize: "11px",
+          color: "rgba(156, 163, 175, 0.4)",
+          letterSpacing: "0.02em"
+        }}>
+          Emergency support: <a href="tel:+94776702154" style={{ color: "rgba(239, 68, 68, 0.6)", textDecoration: "none", fontWeight: "500" }}>0776 702 154</a> (Ilman Fazny &mdash; Talent Show Co.)
         </div>
       </div>
     </div>
