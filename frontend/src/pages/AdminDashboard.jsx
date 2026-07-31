@@ -811,7 +811,7 @@ export default function AdminDashboard() {
             className={`adm-tab ${tab === t ? "active" : ""}`}
             onClick={() => setTab(t)}
           >
-            {t === "overview" ? "⬡ Overview" : t === "bookings" ? "⊞ Bookings" : t === "users" ? "👥 Users" : t === "book" ? "📝 Book a Seat" : "🛡 Admins"}
+            {t === "overview" ? "⬡ Overview" : t === "bookings" ? "⊞ Bookings" : t === "users" ? "⊕ Users" : t === "book" ? "▣ Book a Seat" : "🛡 Admins"}
           </button>
         ))}
       </div>
