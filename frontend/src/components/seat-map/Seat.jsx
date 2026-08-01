@@ -1,9 +1,11 @@
 // src/components/seat-map/Seat.jsx
 import { motion } from "framer-motion";
 import { microSpring } from "../../lib/motionVariants";
+import { getTierConfig } from "../../lib/pricing";
 
 export default function Seat({ seat, isSelected, onSelect, x, y, size }) {
   const isBooked = seat.status === "booked" || seat.status === "held";
+  const tierCfg = getTierConfig(seat);
 
   const cx = x + size / 2;
   const cy = y + size / 2;
@@ -59,6 +61,19 @@ export default function Seat({ seat, isSelected, onSelect, x, y, size }) {
         </>
       )}
 
+      {/* ── Tier tint glow for available seats ────────────────────────── */}
+      {!isBooked && !isSelected && seat.tier !== "normal" && (
+        <rect
+          x={x - 1} y={y - 1}
+          width={size + 2} height={size + 2}
+          rx={4}
+          fill="none"
+          stroke={tierCfg.glowColor}
+          strokeWidth={0.6}
+          style={{ filter: `drop-shadow(0 0 3px ${tierCfg.glowColor})` }}
+        />
+      )}
+
       {/* ── Seat body ───────────────────────────────────────────────────── */}
       <rect
         x={x} y={y}
@@ -67,12 +82,12 @@ export default function Seat({ seat, isSelected, onSelect, x, y, size }) {
         fill={
           isBooked    ? "#27272A"           // charcoal — unavailable
           : isSelected ? "#8B5CF6"         // electric violet — selected
-          : "transparent"                  // ghost — available
+          : tierCfg.bgHint               // subtle tier background tint
         }
         stroke={
           isBooked    ? "none"
           : isSelected ? "#a78bfa"         // bright violet ring
-          : "rgba(255,255,255,0.25)"       // crisp silver outline — available
+          : tierCfg.borderColor            // tier-specific border color
         }
         strokeWidth={isSelected ? 1.2 : 0.75}
         style={
@@ -101,3 +116,4 @@ export default function Seat({ seat, isSelected, onSelect, x, y, size }) {
     </motion.g>
   );
 }
+

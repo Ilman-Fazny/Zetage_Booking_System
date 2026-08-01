@@ -3,7 +3,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 
 from app.db.init_db import Base
 from app.db.session import SessionLocal, engine
-from app.models.seat import Seat, SeatSection, SeatStatus
+from app.models.seat import Seat, SeatSection, SeatStatus, SeatTier
 
 def seats_1_to(n, start=1):
     return list(range(start, start + n))
@@ -107,37 +107,59 @@ BALCONY_BOTTOM = [
 ]
 
 
+# ── Ground floor premium rows: A through G (front, closest to stage) ──
+PREMIUM_ROW_LETTERS = set("ABCDEFG")
+
+
+def _ground_floor_tier(row_label: str) -> SeatTier:
+    """Determine tier from a ground-floor row label like 'A1', 'H8', 'N16'.
+
+    The first character is the row letter (A-Q).
+    Rows A-G → PREMIUM (LKR 750)
+    Rows H-Q → STANDARD (LKR 600)
+    """
+    letter = row_label[0].upper()
+    if letter in PREMIUM_ROW_LETTERS:
+        return SeatTier.PREMIUM
+    return SeatTier.STANDARD
+
+
 def build_seats():
     seats = []
     y = 0
 
-    def add_grid(rows, section):
+    def add_grid(rows, section, tier_fn=None):
         nonlocal y
         for x, (row_label, nums) in enumerate(rows):
+            t = tier_fn(row_label) if tier_fn else SeatTier.NORMAL
             for n in nums:
                 seats.append(Seat(
                     seat_code=f"{row_label}-{n}",
                     section=section,
                     row=row_label,
                     number=n,
+                    tier=t,
                 ))
         y += 1
 
-    add_grid(GROUND_FLOOR_LEFT, SeatSection.GROUND_FLOOR_CENTER)   # left block reuses center enum below adjusted
-    add_grid(GROUND_FLOOR_CENTER, SeatSection.GROUND_FLOOR_CENTER)
-    add_grid(GROUND_FLOOR_RIGHT, SeatSection.GROUND_FLOOR_RIGHT_SIDE)
+    # Ground floor — left, center, right blocks all use row-based tier logic
+    add_grid(GROUND_FLOOR_LEFT,   SeatSection.GROUND_FLOOR_CENTER,     _ground_floor_tier)
+    add_grid(GROUND_FLOOR_CENTER, SeatSection.GROUND_FLOOR_CENTER,     _ground_floor_tier)
+    add_grid(GROUND_FLOOR_RIGHT,  SeatSection.GROUND_FLOOR_RIGHT_SIDE, _ground_floor_tier)
 
+    # Balcony strips — all NORMAL
     for strip_dict in (BALCONY_LEFT_STRIPS, BALCONY_LEFT_STRIPS_2):
         for label, nums in strip_dict.items():
             for n in nums:
-                seats.append(Seat(seat_code=f"{label}-{n}", section=SeatSection.BALCONY_LEFT, row=label, number=n))
+                seats.append(Seat(seat_code=f"{label}-{n}", section=SeatSection.BALCONY_LEFT, row=label, number=n, tier=SeatTier.NORMAL))
 
     for strip_dict in (BALCONY_RIGHT_STRIPS, BALCONY_RIGHT_STRIPS_2):
         for label, nums in strip_dict.items():
             for n in nums:
-                seats.append(Seat(seat_code=f"{label}-{n}", section=SeatSection.BALCONY_RIGHT, row=label, number=n))
+                seats.append(Seat(seat_code=f"{label}-{n}", section=SeatSection.BALCONY_RIGHT, row=label, number=n, tier=SeatTier.NORMAL))
 
-    add_grid(BALCONY_FRONT, SeatSection.BALCONY_FRONT)
+    # Balcony front + bottom — all NORMAL
+    add_grid(BALCONY_FRONT,  SeatSection.BALCONY_FRONT)
     add_grid(BALCONY_BOTTOM, SeatSection.BALCONY_FRONT)
 
     return seats

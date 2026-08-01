@@ -32,6 +32,7 @@ class BookingOut(BaseModel):
     district:          str
     is_sasnaka_member: bool
     status:            BookingStatus
+    price:             int = 500  # per-seat price based on tier
     # New attendance fields
     is_entered:        bool
     entered_at:        Optional[datetime] = None
@@ -50,6 +51,7 @@ class AdminBookingOut(BaseModel):
     district:          str
     is_sasnaka_member: bool
     status:            BookingStatus
+    price:             int = 500
     created_at:        datetime
     user_email:        str
     user_name:         str | None

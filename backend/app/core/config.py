@@ -18,13 +18,17 @@ class Settings(BaseSettings):
     event_name: str = "Zentage Talent Show"
     event_date: str = "September 6, 2026"
     event_venue: str = "Elphinstone Theatre, Maradana"
-    event_price: int = 500   # LKR
+    price_premium:  int = 750   # LKR — Ground floor front rows
+    price_standard: int = 600   # LKR — Ground floor back rows
+    price_normal:   int = 500   # LKR — Balcony seats
 
     # PayHere Integration
     PAYHERE_MERCHANT_ID:     str = ""
     PAYHERE_MERCHANT_SECRET: str = ""
     PAYHERE_BASE_URL:        str = "https://sandbox.payhere.lk/pay/checkout"
-    EVENT_PRICE:             int = 500   # fix from 5000 → 500 LKR
+    PRICE_PREMIUM:           int = 750
+    PRICE_STANDARD:          int = 600
+    PRICE_NORMAL:            int = 500
     FRONTEND_URL:            str = "http://localhost:5173"
     PAYHERE_NOTIFY_URL:      str = "http://localhost:8000"
 

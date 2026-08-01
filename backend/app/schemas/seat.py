@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from app.models.seat import SeatStatus, SeatSection
+from app.models.seat import SeatStatus, SeatSection, SeatTier
 from datetime import datetime
 from typing import Optional
 
@@ -10,6 +10,8 @@ class SeatOut(BaseModel):
     row:       str | None
     number:    int
     status:    SeatStatus
+    tier:      SeatTier
+    price:     int
 
     model_config = {"from_attributes": True}
 

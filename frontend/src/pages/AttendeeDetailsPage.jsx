@@ -7,9 +7,8 @@ import MotionButton from "../components/shared/MotionButton";
 import MotionInput from "../components/shared/MotionInput";
 import { floatingCardVariants, fadeUpVariants } from "../lib/motionVariants";
 import { useDocumentTitle } from "../lib/useDocumentTitle";
+import { calculateTotal, getTierBreakdown } from "../lib/pricing";
 import logo from "../assets/zentage-TS.png";
-
-const EVENT_PRICE = 500;
 
 /* ─────────────────────────────────────────────────────────────────────────────
    Scoped styles
@@ -651,7 +650,18 @@ export default function AttendeeDetailsPage() {
             </div>
             <div className="adp-price-tag">
               <span className="adp-price-label">Total Price</span>
-              <span className="adp-price-val">LKR {(seats.length * EVENT_PRICE).toLocaleString()}</span>
+              <span className="adp-price-val">LKR {calculateTotal(seats).toLocaleString()}</span>
+              {getTierBreakdown(seats).length > 1 && (
+                <span style={{
+                  fontSize: 10,
+                  color: "rgba(202,162,23,0.45)",
+                  marginTop: 2,
+                  fontWeight: 500,
+                  letterSpacing: "0.02em",
+                }}>
+                  {getTierBreakdown(seats).map(b => `${b.count}×${b.label}`).join(" + ")}
+                </span>
+              )}
             </div>
           </div>
         </motion.div>

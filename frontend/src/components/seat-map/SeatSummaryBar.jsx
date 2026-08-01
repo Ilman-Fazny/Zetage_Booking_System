@@ -1,12 +1,12 @@
 // src/components/seat-map/SeatSummaryBar.jsx
 import { motion, AnimatePresence } from "framer-motion";
 import { microSpring } from "../../lib/motionVariants";
-
-const PRICE = 500;
+import { calculateTotal, getTierBreakdown } from "../../lib/pricing";
 
 export default function SeatSummaryBar({ selectedSeats, onContinue }) {
   const count = selectedSeats.length;
-  const total = count * PRICE;
+  const total = calculateTotal(selectedSeats);
+  const breakdown = getTierBreakdown(selectedSeats);
 
   return (
     <AnimatePresence mode="wait">
@@ -69,17 +69,20 @@ export default function SeatSummaryBar({ selectedSeats, onContinue }) {
                 }}>
                   {count} seat{count > 1 ? "s" : ""} selected
                 </p>
+                {/* Tier breakdown */}
                 <p style={{
                   margin: "2px 0 0",
-                  fontSize: 12,
-                  color: "rgba(167,139,250,0.7)",
+                  fontSize: 11,
+                  color: "rgba(167,139,250,0.6)",
                   fontFamily: "'Inter',system-ui,sans-serif",
                   maxWidth: 400,
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap",
                 }}>
-                  {selectedSeats.map(s => s.seat_code).join(", ")}
+                  {breakdown.map(b =>
+                    `${b.count}× ${b.label} (${b.unitPrice})`
+                  ).join("  ·  ")}
                 </p>
               </div>
 
@@ -139,3 +142,4 @@ export default function SeatSummaryBar({ selectedSeats, onContinue }) {
     </AnimatePresence>
   );
 }
+

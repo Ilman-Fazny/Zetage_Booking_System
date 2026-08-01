@@ -128,17 +128,27 @@ def get_booking_stats(db: Session) -> dict:
         .all()
     )
 
-    from app.core.config import settings
+    # Revenue: sum individual seat prices from confirmed paid bookings
+    from app.models.seat import TIER_PRICES, SeatTier
 
-    paid_bookings_count = confirmed.filter(
-        (Booking.order_id == None) | (~Booking.order_id.like("FREE-%"))
-    ).count()
+    paid_bookings = (
+        db.query(Booking)
+        .join(Seat, Booking.seat_id == Seat.id)
+        .filter(
+            Booking.status == BookingStatus.CONFIRMED,
+            (Booking.order_id == None) | (~Booking.order_id.like("FREE-%")),
+        )
+        .all()
+    )
+    total_revenue = sum(
+        TIER_PRICES.get(b.seat.tier, 500) for b in paid_bookings
+    )
 
     return {
         "total_seats":          total_seats,
         "booked_seats":         booked_seats,
         "available_seats":       total_seats - booked_seats,
-        "total_revenue":         paid_bookings_count * settings.event_price,
+        "total_revenue":         total_revenue,
         "sasnaka_member_count":  sasnaka_count,
         "by_district":            {d: c for d, c in by_district_rows},
         "by_section":              {s.value: c for s, c in by_section_rows},

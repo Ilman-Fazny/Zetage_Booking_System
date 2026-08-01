@@ -50,8 +50,9 @@ def initiate_payment(db: Session, user: User, data: BookingCreate) -> dict:
     from app.services.booking_service import create_booking
     bookings = create_booking(db, user, data)   # creates all HELD bookings
 
-    seat_count = len(bookings)
-    amount = f"{settings.EVENT_PRICE * seat_count}.00"
+    # Sum individual seat prices (supports mixed-tier bookings)
+    total_amount = sum(b.seat.price for b in bookings)
+    amount = f"{total_amount}.00"
     order_id = str(uuid.uuid4())[:12].upper()
 
     # Store order_id on all bookings in this batch

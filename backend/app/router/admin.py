@@ -36,6 +36,7 @@ def admin_list_bookings(
             district=b.district,
             is_sasnaka_member=b.is_sasnaka_member,
             status=b.status,
+            price=b.seat.price,
             created_at=b.created_at,
             user_email=b.user.email,
             user_name=b.user.name,

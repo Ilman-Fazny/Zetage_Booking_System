@@ -12,7 +12,6 @@ const EVENT = {
   time: "6:00 PM onwards",
   venue: "Elphinstone Theatre",
   location: "Maradana, Colombo",
-  price: "LKR 500",
   org: "Sasnaka Sansada Foundation",
 };
 

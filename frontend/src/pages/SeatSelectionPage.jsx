@@ -9,7 +9,6 @@ import SeatLegend from "../components/seat-map/SeatLegend";
 import SeatSummaryBar from "../components/seat-map/SeatSummaryBar";
 import logo from "../assets/zentage-TS.png";
 
-const EVENT_PRICE = 500; // LKR
 
 /* Scoped styles injected once */
 const SEAT_PAGE_STYLES = `

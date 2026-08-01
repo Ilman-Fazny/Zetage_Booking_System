@@ -10,7 +10,6 @@ const EVENT = {
   time: "6:00 PM onwards",
   venue: "Elphinstone Theatre",
   location: "Maradana, Colombo",
-  price: "LKR 500",
   org: "Sasnaka Sansada Foundation",
 };
 
@@ -113,7 +112,7 @@ export default function TicketCard({ booking }) {
         <TicketRow label="Section" value={booking.section} />
         <TicketRow label="Venue" value={EVENT.venue} />
         <TicketRow label="Location" value={EVENT.location} />
-        <TicketRow label="Price" value={EVENT.price} />
+        <TicketRow label="Price" value={`LKR ${booking.price || 500}`} />
       </div>
 
       {/* Bottom strip */}
