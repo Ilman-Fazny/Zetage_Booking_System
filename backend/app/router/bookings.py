@@ -19,12 +19,6 @@ def book_seat(
     from app.models.booking import BookingStatus
     
     bookings = create_booking(db, current_user, payload)
-    # Confirm them immediately for direct booking (API-level testing)
-    for booking in bookings:
-        booking.status = BookingStatus.CONFIRMED
-        booking.seat.status = SeatStatus.BOOKED
-    db.commit()
-    background_tasks.add_task(send_ticket_email, current_user, bookings)
     return bookings
 
 @router.get("/me", response_model=list[BookingOut])

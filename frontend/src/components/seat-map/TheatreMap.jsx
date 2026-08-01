@@ -174,7 +174,7 @@ export default function TheatreMap({ sections, selectedSeats, onSelect }) {
         <g transform={`translate(${pan.x} ${pan.y}) scale(${scale})`}>
 
           {/* ════════════════════════════════════════════
-              STAGE — Neon gradient bar, no text clutter
+              STAGE - Neon gradient bar, no text clutter
           ════════════════════════════════════════════ */}
 
           {/* Ambient bloom behind stage */}
@@ -207,7 +207,7 @@ export default function TheatreMap({ sections, selectedSeats, onSelect }) {
             fill="url(#stageShimmer)"
           />
 
-          {/* Minimal "STAGE" label — clean, no dimensions */}
+          {/* Minimal "STAGE" label - clean, no dimensions */}
           <text
             x={STAGE.x + STAGE.width / 2}
             y={STAGE.y + STAGE.height / 2}
@@ -223,10 +223,10 @@ export default function TheatreMap({ sections, selectedSeats, onSelect }) {
           </text>
 
           {/* ════════════════════════════════════════════
-              STRUCTURAL ELEMENTS — Sound/Light Unit, pillars
+              STRUCTURAL ELEMENTS - Sound/Light Unit, pillars
           ════════════════════════════════════════════ */}
 
-          {/* Sound & Light Control Unit — center gap, rows O-Q
+          {/* Sound & Light Control Unit - center gap, rows O-Q
               Ground floor center block x=470-642, rows O (y=376) – Q (y=420) */}
           <rect
             x={455} y={380}
@@ -298,7 +298,7 @@ export default function TheatreMap({ sections, selectedSeats, onSelect }) {
           </text>
 
           {/* ════════════════════════════════════════════
-              SEAT SECTIONS — all interactive, no metadata
+              SEAT SECTIONS - all interactive, no metadata
           ════════════════════════════════════════════ */}
           {Object.entries(blockSeats).map(([blockKey, seats]) => {
             if (seats.length === 0) return null;

@@ -56,9 +56,9 @@ async def release_expired_holds():
                     if not b_time:
                         continue
                     if b_time.tzinfo is None:
-                        compare_time = datetime.utcnow() - timedelta(minutes=1)
+                        compare_time = datetime.utcnow() - timedelta(minutes=10)
                     else:
-                        compare_time = datetime.now(timezone.utc) - timedelta(minutes=1)
+                        compare_time = datetime.now(timezone.utc) - timedelta(minutes=10)
 
                     if b_time < compare_time:
                         seat = db.query(Seat).filter(Seat.id == booking.seat_id).first()

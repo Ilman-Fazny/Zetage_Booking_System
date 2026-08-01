@@ -4,7 +4,7 @@ import { TIER_CONFIG } from "../../lib/pricing";
 export default function SeatLegend() {
   const tierItems = [
     {
-      label: `Premium — LKR ${TIER_CONFIG.premium.price}`,
+      label: `Premium - LKR ${TIER_CONFIG.premium.price}`,
       swatch: (
         <span style={{
           width: 14, height: 14,
@@ -18,7 +18,7 @@ export default function SeatLegend() {
       ),
     },
     {
-      label: `Standard — LKR ${TIER_CONFIG.standard.price}`,
+      label: `Standard - LKR ${TIER_CONFIG.standard.price}`,
       swatch: (
         <span style={{
           width: 14, height: 14,
@@ -32,7 +32,7 @@ export default function SeatLegend() {
       ),
     },
     {
-      label: `Normal — LKR ${TIER_CONFIG.normal.price}`,
+      label: `Normal - LKR ${TIER_CONFIG.normal.price}`,
       swatch: (
         <span style={{
           width: 14, height: 14,

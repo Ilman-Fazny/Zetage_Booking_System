@@ -11,109 +11,11 @@ import logo from "../assets/zentage-TS.png";
 
 
 /* Scoped styles injected once */
-const SEAT_PAGE_STYLES = `
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-  .ssp-root {
-    min-height: 100svh;
-    background-color: #0B0F19;
-    background-image:
-      radial-gradient(ellipse 70% 40% at 50% 0%, rgba(109,40,217,0.10) 0%, transparent 55%),
-      radial-gradient(ellipse 40% 30% at 0% 100%, rgba(59,130,246,0.06) 0%, transparent 50%);
-    padding: 20px 16px 110px;
-    font-family: 'Inter', system-ui, sans-serif;
-    box-sizing: border-box;
-    width: 100%;
-  }
-  .ssp-inner {
-    max-width: 820px;
-    margin: 0 auto;
-  }
-  .ssp-loading {
-    min-height: 100svh;
-    background: #0B0F19;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: rgba(167,139,250,0.7);
-    font-family: 'Inter', system-ui, sans-serif;
-    font-size: 14px;
-    letter-spacing: 0.05em;
-  }
-  .ssp-error {
-    min-height: 100svh;
-    background: #0B0F19;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #f87171;
-    font-family: 'Inter', system-ui, sans-serif;
-    font-size: 14px;
-  }
-  /* Emergency contact widget */
-  .ssp-emergency {
-    margin-top: 24px;
-    padding: 13px 16px;
-    background: linear-gradient(135deg, rgba(239,68,68,0.07) 0%, rgba(239,68,68,0.03) 100%);
-    border: 1px solid rgba(239,68,68,0.22);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .ssp-emergency-icon {
-    width: 30px; height: 30px;
-    border-radius: 50%;
-    background: rgba(239,68,68,0.1);
-    border: 1px solid rgba(239,68,68,0.28);
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-    font-size: 14px;
-  }
-  .ssp-emergency-text { flex: 1; }
-  .ssp-emergency-label {
-    font-size: 9.5px; font-weight: 700;
-    letter-spacing: 0.12em; text-transform: uppercase;
-    color: rgba(239,68,68,0.75); margin: 0 0 2px;
-  }
-  .ssp-emergency-name {
-    font-size: 12.5px; font-weight: 600;
-    color: rgba(224,214,255,0.9); margin: 0 0 1px;
-  }
-  .ssp-emergency-sub {
-    font-size: 11px; color: rgba(156,163,175,0.5); margin: 0;
-  }
-  .ssp-emergency-link {
-    display: inline-flex; align-items: center; gap: 5px;
-    padding: 6px 12px;
-    background: rgba(239,68,68,0.1);
-    border: 1px solid rgba(239,68,68,0.3);
-    border-radius: 7px;
-    color: #fca5a5;
-    font-size: 12.5px; font-weight: 600;
-    font-family: monospace;
-    text-decoration: none;
-    white-space: nowrap;
-    transition: background 0.2s, transform 0.15s;
-  }
-  .ssp-emergency-link:hover {
-    background: rgba(239,68,68,0.18);
-    transform: translateY(-1px);
-  }
-`;
 
-function useInjectStyles(css) {
-  useEffect(() => {
-    const id = "zentage-ssp-styles";
-    if (document.getElementById(id)) return;
-    const tag = document.createElement("style");
-    tag.id = id;
-    tag.textContent = css;
-    document.head.appendChild(tag);
-  }, []);
-}
+
+
 
 export default function SeatSelectionPage() {
-  useInjectStyles(SEAT_PAGE_STYLES);
   useDocumentTitle("Select Your Seat");
 
   const { sections, selectedSeats, selectSeat, loading, error } = useSeatMap();
@@ -277,7 +179,7 @@ export default function SeatSelectionPage() {
           color: "rgba(156, 163, 175, 0.4)",
           letterSpacing: "0.02em"
         }}>
-          Emergency support: <a href="tel:+94776702154" style={{ color: "rgba(248, 113, 113, 0.6)", textDecoration: "none", fontWeight: "500" }}>0776 702 154</a> (Ilman Fazny &mdash; Talent Show Co.)
+          Emergency support: <a href="tel:+94776702154" style={{ color: "rgba(248, 113, 113, 0.6)", textDecoration: "none", fontWeight: "500" }}>0776 702 154</a> (Ilman Fazny - Talent Show Co.)
         </div>
       </div>
     </div>

@@ -76,13 +76,16 @@ def cancel_booking(db: Session, user: User, booking_ref: str) -> None:
     db.commit()
 
 def get_my_bookings(db: Session, user: User) -> list[Booking]:
+    from sqlalchemy.orm import joinedload
     from app.models.booking import BookingStatus
-    for b in user.bookings:
-        _ = b.seat
-    return [
-        b for b in user.bookings
-        if b.status != BookingStatus.CANCELLED
-    ]
+    return (
+        db.query(Booking)
+        .options(joinedload(Booking.seat))
+        .filter(Booking.user_id == user.id)
+        .filter(Booking.status != BookingStatus.CANCELLED)
+        .order_by(Booking.created_at.desc())
+        .all()
+    )
 
 
 def list_bookings(

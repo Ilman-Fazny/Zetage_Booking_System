@@ -80,8 +80,8 @@ export default function Seat({ seat, isSelected, onSelect, x, y, size }) {
         width={size} height={size}
         rx={3}
         fill={
-          isBooked    ? "#27272A"           // charcoal — unavailable
-          : isSelected ? "#8B5CF6"         // electric violet — selected
+          isBooked    ? "#27272A"           // charcoal - unavailable
+          : isSelected ? "#8B5CF6"         // electric violet - selected
           : tierCfg.bgHint               // subtle tier background tint
         }
         stroke={

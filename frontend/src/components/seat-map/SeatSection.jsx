@@ -7,19 +7,19 @@ function getLeftStripCoords(row, number) {
   const isInner = row.endsWith("b");
   const step = SEAT_SIZE + SEAT_GAP;
   let col = isInner ? 1 : 0;
-  
+
   let y = 0;
   if (row.startsWith("UL1")) {
     const idx = number >= 5 ? number - 5 : number - 1;
     y = 70 + idx * step;
   } else if (row.startsWith("UL9")) {
-    const idx = number - 9; 
+    const idx = number - 9;
     y = 180 + idx * step;
   } else if (row.startsWith("UL13")) {
     let idx = 0;
     if (row === "UL13") {
-      idx = number - 17; 
-    } else { 
+      idx = number - 17;
+    } else {
       const map = { 19: 0, 20: 1, 15: 2, 16: 3 };
       idx = map[number] !== undefined ? map[number] : 0;
     }
@@ -27,8 +27,8 @@ function getLeftStripCoords(row, number) {
   } else if (row.startsWith("UL31")) {
     let idx = 0;
     if (row === "UL31") {
-      idx = number - 25; 
-    } else { 
+      idx = number - 25;
+    } else {
       const map = { 22: 0, 23: 1, 24: 2, 29: 3 };
       idx = map[number] !== undefined ? map[number] : 0;
     }
@@ -36,14 +36,14 @@ function getLeftStripCoords(row, number) {
   } else if (row.startsWith("UL29")) {
     let idx = 0;
     if (row === "UL29") {
-      idx = number - 33; 
-    } else { 
+      idx = number - 33;
+    } else {
       const map = { 30: 0, 31: 1, 32: 2, 29: 3 };
       idx = map[number] !== undefined ? map[number] : 0;
     }
     y = 620 + idx * step;
   } else if (row.startsWith("UL37")) {
-    const idx = number - 37; 
+    const idx = number - 37;
     y = 745 + idx * step;
   }
   return { col, y };
@@ -54,7 +54,7 @@ function getRightStripCoords(row, number) {
   const isInner = row.endsWith("b");
   const step = SEAT_SIZE + SEAT_GAP;
   let col = isInner ? 1 : 0;
-  
+
   let y = 0;
   if (row.startsWith("UR1")) {
     const idx = row === "UR1" ? number - 5 : number - 1;
@@ -65,7 +65,7 @@ function getRightStripCoords(row, number) {
   } else if (row.startsWith("UR14")) {
     let idx = 0;
     if (row === "UR14") {
-      idx = number - 15; 
+      idx = number - 15;
     } else {
       const map = { 14: 0, 19: 1, 20: 2, 21: 3 };
       idx = map[number] !== undefined ? map[number] : 0;
@@ -74,7 +74,7 @@ function getRightStripCoords(row, number) {
   } else if (row.startsWith("UR22")) {
     let idx = 0;
     if (row === "UR22") {
-      idx = number - 23; 
+      idx = number - 23;
     } else {
       const map = { 22: 0, 27: 1, 28: 2, 29: 3 };
       idx = map[number] !== undefined ? map[number] : 0;
@@ -83,14 +83,14 @@ function getRightStripCoords(row, number) {
   } else if (row.startsWith("UR30")) {
     let idx = 0;
     if (row === "UR30") {
-      idx = number - 31; 
+      idx = number - 31;
     } else {
       const map = { 30: 0, 35: 1, 36: 2, 37: 3 };
       idx = map[number] !== undefined ? map[number] : 0;
     }
     y = 620 + idx * step;
   } else if (row.startsWith("UR37")) {
-    const idx = number - 37; 
+    const idx = number - 37;
     y = 745 + idx * step;
   }
   return { col, y };
@@ -117,6 +117,7 @@ function getFrontAisleOffset(colIndex) {
 
 // ── Balcony Bottom Col & Aisle Helper ──────────────────────────
 function getBalconyBottomColIndex(row, number) {
+  if (row === "UF6") return number + 18;
   if (row.startsWith("UF")) return number;
   if (row.startsWith("UG") || row === "UH22") return number - 1;
   if (row.startsWith("UH")) return number - 1;
@@ -126,8 +127,11 @@ function getBalconyBottomColIndex(row, number) {
 
 function getBottomAisleOffset(row, number, colIndex) {
   const aisle = 24;
-  if (row.startsWith("UF")) return 0; // continuous block
-  
+  if (row.startsWith("UF")) {
+    if (row === "UF6") return aisle * 2;
+    return 0; // continuous block
+  }
+
   if (row.startsWith("UG") || row === "UH22") {
     let offset = 0;
     if (colIndex >= 10) offset += aisle;
@@ -192,11 +196,11 @@ export default function SeatSection({ seats, blockKey, blockX, blockY, selectedS
           const { col, y } = isLeft
             ? getLeftStripCoords(seat.row, seat.number)
             : getRightStripCoords(seat.row, seat.number);
-            
+
           const sx = isLeft
             ? blockX + col * step
             : blockX - col * step;
-          
+
           return (
             <Seat
               key={seat.seat_code}
@@ -323,7 +327,7 @@ export default function SeatSection({ seats, blockKey, blockX, blockY, selectedS
 
   // 4. Position logic for Ground Floor (All Blocks Unified)
   const rowList = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q"];
-  
+
   // Group seats by row letter
   const rows = {};
   for (const seat of seats) {
@@ -337,7 +341,7 @@ export default function SeatSection({ seats, blockKey, blockX, blockY, selectedS
       {rowList.map((rowLabel, rowIndex) => {
         const rowSeats = rows[rowLabel] || [];
         if (rowSeats.length === 0) return null;
-        
+
         const rowY = blockY + rowIndex * step;
 
         return (
