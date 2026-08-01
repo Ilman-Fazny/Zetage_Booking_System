@@ -56,16 +56,16 @@ export default function SeatSelectionPage() {
             to="/my-ticket"
             style={{
               fontSize: 11,
-              color: "rgba(52, 211, 153, 0.75)",
+              color: "rgba(251, 191, 36, 0.75)",
               textDecoration: "none",
               letterSpacing: "0.04em",
               fontWeight: 600,
-              borderBottom: "1px solid rgba(52, 211, 153, 0.3)",
+              borderBottom: "1px solid rgba(251, 191, 36, 0.3)",
               paddingBottom: 1,
               transition: "color 0.15s",
             }}
-            onMouseEnter={e => e.currentTarget.style.color = "rgba(52, 211, 153, 1)"}
-            onMouseLeave={e => e.currentTarget.style.color = "rgba(52, 211, 153, 0.75)"}
+            onMouseEnter={e => e.currentTarget.style.color = "rgba(251, 191, 36, 1)"}
+            onMouseLeave={e => e.currentTarget.style.color = "rgba(251, 191, 36, 0.75)"}
           >
             My Ticket →
           </Link>

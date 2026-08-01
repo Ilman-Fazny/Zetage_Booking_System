@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { fadeUpVariants, microSpring } from "../lib/motionVariants";
 import { useDocumentTitle } from "../lib/useDocumentTitle";
 import TicketCard from "../components/shared/TicketCard";
+import SplashScreen from "../components/shared/SplashScreen";
 
 /* ─── Injected scoped styles ─── */
 
@@ -35,11 +36,7 @@ export default function TicketPage() {
   }, [loading, navigate]);
 
   if (loading) {
-    return (
-      <div className="tp-root">
-        <div style={{ color: "#ede8ff", marginTop: "20vh" }}>Loading your tickets...</div>
-      </div>
-    );
+    return <SplashScreen message="Loading your tickets" />;
   }
 
   if (!bookings || bookings.length === 0) {
@@ -97,11 +94,13 @@ export default function TicketPage() {
             id="btn-back"
             onClick={() => navigate("/")}
             className="tp-btn-ghost"
+            style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.98 }}
             transition={microSpring}
           >
-            ← Back to seat map
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            Back to seat map
           </motion.button>
         </motion.div>
 

@@ -248,13 +248,15 @@ function useInjectStyles(css) {
   }, []);
 }
 
-export default function SplashScreen({ onComplete }) {
+export default function SplashScreen({ onComplete, message = "Loading your experience" }) {
   useInjectStyles(SPLASH_CSS);
 
   // Automatically dismiss after 2.4s (bar finishes at 1.8s + 0.6s hold)
   useEffect(() => {
-    const t = setTimeout(onComplete, 2400);
-    return () => clearTimeout(t);
+    if (onComplete) {
+      const t = setTimeout(onComplete, 2400);
+      return () => clearTimeout(t);
+    }
   }, [onComplete]);
 
   return (
@@ -351,7 +353,7 @@ export default function SplashScreen({ onComplete }) {
           transition={{ delay: 0.7, duration: 0.4 }}
         >
           <span className="splash-dot-blink" />
-          Loading your experience
+          {message}
           <span className="splash-dot-blink" style={{ animationDelay: "0.4s" }} />
         </motion.div>
 

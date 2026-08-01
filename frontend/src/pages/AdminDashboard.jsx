@@ -7,6 +7,7 @@ import { listContainerVariants, listItemVariants, microSpring } from "../lib/mot
 import { useDocumentTitle } from "../lib/useDocumentTitle";
 import logo from "../assets/zentage-TS.png";
 import QrScannerModal from "../components/QrScannerModal";
+import SplashScreen from "../components/shared/SplashScreen";
 
 /* ─────────────────────────────────────────────────────────────────────────────
    Scoped styles - self-contained, no Tailwind conflicts
@@ -82,8 +83,9 @@ export default function AdminDashboard() {
           <img src={logo} alt="Zentage" className="adm-logo" />
           <div className="adm-topbar-divider" />
           <div>
-            <button className="adm-back-btn" onClick={() => navigate("/")}>
-              ← Seat Map
+            <button className="adm-back-btn" onClick={() => navigate("/")} style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+              Seat Map
             </button>
             <div className="adm-topbar-title">
               <h1>Admin Panel</h1>
@@ -99,7 +101,11 @@ export default function AdminDashboard() {
             whileTap={{ scale: 0.97 }}
             transition={microSpring}
           >
-            <span>📷</span> Scan Entrance
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
+              <circle cx="12" cy="13" r="3" />
+            </svg>
+            Scan Entrance
           </motion.button>
           <span className="adm-admin-badge">Admin</span>
         </div>
@@ -113,7 +119,7 @@ export default function AdminDashboard() {
             className={`adm-tab ${tab === t ? "active" : ""}`}
             onClick={() => setTab(t)}
           >
-            {t === "overview" ? "⬡ Overview" : t === "bookings" ? "⊞ Bookings" : t === "users" ? "⊕ Users" : t === "book" ? "▣ Book a Seat" : "🛡 Admins"}
+            {t === "overview" ? "Overview" : t === "bookings" ? "Bookings" : t === "users" ? "Users" : t === "book" ? "Book a Seat" : "Admins"}
           </button>
         ))}
       </div>
@@ -159,12 +165,7 @@ export default function AdminDashboard() {
 /* ─── Overview tab ──────────────────────────────────────────────────────────── */
 function OverviewTab({ stats, loading }) {
   if (loading) {
-    return (
-      <div className="adm-loading">
-        <span className="adm-loading-dot" />
-        Loading analytics…
-      </div>
-    );
+    return <SplashScreen message="Loading analytics" />;
   }
   if (!stats) return null;
 
@@ -185,10 +186,10 @@ function OverviewTab({ stats, loading }) {
         initial="initial"
         animate="animate"
       >
-        <GlassCard variant="total"  icon="⬡" label="Total Seats" value={stats.total_seats}   sub="venue capacity"    />
-        <GlassCard variant="booked" icon="◈" label="Booked"     value={stats.booked_seats}   sub="confirmed tickets" />
-        <GlassCard variant="avail"  icon="◇" label="Available"  value={stats.available_seats} sub="seats remaining"   />
-        <GlassCard variant="revenue" icon="✦" label="Revenue" value={`LKR ${stats.total_revenue.toLocaleString()}`} small sub="total collected" />
+        <GlassCard variant="total"  icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>} label="Total Seats" value={stats.total_seats}   sub="venue capacity"    />
+        <GlassCard variant="booked" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>} label="Booked"     value={stats.booked_seats}   sub="confirmed tickets" />
+        <GlassCard variant="avail"  icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg>} label="Available"  value={stats.available_seats} sub="seats remaining"   />
+        <GlassCard variant="revenue" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>} label="Revenue" value={`LKR ${stats.total_revenue.toLocaleString()}`} small sub="total collected" />
       </motion.div>
 
       {/* ── Occupancy bar ── */}
@@ -340,11 +341,16 @@ function BookingsTab({
     <div>
       {/* Filter panel */}
       <div className="adm-filter-panel">
-        <p className="adm-filter-title">⊟ Filters & Search</p>
+        <p className="adm-filter-title">Filters & Search</p>
         
         {/* Search bar input */}
         <div className="adm-input-wrapper">
-          <span className="adm-input-icon">🔍</span>
+          <span className="adm-input-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </span>
           <input
             type="text"
             className="adm-input"
@@ -573,11 +579,16 @@ function AdminsTab() {
       <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
         {/* Promote Form */}
         <div className="adm-panel">
-          <p className="adm-panel-title">🛡 Promote User to Admin</p>
+          <p className="adm-panel-title">Promote User to Admin</p>
           <form onSubmit={handlePromote} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", alignItems: "center" }}>
               <div className="adm-input-wrapper" style={{ flexGrow: 1, marginBottom: 0 }}>
-                <span className="adm-input-icon">✉️</span>
+                <span className="adm-input-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="4" width="20" height="16" rx="2" />
+                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                  </svg>
+                </span>
                 <input
                   type="email"
                   className="adm-input"
@@ -597,17 +608,17 @@ function AdminsTab() {
                 whileTap={{ scale: 0.98 }}
                 transition={microSpring}
               >
-                {promoting ? "Promoting..." : "Promote Admin 🛡"}
+                {promoting ? "Promoting..." : "Promote Admin"}
               </motion.button>
             </div>
             {error && (
               <p style={{ color: "#ef4444", fontSize: "13px", fontWeight: "500", margin: "4px 0 0" }}>
-                ❌ {error}
+                {error}
               </p>
             )}
             {success && (
               <p style={{ color: "#34d399", fontSize: "13px", fontWeight: "500", margin: "4px 0 0" }}>
-                ✅ {success}
+                {success}
               </p>
             )}
           </form>
@@ -615,12 +626,9 @@ function AdminsTab() {
 
         {/* Admins List */}
         <div className="adm-panel">
-          <p className="adm-panel-title">📋 Current Admins List</p>
+          <p className="adm-panel-title">Current Admins List</p>
           {loading ? (
-            <div className="adm-loading">
-              <span className="adm-loading-dot" />
-              Loading administrators…
-            </div>
+            <SplashScreen message="Loading administrators" />
           ) : admins.length === 0 ? (
             <p style={{ fontSize: "13px", color: "rgba(180,170,210,0.35)", textAlign: "center", padding: "20px 0" }}>
               No admins found.
@@ -651,7 +659,7 @@ function AdminsTab() {
                           <td>
                             {isSuperAdmin ? (
                               <span className="adm-admin-badge" style={{ fontSize: "9.5px", padding: "2px 8px", color: "#fbbf24", borderColor: "rgba(251, 191, 36, 0.35)", background: "rgba(251, 191, 36, 0.08)" }}>
-                                Super Admin 👑
+                                Super Admin
                               </span>
                             ) : (
                               <span className="adm-admin-badge" style={{ fontSize: "9.5px", padding: "2px 8px" }}>
@@ -678,10 +686,10 @@ function AdminsTab() {
                                 whileTap={{ scale: 0.97 }}
                                 transition={microSpring}
                               >
-                                Dismiss ⛔
+                                Dismiss
                               </motion.button>
                             ) : (
-                              <span style={{ fontSize: "11.5px", color: "rgba(180, 170, 210, 0.35)", fontWeight: "500", letterSpacing: "0.02em" }}>🔒 Permanent</span>
+                              <span style={{ fontSize: "11.5px", color: "rgba(180, 170, 210, 0.35)", fontWeight: "500", letterSpacing: "0.02em" }}>Permanent</span>
                             )}
                           </td>
                         </motion.tr>
@@ -741,11 +749,16 @@ function BookSeatTab() {
   return (
     <div>
       <div className="adm-panel" style={{ maxWidth: 600, margin: "0 auto" }}>
-        <p className="adm-panel-title">📝 Admin Direct Booking</p>
+        <p className="adm-panel-title">Admin Direct Booking</p>
         <form onSubmit={handleBook} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           
           <div className="adm-input-wrapper" style={{ marginBottom: 0 }}>
-            <span className="adm-input-icon">✉️</span>
+            <span className="adm-input-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="4" width="20" height="16" rx="2" />
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+              </svg>
+            </span>
             <input
               type="email"
               className="adm-input"

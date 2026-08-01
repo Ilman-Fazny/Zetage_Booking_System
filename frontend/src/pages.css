@@ -9,10 +9,7 @@
   /* ── Root ── */
   .adm-root {
     min-height: 100svh;
-    background-color: #0D0D12;
-    background-image:
-      radial-gradient(ellipse 80% 40% at 50% 0%, rgba(109,40,217,0.10) 0%, transparent 55%),
-      radial-gradient(ellipse 40% 30% at 100% 80%, rgba(59,130,246,0.06) 0%, transparent 50%);
+    background-color: #09090b;
     font-family: 'Inter', system-ui, sans-serif;
     color: #e2d9ff;
     text-align: left;
@@ -108,11 +105,10 @@
     bottom: -1px; left: 12px; right: 12px;
     height: 2px;
     border-radius: 2px 2px 0 0;
-    background: linear-gradient(90deg, #7c3aed, #a78bfa);
+    background: #a78bfa;
     transform: scaleX(0);
     transform-origin: center;
     transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
-    box-shadow: 0 0 10px rgba(139,92,246,0.7);
   }
   .adm-tab.active {
     color: #e2d9ff;
@@ -161,26 +157,20 @@
     .adm-cards-grid { grid-template-columns: repeat(4, 1fr); }
   }
 
-  /* ── Glass card ── */
+  /* ── Solid card ── */
   .adm-glass-card {
     position: relative;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.07);
-    border-radius: 16px;
+    background: #121217;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
     padding: 18px 20px;
-    backdrop-filter: blur(12px);
     overflow: hidden;
-    transition: border-color 0.25s, transform 0.2s;
-  }
-  .adm-glass-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 15%; right: 15%; height: 1px;
-    background: linear-gradient(90deg, transparent, var(--card-glow, rgba(255,255,255,0.12)), transparent);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   }
   .adm-glass-card:hover {
-    border-color: rgba(255,255,255,0.12);
-    transform: translateY(-1px);
+    border-color: rgba(255,255,255,0.15);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.25);
   }
   .adm-card-icon {
     width: 32px; height: 32px;
@@ -230,20 +220,14 @@
 
   /* ── Section panel ── */
   .adm-panel {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 16px;
+    background: #121217;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
     padding: 20px 22px;
     margin-bottom: 16px;
-    backdrop-filter: blur(8px);
     position: relative;
     overflow: hidden;
-  }
-  .adm-panel::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 20%; right: 20%; height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(139,92,246,0.2), transparent);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   }
   .adm-panel-title {
     font-size: 11px;
@@ -284,24 +268,19 @@
   .adm-occ-fill {
     height: 100%;
     border-radius: 8px;
-    background: linear-gradient(90deg, #5b21b6, #7c3aed, #a78bfa);
+    background: #8b5cf6;
     position: relative;
     transition: width 1s cubic-bezier(0.22,1,0.36,1);
-    box-shadow:
-      0 0 10px rgba(139,92,246,0.7),
-      0 0 22px rgba(139,92,246,0.35),
-      0 0 40px rgba(109,40,217,0.2);
   }
-  /* Glow head dot */
+  /* Head dot */
   .adm-occ-fill::after {
     content: '';
     position: absolute;
-    right: -4px; top: 50%;
+    right: -2px; top: 50%;
     transform: translateY(-50%);
-    width: 12px; height: 12px;
+    width: 8px; height: 8px;
     border-radius: 50%;
-    background: #c4b5fd;
-    box-shadow: 0 0 10px rgba(196,181,253,0.9), 0 0 20px rgba(139,92,246,0.7);
+    background: #ddd6fe;
   }
   /* Track secondary grid lines */
   .adm-occ-ticks {
@@ -375,20 +354,18 @@
   .adm-bar-fill {
     height: 100%;
     border-radius: 6px;
-    background: linear-gradient(90deg, #5b21b6, #8b5cf6);
+    background: #8b5cf6;
     position: relative;
     transition: width 0.9s cubic-bezier(0.22,1,0.36,1);
-    box-shadow: 0 0 8px rgba(139,92,246,0.55), 0 0 18px rgba(109,40,217,0.25);
   }
   .adm-bar-fill::after {
     content: '';
     position: absolute;
-    right: -3px; top: 50%;
+    right: -2px; top: 50%;
     transform: translateY(-50%);
-    width: 8px; height: 8px;
+    width: 6px; height: 6px;
     border-radius: 50%;
-    background: #c4b5fd;
-    box-shadow: 0 0 6px rgba(196,181,253,0.9);
+    background: #ddd6fe;
   }
   .adm-bar-count {
     font-size: 12px;
@@ -412,11 +389,12 @@
 
   /* ── Bookings tab ── */
   .adm-filter-panel {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 16px;
+    background: #121217;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
     padding: 18px 22px;
     margin-bottom: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   }
   .adm-filter-title {
     font-size: 10px;
@@ -454,20 +432,19 @@
     margin-top: 12px;
     font-family: 'Inter', system-ui, sans-serif;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 500;
     color: #fff;
-    background: linear-gradient(135deg, #7c3aed, #5b21b6);
+    background: #7c3aed;
     border: none;
-    border-radius: 10px;
+    border-radius: 8px;
     padding: 9px 20px;
     cursor: pointer;
-    letter-spacing: 0.04em;
-    box-shadow: 0 0 16px rgba(109,40,217,0.4), 0 4px 10px rgba(109,40,217,0.3);
-    transition: transform 0.15s, box-shadow 0.15s;
+    letter-spacing: 0.02em;
+    transition: background-color 0.2s, transform 0.15s;
   }
   .adm-apply-btn:hover {
+    background: #8b5cf6;
     transform: translateY(-1px);
-    box-shadow: 0 0 24px rgba(109,40,217,0.6), 0 6px 14px rgba(109,40,217,0.4);
   }
 
   .adm-results-count {
@@ -479,10 +456,11 @@
 
   /* ── Bookings table ── */
   .adm-table-wrap {
-    background: rgba(255,255,255,0.025);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 16px;
+    background: #121217;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
     overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   }
   .adm-table-scroll { overflow-x: auto; }
   .adm-table {
@@ -571,23 +549,22 @@
   .adm-scan-btn {
     font-family: 'Inter', system-ui, sans-serif;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 500;
     color: #fff;
-    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    background: #7c3aed;
     border: none;
-    border-radius: 20px;
+    border-radius: 8px;
     padding: 6px 14px;
     cursor: pointer;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.02em;
     display: flex;
     align-items: center;
     gap: 6px;
-    box-shadow: 0 0 12px rgba(37,99,235,0.3);
-    transition: transform 0.15s, box-shadow 0.15s, background-color 0.2s;
+    transition: transform 0.15s, background-color 0.2s;
     outline: none;
   }
   .adm-scan-btn:hover {
-    box-shadow: 0 0 18px rgba(37,99,235,0.5);
+    background: #8b5cf6;
   }
   .adm-scan-btn:active {
     transform: translateY(0);
@@ -613,7 +590,7 @@
     color: #ede8ff;
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.09);
-    border-radius: 10px;
+    border-radius: 6px;
     padding: 10px 14px 10px 38px;
     outline: none;
     width: 100%;
@@ -623,8 +600,8 @@
     color: rgba(180, 170, 210, 0.35);
   }
   .adm-input:focus {
-    border-color: rgba(139, 92, 246, 0.45);
-    box-shadow: 0 0 10px rgba(139, 92, 246, 0.15);
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 1px #8b5cf6;
   }
 
   .adm-email-cell {
@@ -700,11 +677,7 @@
   /* ── Page root ── */
   .adp-root {
     min-height: 100svh;
-    background-color: #0B0F19;
-    background-image:
-      radial-gradient(ellipse 70% 45% at 50% 0%, rgba(109,40,217,0.11) 0%, transparent 55%),
-      radial-gradient(ellipse 45% 35% at 5%  100%, rgba(59,130,246,0.07) 0%, transparent 50%),
-      radial-gradient(ellipse 35% 25% at 95% 50%, rgba(236,72,153,0.05) 0%, transparent 50%);
+    background-color: #09090b;
     display: flex;
     align-items: flex-start;
     justify-content: center;
@@ -745,34 +718,13 @@
   /* ── Seat stub card ── */
   .adp-stub {
     position: relative;
-    background: linear-gradient(135deg, rgba(109,40,217,0.2) 0%, rgba(79,30,157,0.12) 50%, rgba(30,20,60,0.3) 100%);
-    border: 1px solid rgba(139,92,246,0.25);
-    border-radius: 12px;
+    background: #18181b;
+    border: 1px solid rgba(167,139,250,0.15);
+    border-radius: 10px;
     padding: 20px 22px;
     margin-bottom: 14px;
     overflow: hidden;
-    backdrop-filter: blur(12px);
-    box-shadow:
-      0 0 0 1px rgba(139,92,246,0.06),
-      0 20px 50px rgba(0,0,0,0.45),
-      inset 0 1px 0 rgba(255,255,255,0.07);
-  }
-  /* Top violet edge glow */
-  .adp-stub::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 10%; right: 10%; height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(167,139,250,0.6), transparent);
-  }
-  /* Abstract background pattern */
-  .adp-stub::after {
-    content: '';
-    position: absolute;
-    right: -30px; top: -30px;
-    width: 130px; height: 130px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%);
-    pointer-events: none;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
   }
   .adp-stub-eyebrow {
     display: flex;
