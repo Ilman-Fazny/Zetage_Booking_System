@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { fetchStats, fetchBookings, fetchAdmins, promoteUser, demoteUser, resendBookingEmail, adminBookSeats, fetchUsers, deleteBooking, deleteUser } from "../lib/admin";
+import { fetchStats, fetchBookings, fetchAdmins, promoteUser, demoteUser, resendBookingEmail, adminBookSeats, fetchUsers, deleteBooking, deleteUser, markAttendance, unmarkAttendance } from "../lib/admin";
 import { DISTRICTS } from "../lib/districts";
 import { listContainerVariants, listItemVariants, microSpring } from "../lib/motionVariants";
 import { useDocumentTitle } from "../lib/useDocumentTitle";
@@ -84,7 +84,7 @@ export default function AdminDashboard() {
           <div className="adm-topbar-divider" />
           <div>
             <button className="adm-back-btn" onClick={() => navigate("/")} style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
               Seat Map
             </button>
             <div className="adm-topbar-title">
@@ -186,10 +186,10 @@ function OverviewTab({ stats, loading }) {
         initial="initial"
         animate="animate"
       >
-        <GlassCard variant="total"  icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>} label="Total Seats" value={stats.total_seats}   sub="venue capacity"    />
-        <GlassCard variant="booked" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>} label="Booked"     value={stats.booked_seats}   sub="confirmed tickets" />
-        <GlassCard variant="avail"  icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg>} label="Available"  value={stats.available_seats} sub="seats remaining"   />
-        <GlassCard variant="revenue" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>} label="Revenue" value={`LKR ${stats.total_revenue.toLocaleString()}`} small sub="total collected" />
+        <GlassCard variant="total" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" /></svg>} label="Total Seats" value={stats.total_seats} sub="venue capacity" />
+        <GlassCard variant="booked" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>} label="Booked" value={stats.booked_seats} sub="confirmed tickets" />
+        <GlassCard variant="avail" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /></svg>} label="Available" value={stats.available_seats} sub="seats remaining" />
+        <GlassCard variant="revenue" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>} label="Revenue" value={`LKR ${stats.total_revenue.toLocaleString()}`} small sub="total collected" />
       </motion.div>
 
       {/* ── Occupancy bar ── */}
@@ -337,18 +337,71 @@ function BookingsTab({
     }
   };
 
+  const onMarkAttendance = async (bookingRef) => {
+    try {
+      await markAttendance(bookingRef);
+      onApplyFilters();
+    } catch (err) {
+      const msg = err.response?.data?.detail || "Failed to mark attendance.";
+      alert(`Error: ${msg}`);
+    }
+  };
+
+  const onUnmarkAttendance = async (bookingRef) => {
+    try {
+      await unmarkAttendance(bookingRef);
+      onApplyFilters();
+    } catch (err) {
+      const msg = err.response?.data?.detail || "Failed to undo attendance.";
+      alert(`Error: ${msg}`);
+    }
+  };
+
+  const downloadCSV = () => {
+    if (filteredBookings.length === 0) {
+      alert("No data to download.");
+      return;
+    }
+    const headers = ["Ref", "Name", "Email", "Seat", "Section", "District", "Sasnaka Member", "Status", "Email Sent", "Attendance", "Date"];
+    const rows = filteredBookings.map(b => [
+      b.booking_ref,
+      `"${b.attendee_name || ""}"`,
+      b.user_email,
+      b.seat_code,
+      b.section,
+      b.district,
+      b.is_sasnaka_member ? "Yes" : "No",
+      b.status,
+      b.email_sent ? "Yes" : "No",
+      b.is_entered ? "Yes" : "No",
+      new Date(b.created_at).toLocaleDateString("en-GB")
+    ]);
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(e => e.join(","))
+    ].join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", "zentage_bookings.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div>
       {/* Filter panel */}
       <div className="adm-filter-panel">
         <p className="adm-filter-title">Filters & Search</p>
-        
+
         {/* Search bar input */}
         <div className="adm-input-wrapper">
           <span className="adm-input-icon">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8"/>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
           </span>
           <input
@@ -387,15 +440,31 @@ function BookingsTab({
             {SECTIONS.map((s) => <option key={s}>{s}</option>)}
           </select>
         </div>
-        <motion.button
-          className="adm-apply-btn"
-          onClick={onApplyFilters}
-          whileHover={{ scale: 1.03, y: -1 }}
-          whileTap={{ scale: 0.97 }}
-          transition={microSpring}
-        >
-          Apply Filters →
-        </motion.button>
+        <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "center", marginTop: "12px" }}>
+          <motion.button
+            className="adm-csv-btn"
+            onClick={downloadCSV}
+            whileHover={{ scale: 1.03, y: -1 }}
+            whileTap={{ scale: 0.97 }}
+            transition={microSpring}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Download CSV
+          </motion.button>
+          <motion.button
+            className="adm-apply-btn"
+            onClick={onApplyFilters}
+            whileHover={{ scale: 1.03, y: -1 }}
+            whileTap={{ scale: 0.97 }}
+            transition={microSpring}
+          >
+            Apply Filters →
+          </motion.button>
+        </div>
       </div>
 
       {/* Results count */}
@@ -445,8 +514,8 @@ function BookingsTab({
                     </td>
                     <td>
                       {b.status === "confirmed" || b.status === "CONFIRMED"
-                        ? <span className="adm-badge-member" style={{borderColor: "rgba(52,211,153,0.2)", color: "#34d399"}}>Confirmed</span>
-                        : <span className="adm-badge-no" style={{borderColor: "rgba(251,146,60,0.2)", color: "#fb923c"}}>Pending</span>}
+                        ? <span className="adm-badge-member" style={{ borderColor: "rgba(52,211,153,0.2)", color: "#34d399" }}>Confirmed</span>
+                        : <span className="adm-badge-no" style={{ borderColor: "rgba(251,146,60,0.2)", color: "#fb923c" }}>Pending</span>}
                     </td>
                     <td>
                       <div className="adm-email-cell">
@@ -470,7 +539,7 @@ function BookingsTab({
                     </td>
                     <td>
                       {b.is_entered ? (
-                        <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "2px", alignItems: "flex-start" }}>
                           <span className="adm-badge-member">Checked In</span>
                           {b.entered_at && (
                             <span style={{ fontSize: "10px", color: "rgba(52, 211, 153, 0.7)" }}>
@@ -479,9 +548,26 @@ function BookingsTab({
                               })}
                             </span>
                           )}
+                          <button
+                            className="adm-btn-checkin"
+                            style={{ background: "transparent", color: "#f43f5e", borderColor: "rgba(244, 63, 94, 0.2)" }}
+                            onClick={() => onUnmarkAttendance(b.booking_ref)}
+                            title="Undo check-in"
+                          >
+                            Undo
+                          </button>
                         </div>
                       ) : (
-                        <span className="adm-badge-no" style={{ color: "rgba(180, 170, 210, 0.45)", borderColor: "rgba(180, 170, 210, 0.15)", background: "rgba(180, 170, 210, 0.02)" }}>Pending</span>
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+                          <span className="adm-badge-no" style={{ color: "rgba(180, 170, 210, 0.45)", borderColor: "rgba(180, 170, 210, 0.15)", background: "rgba(180, 170, 210, 0.02)" }}>Pending</span>
+                          <button
+                            className="adm-btn-checkin"
+                            onClick={() => onMarkAttendance(b.booking_ref)}
+                            title="Manually check in this attendee"
+                          >
+                            Mark Present
+                          </button>
+                        </div>
                       )}
                     </td>
                     <td className="adm-td-date">
@@ -751,7 +837,7 @@ function BookSeatTab() {
       <div className="adm-panel" style={{ maxWidth: 600, margin: "0 auto" }}>
         <p className="adm-panel-title">Admin Direct Booking</p>
         <form onSubmit={handleBook} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-          
+
           <div className="adm-input-wrapper" style={{ marginBottom: 0 }}>
             <span className="adm-input-icon">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -771,7 +857,7 @@ function BookSeatTab() {
           </div>
 
           <div className="adm-input-wrapper" style={{ marginBottom: 0 }}>
-            <span className="adm-input-icon"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{display: "inline-block", verticalAlign: "middle"}}><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg></span>
+            <span className="adm-input-icon"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block", verticalAlign: "middle" }}><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z" /><path d="M13 5v2" /><path d="M13 17v2" /><path d="M13 11v2" /></svg></span>
             <input
               type="text"
               className="adm-input"
@@ -814,7 +900,7 @@ function BookSeatTab() {
             whileTap={{ scale: 0.98 }}
             transition={microSpring}
           >
-            {submitting ? "Booking..." : <>Confirm Free Booking <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{display: "inline-block", verticalAlign: "middle"}}><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg></>}
+            {submitting ? "Booking..." : <>Confirm Free Booking <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block", verticalAlign: "middle" }}><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z" /><path d="M13 5v2" /><path d="M13 17v2" /><path d="M13 11v2" /></svg></>}
           </motion.button>
 
           {error && (
@@ -916,7 +1002,7 @@ function UsersTab() {
       {/* Filter panel */}
       <div className="adm-filter-panel">
         <p className="adm-filter-title">👥 User Filters & Search</p>
-        
+
         {/* Search bar input */}
         <div className="adm-input-wrapper">
           <span className="adm-input-icon">🔍</span>
@@ -939,7 +1025,7 @@ function UsersTab() {
             <option value="yes">Has booking</option>
             <option value="no">No booking</option>
           </select>
-          
+
           <select
             value={filterSection}
             onChange={(e) => setFilterSection(e.target.value)}

@@ -65,3 +65,87 @@ def scan_entrance(booking_ref: str, db: Session) -> ScanResponse:
         section=seat.section.value,
         attended_at=seat.attended_at,
     )
+
+def unscan_entrance(booking_ref: str, db: Session) -> ScanResponse:
+    # Normalize input reference
+    booking_ref_normalized = booking_ref.strip().upper()
+
+    stmt = (
+        select(Seat)
+        .join(Booking, Booking.seat_id == Seat.id)
+        .where(Booking.booking_ref == booking_ref_normalized)
+        .where(Booking.status == BookingStatus.CONFIRMED)
+        .with_for_update()
+    )
+    seat = db.execute(stmt).scalar_one_or_none()
+
+    if not seat:
+        raise HTTPException(status_code=404, detail="Invalid QR code — booking not found")
+
+    if not seat.attended:
+        raise HTTPException(
+            status_code=400,
+            detail="Seat is not marked as attended"
+        )
+
+    # Revert attendance on seat and booking
+    seat.attended = False
+    seat.attended_at = None
+    booking = seat.booking
+    if booking:
+        booking.is_entered = False
+        booking.entered_at = None
+    db.commit()
+    db.refresh(seat)
+    if booking:
+        db.refresh(booking)
+
+    return ScanResponse(
+        success=True,
+        message="Check-in reverted successfully",
+        seat_code=seat.seat_code,
+        section=seat.section.value,
+        attended_at=None,
+    )
+
+def unscan_entrance(booking_ref: str, db: Session) -> ScanResponse:
+    # Normalize input reference
+    booking_ref_normalized = booking_ref.strip().upper()
+
+    stmt = (
+        select(Seat)
+        .join(Booking, Booking.seat_id == Seat.id)
+        .where(Booking.booking_ref == booking_ref_normalized)
+        .where(Booking.status == BookingStatus.CONFIRMED)
+        .with_for_update()
+    )
+    seat = db.execute(stmt).scalar_one_or_none()
+
+    if not seat:
+        raise HTTPException(status_code=404, detail="Invalid QR code — booking not found")
+
+    if not seat.attended:
+        raise HTTPException(
+            status_code=400,
+            detail="Seat is not marked as attended"
+        )
+
+    # Revert attendance on seat and booking
+    seat.attended = False
+    seat.attended_at = None
+    booking = seat.booking
+    if booking:
+        booking.is_entered = False
+        booking.entered_at = None
+    db.commit()
+    db.refresh(seat)
+    if booking:
+        db.refresh(booking)
+
+    return ScanResponse(
+        success=True,
+        message="Check-in reverted successfully",
+        seat_code=seat.seat_code,
+        section=seat.section.value,
+        attended_at=None,
+    )

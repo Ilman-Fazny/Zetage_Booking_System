@@ -108,7 +108,7 @@ def list_bookings(
     if section:
         query = query.filter(Seat.section == section)
 
-    return query.order_by(Booking.created_at.desc()).all()
+    return query.order_by(Booking.created_at.desc(), Booking.id.asc()).all()
 
 def get_booking_stats(db: Session) -> dict:
     total_seats = db.query(Seat).count()

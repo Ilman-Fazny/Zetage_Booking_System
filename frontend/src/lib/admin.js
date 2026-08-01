@@ -64,3 +64,13 @@ export async function deleteUser(userId) {
   const { data } = await api.delete(`/admin/users/${userId}`);
   return data;
 }
+
+export async function markAttendance(bookingRef) {
+  const { data } = await api.post("/admin/scan", { booking_ref: bookingRef });
+  return data;
+}
+
+export async function unmarkAttendance(bookingRef) {
+  const { data } = await api.post("/admin/unscan", { booking_ref: bookingRef });
+  return data;
+}

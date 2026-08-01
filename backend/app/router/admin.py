@@ -11,7 +11,7 @@ from app.schemas.user import UserOut, PromoteRequest, AdminUserSummaryOut, Admin
 from app.models.user import User
 from app.models.booking import Booking, BookingStatus
 from app.models.seat import Seat, SeatStatus
-from app.services.admin_service import scan_entrance
+from app.services.admin_service import scan_entrance, unscan_entrance
 from app.services.email_service import send_ticket_email_raise, send_ticket_email
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -77,6 +77,30 @@ def scan_qr_entrance(
     Requires admin JWT.
     """
     return scan_entrance(payload.booking_ref, db)
+
+@router.post("/unscan", response_model=ScanResponse)
+def unscan_qr_entrance(
+    payload: ScanRequest,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_admin_user),
+):
+    """
+    Unmark a seat as attended (revert check-in).
+    Requires admin JWT.
+    """
+    return unscan_entrance(payload.booking_ref, db)
+
+@router.post("/unscan", response_model=ScanResponse)
+def unscan_qr_entrance(
+    payload: ScanRequest,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_admin_user),
+):
+    """
+    Unmark a seat as attended (revert check-in).
+    Requires admin JWT.
+    """
+    return unscan_entrance(payload.booking_ref, db)
 
 
 @router.get("/admins", response_model=list[UserOut])
