@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { fadeUpVariants, microSpring } from "../lib/motionVariants";
 import { useDocumentTitle } from "../lib/useDocumentTitle";
 import TicketCard from "../components/shared/TicketCard";
-import SplashScreen from "../components/shared/SplashScreen";
+import TicketSkeleton from "../components/shared/TicketSkeleton";
 
 /* ─── Injected scoped styles ─── */
 
@@ -35,13 +35,7 @@ export default function TicketPage() {
     }
   }, [loading, navigate]);
 
-  if (loading) {
-    return <SplashScreen message="Loading your tickets" />;
-  }
 
-  if (!bookings || bookings.length === 0) {
-    return <Navigate to="/" replace />;
-  }
 
   return (
     <div className="tp-root">
@@ -62,9 +56,18 @@ export default function TicketPage() {
 
         {/* ── Ticket cards scroll list ────────────────── */}
         <div className="tp-tickets-list" style={{ maxHeight: "65vh", overflowY: "auto", paddingRight: 4, paddingBottom: 16 }}>
-          {bookings.map((booking) => (
-            <TicketCard key={booking.booking_ref} booking={booking} />
-          ))}
+          {loading ? (
+            <>
+              <TicketSkeleton />
+              <TicketSkeleton />
+            </>
+          ) : !bookings || bookings.length === 0 ? (
+            <Navigate to="/" replace />
+          ) : (
+            bookings.map((booking) => (
+              <TicketCard key={booking.booking_ref} booking={booking} />
+            ))
+          )}
         </div>
 
         {/* ── Actions ─────────────────────────────────── */}

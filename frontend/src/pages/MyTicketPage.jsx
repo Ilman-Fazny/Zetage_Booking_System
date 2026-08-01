@@ -5,7 +5,7 @@ import { fetchMyBooking } from "../lib/bookings";
 import { popVariants, fadeUpVariants, microSpring } from "../lib/motionVariants";
 import { useDocumentTitle } from "../lib/useDocumentTitle";
 import TicketCard from "../components/shared/TicketCard";
-import SplashScreen from "../components/shared/SplashScreen";
+import TicketSkeleton from "../components/shared/TicketSkeleton";
 
 const EVENT = {
   name: "Zentage Talent Show",
@@ -41,73 +41,7 @@ export default function MyTicketPage() {
       .finally(() => setLoading(false));
   }, [navigate]);
 
-  if (loading) {
-    return <SplashScreen message="Loading your tickets" />;
-  }
 
-  if (error) {
-    return (
-      <div className="tp-root">
-        <div style={{ textAlign: "center", maxWidth: 320 }}>
-          <p style={{ color: "#f87171", fontSize: "14px", marginBottom: "16px" }}>{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            style={{
-              background: "rgba(255,255,255,0.06)",
-              border: "1px solid rgba(255,255,255,0.12)",
-              borderRadius: "8px",
-              padding: "8px 16px",
-              color: "#ede8ff",
-              fontSize: "13px",
-              cursor: "pointer"
-            }}
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (!bookings || bookings.length === 0) {
-    return (
-      <div className="tp-root" style={{ alignItems: "center" }}>
-        <div className="tp-wrapper">
-          <div className="tp-card" style={{ padding: "40px 24px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: "20px" }}>
-            <div className="tp-check-ring" style={{ marginBottom: 0 }}>
-              <span style={{ fontSize: "20px" }}><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{display: "inline-block", verticalAlign: "middle"}}><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg></span>
-            </div>
-            <div style={{ fontSize: "18px", fontWeight: "600", color: "#ede8ff" }}>
-              No tickets booked yet
-            </div>
-            <Link
-              to="/"
-              style={{
-                fontSize: "14px",
-                color: "#a78bfa",
-                textDecoration: "none",
-                fontWeight: "600",
-                letterSpacing: "0.02em",
-                borderBottom: "1px solid rgba(167, 139, 250, 0.3)",
-                paddingBottom: 2,
-                transition: "all 0.2s"
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.color = "#c084fc";
-                e.currentTarget.style.borderColor = "rgba(192, 132, 252, 0.5)";
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.color = "#a78bfa";
-                e.currentTarget.style.borderColor = "rgba(167, 139, 250, 0.3)";
-              }}
-            >
-              Browse seats →
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="tp-root">
@@ -123,17 +57,76 @@ export default function MyTicketPage() {
           </p>
         </div>
 
-        {bookings.some(b => b.status === "pending" || b.status === "PENDING") && (
+        {!loading && bookings.some(b => b.status === "pending" || b.status === "PENDING") && (
           <div style={{ background: "rgba(251,146,60,0.1)", border: "1px solid rgba(251,146,60,0.3)", borderRadius: "8px", padding: "12px", marginBottom: "20px", textAlign: "center", color: "#fb923c", fontSize: "13px", fontWeight: "500" }}>
             Your seat is held for 1 minute - complete payment quickly.
           </div>
         )}
 
-        {/* ── Ticket cards scroll list ────────────────── */}
-        <div className="tp-tickets-list" style={{ maxHeight: "65vh", overflowY: "auto", paddingRight: 4, paddingBottom: 16 }}>
-          {bookings.map((booking) => (
-            <TicketCard key={booking.booking_ref} booking={booking} />
-          ))}
+        {/* ── Content ── */}
+        <div className="tp-wrapper" style={{ marginTop: 24 }}>
+          {loading ? (
+            <>
+              <TicketSkeleton />
+              <TicketSkeleton />
+            </>
+          ) : error ? (
+            <div style={{ textAlign: "center", maxWidth: 320, margin: "0 auto" }}>
+              <p style={{ color: "#f87171", fontSize: "14px", marginBottom: "16px" }}>{error}</p>
+              <button
+                onClick={() => window.location.reload()}
+                style={{
+                  background: "rgba(255,255,255,0.06)",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  borderRadius: "8px",
+                  padding: "8px 16px",
+                  color: "#ede8ff",
+                  fontSize: "13px",
+                  cursor: "pointer"
+                }}
+              >
+                Retry
+              </button>
+            </div>
+          ) : !bookings || bookings.length === 0 ? (
+            <div className="tp-card" style={{ padding: "40px 24px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: "20px" }}>
+              <div className="tp-check-ring" style={{ marginBottom: 0 }}>
+                <span style={{ fontSize: "20px" }}><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{display: "inline-block", verticalAlign: "middle"}}><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg></span>
+              </div>
+              <div style={{ fontSize: "18px", fontWeight: "600", color: "#ede8ff" }}>
+                No tickets booked yet
+              </div>
+              <Link
+                to="/"
+                style={{
+                  fontSize: "14px",
+                  color: "#a78bfa",
+                  textDecoration: "none",
+                  fontWeight: "600",
+                  letterSpacing: "0.02em",
+                  borderBottom: "1px solid rgba(167, 139, 250, 0.3)",
+                  paddingBottom: 2,
+                  transition: "all 0.2s"
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.color = "#c084fc";
+                  e.currentTarget.style.borderColor = "rgba(192, 132, 252, 0.5)";
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.color = "#a78bfa";
+                  e.currentTarget.style.borderColor = "rgba(167, 139, 250, 0.3)";
+                }}
+              >
+                Book a seat →
+              </Link>
+            </div>
+          ) : (
+            <div className="tp-tickets-list" style={{ maxHeight: "65vh", overflowY: "auto", paddingRight: 4, paddingBottom: 16 }}>
+              {bookings.map((booking) => (
+                <TicketCard key={booking.booking_ref} booking={booking} />
+              ))}
+            </div>
+          )}
         </div>
 
         {/* ── Actions ─────────────────────────────────── */}

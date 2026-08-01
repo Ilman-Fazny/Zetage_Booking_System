@@ -7,7 +7,8 @@ import { listContainerVariants, listItemVariants, microSpring } from "../lib/mot
 import { useDocumentTitle } from "../lib/useDocumentTitle";
 import logo from "../assets/zentage-TS.png";
 import QrScannerModal from "../components/QrScannerModal";
-import SplashScreen from "../components/shared/SplashScreen";
+
+import { StatsSkeleton, TableSkeleton } from "../components/shared/AdminSkeletons";
 
 /* ─────────────────────────────────────────────────────────────────────────────
    Scoped styles - self-contained, no Tailwind conflicts
@@ -165,7 +166,7 @@ export default function AdminDashboard() {
 /* ─── Overview tab ──────────────────────────────────────────────────────────── */
 function OverviewTab({ stats, loading }) {
   if (loading) {
-    return <SplashScreen message="Loading analytics" />;
+    return <StatsSkeleton />;
   }
   if (!stats) return null;
 
@@ -475,7 +476,9 @@ function BookingsTab({
       </p>
 
       {/* Table */}
-      {!loading && filteredBookings.length === 0 ? (
+      {loading ? (
+        <TableSkeleton rows={8} columns={11} />
+      ) : filteredBookings.length === 0 ? (
         <div className="adm-table-wrap">
           <p className="adm-no-results">
             {bookings.length === 0
@@ -714,7 +717,7 @@ function AdminsTab() {
         <div className="adm-panel">
           <p className="adm-panel-title">Current Admins List</p>
           {loading ? (
-            <SplashScreen message="Loading administrators" />
+            <TableSkeleton rows={4} columns={5} />
           ) : admins.length === 0 ? (
             <p style={{ fontSize: "13px", color: "rgba(180,170,210,0.35)", textAlign: "center", padding: "20px 0" }}>
               No admins found.
@@ -1045,7 +1048,9 @@ function UsersTab() {
       </p>
 
       {/* Table */}
-      {!loading && filteredUsers.length === 0 ? (
+      {loading ? (
+        <TableSkeleton rows={8} columns={6} />
+      ) : filteredUsers.length === 0 ? (
         <div className="adm-table-wrap">
           <p className="adm-no-results">
             {users.length === 0

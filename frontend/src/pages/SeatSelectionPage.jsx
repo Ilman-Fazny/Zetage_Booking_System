@@ -8,7 +8,7 @@ import TheatreMap from "../components/seat-map/TheatreMap";
 import SeatLegend from "../components/seat-map/SeatLegend";
 import SeatSummaryBar from "../components/seat-map/SeatSummaryBar";
 import logo from "../assets/zentage-TS.png";
-import SplashScreen from "../components/shared/SplashScreen";
+import SeatMapSkeleton from "../components/shared/SeatMapSkeleton";
 
 
 /* Scoped styles injected once */
@@ -28,12 +28,7 @@ export default function SeatSelectionPage() {
     navigate("/details", { state: { seats: selectedSeats } });
   }
 
-  if (loading) {
-    return <SplashScreen message="Loading seat map" />;
-  }
-  if (error) {
-    return <div className="ssp-error">{error}</div>;
-  }
+
 
   return (
     <div className="ssp-root">
@@ -147,18 +142,26 @@ export default function SeatSelectionPage() {
           <SeatLegend />
         </div>
 
-        {/* ── Theatre Map ─────────────────────────────────────── */}
-        <TheatreMap
-          sections={sections}
-          selectedSeats={selectedSeats}
-          onSelect={selectSeat}
-        />
+        {/* ── Theatre Map or Loading State ──────────────────────── */}
+        {loading ? (
+          <SeatMapSkeleton />
+        ) : error ? (
+          <div className="ssp-error">{error}</div>
+        ) : (
+          <>
+            <TheatreMap
+              sections={sections}
+              selectedSeats={selectedSeats}
+              onSelect={selectSeat}
+            />
 
-        {/* ── Floating Summary Drawer ──────────────────────────── */}
-        <SeatSummaryBar
-          selectedSeats={selectedSeats}
-          onContinue={handleContinue}
-        />
+            {/* ── Floating Summary Drawer ──────────────────────────── */}
+            <SeatSummaryBar
+              selectedSeats={selectedSeats}
+              onContinue={handleContinue}
+            />
+          </>
+        )}
 
         {/* ── Emergency Support Contact ─────────────── */}
         <div style={{

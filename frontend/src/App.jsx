@@ -1,5 +1,5 @@
 // src/App.jsx
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import ProtectedRoute from "./components/shared/ProtectedRoute";
@@ -21,7 +21,7 @@ const PAGE_TRANSITION = {
   animate:    { opacity: 1, y: 0  },
   exit:       { opacity: 0, y: -8 },
   transition: {
-    duration: 0.48,
+    duration: 0.3,
     ease: [0.16, 1, 0.3, 1],
   },
 };
@@ -30,11 +30,40 @@ const PAGE_TRANSITION = {
 function PageShell({ children }) {
   return (
     <motion.div
-      style={{ width: "100%", willChange: "opacity, transform" }}
+      style={{ width: "100%", willChange: "opacity, transform", gridArea: "1 / 1" }}
       {...PAGE_TRANSITION}
     >
       {children}
     </motion.div>
+  );
+}
+
+function GoldenRouteProgress() {
+  const location = useLocation();
+  const [key, setKey] = useState(0);
+
+  // Trigger animation on route change
+  useEffect(() => {
+    setKey(k => k + 1);
+  }, [location.pathname]);
+
+  return (
+    <motion.div
+      key={key}
+      initial={{ width: "0%", opacity: 1 }}
+      animate={{ width: "100%", opacity: 0 }}
+      transition={{ duration: 0.8, ease: "easeOut" }}
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        height: "3px",
+        background: "linear-gradient(90deg, transparent, #fbbf24, #fef08a, #fbbf24)",
+        boxShadow: "0 0 12px rgba(251, 191, 36, 0.8), 0 0 4px rgba(254, 240, 138, 0.8)",
+        zIndex: 99999,
+        pointerEvents: "none"
+      }}
+    />
   );
 }
 
@@ -60,14 +89,17 @@ export default function App() {
         )}
       </AnimatePresence>
 
+      {/* ── Golden Progress Bar ──────────────────────────────────────────── */}
+      <GoldenRouteProgress />
+
       {/* ── Main App (mounts immediately, revealed after splash exits) ───── */}
       <div
         className="flex flex-col min-h-screen w-full"
         style={{ display: splashDone ? "flex" : "none" }}
       >
-        <div className="flex-grow">
-          <AnimatePresence mode="wait" initial={false}>
-            <Routes location={location} key={location.key}>
+        <div className="flex-grow" style={{ display: "grid" }}>
+          <AnimatePresence initial={false}>
+            <Routes location={location} key={location.pathname}>
               <Route
                 path="/login"
                 element={<PageShell><LoginPage /></PageShell>}
