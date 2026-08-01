@@ -8,6 +8,7 @@ import TheatreMap from "../components/seat-map/TheatreMap";
 import SeatLegend from "../components/seat-map/SeatLegend";
 import SeatSummaryBar from "../components/seat-map/SeatSummaryBar";
 import logo from "../assets/zentage-TS.png";
+import SplashScreen from "../components/shared/SplashScreen";
 
 
 /* Scoped styles injected once */
@@ -28,19 +29,7 @@ export default function SeatSelectionPage() {
   }
 
   if (loading) {
-    return (
-      <div className="ssp-loading">
-        <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <span style={{
-            width: 8, height: 8, borderRadius: "50%",
-            background: "rgba(139,92,246,0.8)",
-            animation: "ssp-pulse 1.2s ease-in-out infinite",
-            display: "inline-block",
-          }} />
-          Loading seat map…
-        </span>
-      </div>
-    );
+    return <SplashScreen message="Loading seat map" />;
   }
   if (error) {
     return <div className="ssp-error">{error}</div>;

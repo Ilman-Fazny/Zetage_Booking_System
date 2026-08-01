@@ -194,7 +194,7 @@ const SPLASH_CSS = `
   /* ── Progress bar ── */
   .splash-progress-wrap {
     margin-top: 36px;
-    width: 180px;
+    width: 220px;
     height: 2px;
     background: rgba(255,255,255,0.06);
     border-radius: 2px;
@@ -202,15 +202,17 @@ const SPLASH_CSS = `
     position: relative;
   }
   .splash-progress-fill {
-    height: 100%;
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 40%;
     border-radius: 2px;
-    background: linear-gradient(90deg, #92700a, #f0d060, #c9a220);
-    box-shadow: 0 0 8px rgba(202,162,23,0.7), 0 0 16px rgba(202,162,23,0.3);
-    animation: splash-bar 1.8s cubic-bezier(0.22,1,0.36,1) forwards;
+    background: linear-gradient(90deg, transparent, #eab308, #ca8a04, transparent);
+    box-shadow: 0 0 12px rgba(234,179,8,0.6);
+    animation: splash-indeterminate 1.6s ease-in-out infinite alternate;
   }
-  @keyframes splash-bar {
-    from { width: 0%; }
-    to   { width: 100%; }
+  @keyframes splash-indeterminate {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(350%); }
   }
 
   /* ── Tagline under bar ── */
