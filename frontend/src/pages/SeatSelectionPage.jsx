@@ -1,5 +1,5 @@
 // src/pages/SeatSelectionPage.jsx
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useSeatMap } from "../lib/useSeatMap";
 import { useAuth } from "../context/AuthContext";
@@ -9,6 +9,7 @@ import SeatLegend from "../components/seat-map/SeatLegend";
 import SeatSummaryBar from "../components/seat-map/SeatSummaryBar";
 import logo from "../assets/zentage-TS.png";
 import SeatMapSkeleton from "../components/shared/SeatMapSkeleton";
+import { motion } from "framer-motion";
 
 
 /* Scoped styles injected once */
@@ -22,11 +23,16 @@ export default function SeatSelectionPage() {
   const { sections, selectedSeats, selectSeat, loading, error } = useSeatMap();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const bottomRef = useRef(null);
 
   function handleContinue() {
     if (!selectedSeats.length) return;
     navigate("/details", { state: { seats: selectedSeats } });
   }
+
+  const scrollToBottom = () => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
 
 
@@ -160,6 +166,37 @@ export default function SeatSelectionPage() {
               selectedSeats={selectedSeats}
               onContinue={handleContinue}
             />
+
+            {/* Floating Scroll Down button to bypass SVG map on mobile */}
+            <motion.button
+              onClick={scrollToBottom}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              style={{
+                position: "fixed",
+                bottom: "85px",
+                right: "20px",
+                width: "46px",
+                height: "46px",
+                borderRadius: "50%",
+                background: "linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)",
+                border: "1px solid rgba(255, 255, 255, 0.15)",
+                boxShadow: "0 8px 30px rgba(109, 40, 217, 0.45), 0 0 10px rgba(109, 40, 217, 0.2)",
+                color: "#fff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                zIndex: 99,
+                outline: "none",
+              }}
+              title="Scroll to bottom"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <polyline points="19 12 12 19 5 12"></polyline>
+              </svg>
+            </motion.button>
           </>
         )}
 
@@ -173,6 +210,7 @@ export default function SeatSelectionPage() {
         }}>
           Emergency support: <a href="tel:+94776702154" style={{ color: "rgba(248, 113, 113, 0.6)", textDecoration: "none", fontWeight: "500" }}>0776 702 154</a> (Ilman Fazny - Talent Show Co.)
         </div>
+        <div ref={bottomRef} style={{ height: "1px" }} />
       </div>
     </div>
   );
