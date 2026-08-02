@@ -3,5 +3,5 @@ export const DISTRICTS = [
   "Galle", "Matara", "Hambantota", "Jaffna", "Kilinochchi", "Mannar",
   "Vavuniya", "Mullaitivu", "Batticaloa", "Ampara", "Trincomalee",
   "Kurunegala", "Puttalam", "Anuradhapura", "Polonnaruwa", "Badulla",
-  "Moneragala", "Ratnapura", "Kegalle",
+  "Moneragala", "Ratnapura", "Kegalle", "Invitee"
 ];
