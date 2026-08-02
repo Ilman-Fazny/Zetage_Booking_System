@@ -42,6 +42,13 @@ class Settings(BaseSettings):
     EVENT_DATE: str = "September 6, 2026"
     EVENT_VENUE: str = "Elphinstone Theatre, Maradana"
 
+    @field_validator("database_url", mode="before")
+    @classmethod
+    def fix_postgres_scheme(cls, v: str) -> str:
+        if isinstance(v, str) and v.startswith("postgres://"):
+            return v.replace("postgres://", "postgresql://", 1)
+        return v
+
     @field_validator("secret_key")
     @classmethod
     def secret_key_must_be_strong(cls, v: str) -> str:
