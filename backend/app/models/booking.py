@@ -14,10 +14,6 @@ class BookingStatus(str, enum.Enum):
 
 class Booking(Base):
     __tablename__ = "bookings"
-    __table_args__ = (
-        # one booking per seat, enforced at DB level
-        UniqueConstraint("seat_id", name="uq_one_booking_per_seat"),
-    )
 
     id                 = Column(Integer, primary_key=True, index=True)
     booking_ref        = Column(String, unique=True, index=True,
