@@ -278,12 +278,6 @@ export default function QrScannerModal({ onClose }) {
           } catch (err) {
             const detail = err.response?.data?.detail || "Scan failed";
             setResult({ success: false, message: detail });
-          } finally {
-            // Resume after short delay to allow next scan
-            setTimeout(() => {
-              didScan.current = false;
-              html5QrCode.resume();
-            }, 1200);
           }
         }, 200, { leading: true, trailing: false }),
         () => {} // suppress verbose camera frame-processing logs
@@ -320,8 +314,24 @@ export default function QrScannerModal({ onClose }) {
     };
   }, []);
 
-  const handleScanAgain = () => {
-    startScanner();
+  const handleScanAgain = async () => {
+    setError(null);
+    setResult(null);
+    setScanning(true);
+    if (scannerRef.current) {
+      try {
+        await scannerRef.current.resume();
+        // Grace period before enabling scan to allow moving scanner away
+        setTimeout(() => {
+          didScan.current = false;
+        }, 600);
+      } catch (err) {
+        console.error("Failed to resume scanner, restarting:", err);
+        startScanner();
+      }
+    } else {
+      startScanner();
+    }
   };
 
   return (
