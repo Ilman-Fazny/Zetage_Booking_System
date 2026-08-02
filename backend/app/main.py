@@ -36,7 +36,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
 
 async def release_expired_holds():
-    """Runs every 30 seconds. Releases seats held > 1 minute with no payment."""
+    """Runs every 30 seconds. Releases seats held > 10 minutes with no payment."""
     while True:
         try:
             await asyncio.sleep(30)  # 30 seconds

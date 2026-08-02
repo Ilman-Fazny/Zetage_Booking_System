@@ -22,6 +22,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [fieldsKey, setFieldsKey] = useState(0); // re-triggers slide animation on tab switch
@@ -35,6 +36,7 @@ export default function LoginPage() {
     if (next === mode) return;
     setMode(next);
     setError("");
+    setSuccess("");
     setShowPassword(false);
     setFieldsKey((k) => k + 1);
   }
@@ -47,13 +49,20 @@ export default function LoginPage() {
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
+    setSuccess("");
     setLoading(true);
     try {
-      const data =
-        mode === "login"
-          ? await loginWithPassword(email, password)
-          : await registerWithPassword(email, password, name);
-      handleSuccess(data);
+      if (mode === "login") {
+        const data = await loginWithPassword(email, password);
+        handleSuccess(data);
+      } else {
+        await registerWithPassword(email, password, name);
+        setSuccess("Account created successfully! Please log in.");
+        setMode("login");
+        setPassword("");
+        setName("");
+        setFieldsKey((k) => k + 1);
+      }
     } catch (err) {
       setError(err.response?.data?.detail || "Something went wrong. Please try again.");
     } finally {
@@ -63,6 +72,7 @@ export default function LoginPage() {
 
   async function handleGoogleCredential(credential) {
     setError("");
+    setSuccess("");
     try {
       const data = await loginWithGoogle(credential);
       handleSuccess(data);
@@ -196,6 +206,7 @@ export default function LoginPage() {
                 </button>
               </div>
 
+              {success && <p className="lp-success">{success}</p>}
               {error && <p className="lp-error">{error}</p>}
 
               <MotionButton
