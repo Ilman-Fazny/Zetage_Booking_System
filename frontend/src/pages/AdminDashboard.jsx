@@ -58,8 +58,8 @@ export default function AdminDashboard() {
     }
   }, [tab, loadStats]);
 
-  const loadBookings = useCallback(async () => {
-    setLoadingBookings(true);
+  const loadBookings = useCallback(async (isSilent = false) => {
+    if (!isSilent) setLoadingBookings(true);
     try {
       const data = await fetchBookings({
         district: filterDistrict || undefined,
@@ -68,12 +68,16 @@ export default function AdminDashboard() {
       });
       setBookings(data);
     } finally {
-      setLoadingBookings(false);
+      if (!isSilent) setLoadingBookings(false);
     }
   }, [filterDistrict, filterSasnaka, filterSection]);
 
   useEffect(() => {
-    if (tab === "bookings") loadBookings();
+    if (tab === "bookings") {
+      loadBookings();
+      const interval = setInterval(() => loadBookings(true), 5000);
+      return () => clearInterval(interval);
+    }
   }, [tab, loadBookings]);
 
   return (
@@ -331,7 +335,7 @@ function BookingsTab({
     try {
       await resendBookingEmail(bookingId);
       alert(`Email resent successfully to ${email}!`);
-      onApplyFilters();
+      onApplyFilters(true);
     } catch (err) {
       const msg = err.response?.data?.detail || "Failed to resend email.";
       alert(`Error: ${msg}`);
@@ -341,7 +345,7 @@ function BookingsTab({
   const onMarkAttendance = async (bookingRef) => {
     try {
       await markAttendance(bookingRef);
-      onApplyFilters();
+      onApplyFilters(true);
     } catch (err) {
       const msg = err.response?.data?.detail || "Failed to mark attendance.";
       alert(`Error: ${msg}`);
@@ -351,7 +355,7 @@ function BookingsTab({
   const onUnmarkAttendance = async (bookingRef) => {
     try {
       await unmarkAttendance(bookingRef);
-      onApplyFilters();
+      onApplyFilters(true);
     } catch (err) {
       const msg = err.response?.data?.detail || "Failed to undo attendance.";
       alert(`Error: ${msg}`);
@@ -931,8 +935,8 @@ function UsersTab() {
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
-  const loadUsers = useCallback(async () => {
-    setLoading(true);
+  const loadUsers = useCallback(async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
     try {
       const data = await fetchUsers({
         hasBooking: filterHasBooking === "" ? undefined : filterHasBooking === "yes",
@@ -942,12 +946,14 @@ function UsersTab() {
     } catch (err) {
       console.error("Failed to fetch users:", err);
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
     }
   }, [filterHasBooking, filterSection]);
 
   useEffect(() => {
     loadUsers();
+    const interval = setInterval(() => loadUsers(true), 5000);
+    return () => clearInterval(interval);
   }, [loadUsers]);
 
   // Search input debouncer (300ms)
