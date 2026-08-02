@@ -14,6 +14,8 @@ import PaymentCancelledPage from "./pages/PaymentCancelledPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import TermsPage from "./pages/TermsPage";
 import ReturnPolicyPage from "./pages/ReturnPolicyPage";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 // ─── Cinematic page transition config ──────────────────────────────────────
 const PAGE_TRANSITION = {
@@ -82,6 +84,8 @@ export default function App() {
 
   return (
     <>
+      <Analytics />
+      <SpeedInsights />
       {/* ── Cinematic Splash Screen (shown once on app load) ─────────────── */}
       <AnimatePresence>
         {!splashDone && (
