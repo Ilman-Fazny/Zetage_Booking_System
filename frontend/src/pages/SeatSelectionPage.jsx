@@ -30,14 +30,32 @@ export default function SeatSelectionPage() {
     navigate("/details", { state: { seats: selectedSeats } });
   }
 
+  const [isAtBottom, setIsAtBottom] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+      const scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight || 0;
+      const clientHeight = document.documentElement.clientHeight || window.innerHeight || 0;
+      
+      // If we are within 180px of the bottom, hide the arrow
+      if (scrollTop + clientHeight >= scrollHeight - 180) {
+        setIsAtBottom(true);
+      } else {
+        setIsAtBottom(false);
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll(); // run once on load
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const handleScrollClick = () => {
     window.scrollTo({
       top: document.documentElement.scrollHeight || document.body.scrollHeight,
       behavior: "smooth"
     });
   };
-
-
 
   return (
     <div className="ssp-root">
@@ -146,38 +164,9 @@ export default function SeatSelectionPage() {
           marginBottom: 20,
         }} />
 
-        {/* ── Legend & Actions ─────────────────────────────────── */}
-        <div style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-end",
-          marginBottom: 16
-        }}>
+        {/* ── Legend ──────────────────────────────────────────── */}
+        <div style={{ marginBottom: 16 }}>
           <SeatLegend />
-          
-          <motion.button
-            onClick={handleScrollClick}
-            disabled={selectedSeats.length === 0}
-            whileHover={selectedSeats.length > 0 ? { scale: 1.04, y: -2 } : {}}
-            whileTap={selectedSeats.length > 0 ? { scale: 0.96, y: 0 } : {}}
-            style={{
-              padding: "9px 24px",
-              background: selectedSeats.length > 0 ? "linear-gradient(135deg,#7c3aed 0%,#6d28d9 50%,#5b21b6 100%)" : "rgba(124, 58, 237, 0.3)",
-              border: "none",
-              borderRadius: 10,
-              color: selectedSeats.length > 0 ? "#fff" : "rgba(255, 255, 255, 0.5)",
-              fontSize: 14,
-              fontWeight: 600,
-              fontFamily: "'Inter',system-ui,sans-serif",
-              letterSpacing: "0.03em",
-              cursor: selectedSeats.length > 0 ? "pointer" : "not-allowed",
-              boxShadow: selectedSeats.length > 0 ? "0 0 15px rgba(109,40,217,0.4), 0 4px 10px rgba(109,40,217,0.3)" : "none",
-              position: "relative",
-              overflow: "hidden",
-            }}
-          >
-            Next →
-          </motion.button>
         </div>
 
         {/* ── Theatre Map or Loading State ──────────────────────── */}
@@ -213,7 +202,46 @@ export default function SeatSelectionPage() {
         </div>
       </div>
 
-
+      {/* Floating Scroll Arrow Button (fixed in user viewport) */}
+      {createPortal(
+        <AnimatePresence>
+          {!isAtBottom && (
+            <motion.button
+              onClick={handleScrollClick}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              style={{
+                position: "fixed",
+                right: "24px",
+                bottom: "12vh",
+                width: "48px",
+                height: "48px",
+                borderRadius: "50%",
+                background: "rgba(124, 58, 237, 0.4)",
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+                border: "1px solid rgba(139, 92, 246, 0.6)",
+                color: "#fff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                zIndex: 1000,
+                boxShadow: "0 8px 32px rgba(109, 40, 217, 0.35), 0 0 15px rgba(139, 92, 246, 0.25)",
+                outline: "none"
+              }}
+              whileHover={{ scale: 1.1, background: "rgba(124, 58, 237, 0.65)" }}
+              whileTap={{ scale: 0.9 }}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: "2px" }}>
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </motion.button>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   );
 }
