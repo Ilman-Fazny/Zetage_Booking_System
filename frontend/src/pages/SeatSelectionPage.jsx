@@ -211,48 +211,54 @@ export default function SeatSelectionPage() {
 
       {/* Floating Scroll Arrow Button (fixed in user viewport) */}
       {createPortal(
-        <motion.button
-          onClick={handleScrollClick}
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          style={{
-            position: "fixed",
-            right: "24px",
-            bottom: "12vh",
-            width: "48px",
-            height: "48px",
-            borderRadius: "50%",
-            background: "rgba(124, 58, 237, 0.4)",
-            backdropFilter: "blur(12px)",
-            WebkitBackdropFilter: "blur(12px)",
-            border: "1px solid rgba(139, 92, 246, 0.6)",
-            color: "#fff",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-            zIndex: 1000,
-            boxShadow: "0 8px 32px rgba(109, 40, 217, 0.35), 0 0 15px rgba(139, 92, 246, 0.25)",
-            outline: "none"
-          }}
-          whileHover={{ scale: 1.1, background: "rgba(124, 58, 237, 0.65)" }}
-          whileTap={{ scale: 0.9 }}
-        >
-          <motion.div
-            animate={{ rotate: isAtBottom ? 180 : 0 }}
-            transition={{ type: "spring", stiffness: 200, damping: 15 }}
-            style={{ 
-              display: "flex", 
-              alignItems: "center", 
-              justifyContent: "center",
-              marginTop: isAtBottom ? "-2px" : "2px"
-            }}
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-          </motion.div>
-        </motion.button>,
+        <AnimatePresence>
+          {selectedSeats.length > 0 && (
+            <motion.button
+              onClick={handleScrollClick}
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.5 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              style={{
+                position: "fixed",
+                right: "24px",
+                bottom: "12vh",
+                width: "48px",
+                height: "48px",
+                borderRadius: "50%",
+                background: "rgba(124, 58, 237, 0.4)",
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+                border: "1px solid rgba(139, 92, 246, 0.6)",
+                color: "#fff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                zIndex: 1000,
+                boxShadow: "0 8px 32px rgba(109, 40, 217, 0.35), 0 0 15px rgba(139, 92, 246, 0.25)",
+                outline: "none"
+              }}
+              whileHover={{ scale: 1.1, background: "rgba(124, 58, 237, 0.65)" }}
+              whileTap={{ scale: 0.9 }}
+            >
+              <motion.div
+                animate={{ rotate: isAtBottom ? 180 : 0 }}
+                transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                style={{ 
+                  display: "flex", 
+                  alignItems: "center", 
+                  justifyContent: "center",
+                  marginTop: isAtBottom ? "-2px" : "2px"
+                }}
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </motion.div>
+            </motion.button>
+          )}
+        </AnimatePresence>,
         document.body
       )}
     </div>
