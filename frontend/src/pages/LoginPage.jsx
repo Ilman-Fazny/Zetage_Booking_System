@@ -7,6 +7,7 @@ import MotionButton from "../components/shared/MotionButton";
 import MotionInput from "../components/shared/MotionInput";
 import { useDocumentTitle } from "../lib/useDocumentTitle";
 import logo from "../assets/zentage-TS.png";
+import EventStatusBanner from "../components/auth/EventStatusBanner";
 
 /* ─────────────────────────────────────────────
    Scoped CSS injected once into <head>
@@ -229,6 +230,8 @@ export default function LoginPage() {
               </MotionButton>
             </div>
           </form>
+          
+          <EventStatusBanner />
         </div>
       </div>
     </div>

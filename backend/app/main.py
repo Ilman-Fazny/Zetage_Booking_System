@@ -14,7 +14,7 @@ from slowapi.errors import RateLimitExceeded
 limiter = Limiter(key_func=get_remote_address)
 
 from app.core.config import settings
-from app.router import auth, bookings, seats, admin, payments
+from app.router import auth, bookings, seats, admin, payments, availability
 from app.db.init_db import init_db
 from app.models import User, Seat, Booking
 
@@ -133,6 +133,7 @@ app.add_middleware(
 app.include_router(auth.router, prefix="/api")
 app.include_router(bookings.router, prefix="/api")
 app.include_router(seats.router, prefix="/api")
+app.include_router(availability.router, prefix="/api")
 app.include_router(admin.router,    prefix="/api")
 app.include_router(payments.router, prefix="/api")
 
