@@ -112,11 +112,18 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 # Security headers on every response
 app.add_middleware(SecurityHeadersMiddleware)
 
-# CORS Configuration — only allow the known frontend origin and needed methods
-# NOTE: For production, set FRONTEND_URL in .env to your actual domain.
+# CORS Configuration — support multiple comma-separated frontend domains
+# NOTE: Set FRONTEND_URL in your environment (e.g., "https://zentage.sasnaka.org,https://your-vercel-domain.vercel.app")
+frontend_origins = []
+if settings.FRONTEND_URL:
+    # Split by comma to support multiple domains
+    frontend_origins = [origin.strip() for origin in settings.FRONTEND_URL.split(",") if origin.strip()]
+else:
+    frontend_origins = ["http://localhost:5173", "http://localhost:3000"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.FRONTEND_URL] if settings.FRONTEND_URL else ["http://localhost:5173"],
+    allow_origins=frontend_origins,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type", "Accept", "X-Requested-With"],
     allow_credentials=True,
