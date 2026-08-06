@@ -230,9 +230,10 @@ export default function LoginPage() {
               </MotionButton>
             </div>
           </form>
-          
-          <EventStatusBanner />
         </div>
+
+        {/* ── Status Banner Outside Card ── */}
+        <EventStatusBanner />
       </div>
     </div>
   );
