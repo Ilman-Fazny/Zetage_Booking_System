@@ -5,13 +5,16 @@ import api from "./api";
 export function useAvailability() {
   const [availability, setAvailability] = useState({ total: 0, available: 0 });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   const fetchAvailability = useCallback(async () => {
     try {
       const { data } = await api.get("/availability");
       setAvailability(data);
+      setError(false);
     } catch (err) {
       console.error("Failed to fetch availability", err);
+      setError(true);
     } finally {
       setLoading(false);
     }
@@ -23,5 +26,5 @@ export function useAvailability() {
     return () => clearInterval(interval);
   }, [fetchAvailability]);
 
-  return { availability, loading };
+  return { availability, loading, error };
 }

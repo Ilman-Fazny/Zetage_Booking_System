@@ -3,13 +3,13 @@ import { useAvailability } from "../../lib/useAvailability";
 import { useCountdown } from "../../lib/useCountdown";
 
 export default function EventStatusBanner() {
-  const { availability, loading } = useAvailability();
+  const { availability, loading, error } = useAvailability();
   const timeLeft = useCountdown("September 6, 2026");
 
   const formatTime = (value) => value.toString().padStart(2, "0");
 
   const isLowSeats = availability.available > 0 && availability.available <= 100;
-  const isSoldOut = availability.available === 0 && !loading;
+  const isSoldOut = availability.total > 0 && availability.available === 0 && !loading && !error;
 
   return (
     <div className="lp-status-banner">
@@ -43,6 +43,8 @@ export default function EventStatusBanner() {
             >
               {isSoldOut ? (
                 <span>SOLD OUT</span>
+              ) : error || availability.total === 0 ? (
+                <span>-- seats left</span>
               ) : (
                 <>
                   <span className={`lp-pulse-dot ${isLowSeats ? "urgent" : ""}`} />
