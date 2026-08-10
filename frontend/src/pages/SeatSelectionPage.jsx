@@ -446,7 +446,7 @@ export default function SeatSelectionPage() {
                   {/* Middle Text */}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", marginBottom: 2 }}>
-                      <h4 style={{ margin: 0, color: "#fff", fontSize: 15, fontWeight: 700, letterSpacing: "-0.01em" }}>Interactive Seat Map</h4>
+                      <h4 style={{ margin: 0, color: "#fff", fontSize: 15, fontWeight: 700, letterSpacing: "-0.01em" }}>Specific Seat Booking</h4>
                       <span style={{
                         fontSize: 8.5,
                         fontWeight: 800,
@@ -461,7 +461,7 @@ export default function SeatSelectionPage() {
                       </span>
                     </div>
                     <p style={{ margin: 0, color: "rgba(255,255,255,0.55)", fontSize: 12, lineHeight: 1.35 }}>
-                      Choose exact seats. Requires bank slip or ticket screenshot upload. 
+                      Choose exact seats. Requires bank slip or TicketsMinistry ticket screenshot upload. 
                       <span style={{ color: "#f59e0b", fontWeight: 600 }}> (Limited chance to book specific seats!)</span>
                     </p>
                   </div>
