@@ -81,8 +81,19 @@ async def release_expired_holds():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup logic
-    init_db()
+    # Startup logic: Run migrations automatically
+    try:
+        import sys
+        import os
+        backend_dir = os.path.dirname(os.path.dirname(__file__))
+        if backend_dir not in sys.path:
+            sys.path.insert(0, backend_dir)
+        from migrate_db_schema import migrate
+        migrate()
+    except Exception as e:
+        print(f"Migration failed or not found, falling back to init_db: {e}")
+        init_db()
+        
     task = asyncio.create_task(release_expired_holds())
     yield
     # Shutdown logic
