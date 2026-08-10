@@ -22,12 +22,17 @@ export default function SeatSelectionPage() {
   useDocumentTitle("Select Your Seat");
 
   const { sections, selectedSeats, selectSeat, loading, error } = useSeatMap();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [showChoiceModal, setShowChoiceModal] = useState(false);
   
   useEffect(() => {
-    if (user) setShowChoiceModal(true);
+    const hasChosen = sessionStorage.getItem("hasChosenBookingType");
+    if (user && hasChosen !== "true") {
+      setShowChoiceModal(true);
+    } else {
+      setShowChoiceModal(false);
+    }
   }, [user]);
 
   function handleContinue() {
@@ -110,6 +115,29 @@ export default function SeatSelectionPage() {
             >
               Admin panel →
             </Link>
+          )}
+          {user && (
+            <button
+              onClick={logout}
+              style={{
+                fontSize: 11,
+                color: "rgba(239, 68, 68, 0.75)",
+                textDecoration: "none",
+                letterSpacing: "0.04em",
+                fontWeight: 600,
+                background: "none",
+                border: "none",
+                borderBottom: "1px solid rgba(239, 68, 68, 0.3)",
+                padding: 0,
+                paddingBottom: 1,
+                cursor: "pointer",
+                transition: "color 0.15s",
+              }}
+              onMouseEnter={e => e.currentTarget.style.color = "rgba(239, 68, 68, 1)"}
+              onMouseLeave={e => e.currentTarget.style.color = "rgba(239, 68, 68, 0.75)"}
+            >
+              Log Out
+            </button>
           )}
         </div>
 
@@ -319,6 +347,7 @@ export default function SeatSelectionPage() {
                   href="https://www.ticketsministry.com/theatre/zentage/018d5fdb-7c2b-4c56-b070-fb58ce53443f"
                   target="_blank"
                   rel="noreferrer"
+                  onClick={() => sessionStorage.setItem("hasChosenBookingType", "true")}
                   whileHover={{ scale: 1.02, y: -3, backgroundColor: "rgba(255,255,255,0.08)" }}
                   whileTap={{ scale: 0.98 }}
                   style={{
@@ -378,7 +407,10 @@ export default function SeatSelectionPage() {
 
                 {/* Select by Seat Number Card */}
                 <motion.button
-                  onClick={() => setShowChoiceModal(false)}
+                  onClick={() => {
+                    sessionStorage.setItem("hasChosenBookingType", "true");
+                    setShowChoiceModal(false);
+                  }}
                   whileHover={{ scale: 1.02, y: -3, borderColor: "rgba(245, 158, 11, 0.5)", boxShadow: "0 12px 30px rgba(245, 158, 11, 0.15)" }}
                   whileTap={{ scale: 0.98 }}
                   style={{
