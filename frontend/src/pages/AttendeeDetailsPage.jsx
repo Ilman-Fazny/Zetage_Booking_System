@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate, Navigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { initiatePayment } from "../lib/payments";
+import { motion, AnimatePresence } from "framer-motion";
+import api from "../lib/api";
 import { DISTRICTS } from "../lib/districts";
 import MotionButton from "../components/shared/MotionButton";
 import MotionInput from "../components/shared/MotionInput";
@@ -28,8 +28,30 @@ export default function AttendeeDetailsPage() {
   const [isSasnakaMember, setIsSasnakaMember] = useState(null);
   const [phone, setPhone] = useState("");
   const [acceptedPolicies, setAcceptedPolicies] = useState(false);
+  const [slipFile, setSlipFile] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(300); // 5 minutes
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          navigate("/");
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [navigate]);
+
+  const formatTime = (seconds) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s < 10 ? '0' : ''}${s}`;
+  };
 
   if (!seats || seats.length === 0) return <Navigate to="/" replace />;
 
@@ -53,6 +75,10 @@ export default function AttendeeDetailsPage() {
       setError("Phone number must be exactly 10 digits.");
       return;
     }
+    if (!slipFile) {
+      setError("Please upload your payment slip or ticket.");
+      return;
+    }
     if (!acceptedPolicies) {
       setError("Please agree to the Terms, Privacy Policy, and Return Policy to proceed.");
       return;
@@ -60,28 +86,19 @@ export default function AttendeeDetailsPage() {
 
     setLoading(true);
     try {
-      const params = await initiatePayment({
-        seatCodes: seats.map(s => s.seat_code),
-        district,
-        isSasnakaMember,
-        phone,
+      const formData = new FormData();
+      formData.append("seat_codes", seats.map(s => s.seat_code).join(","));
+      formData.append("district", district);
+      formData.append("is_sasnaka_member", isSasnakaMember);
+      formData.append("phone", phone);
+      formData.append("file", slipFile);
+
+      await api.post("/bookings/upload-slip-batch", formData, {
+        headers: { "Content-Type": "multipart/form-data" }
       });
-
-      // Build a hidden form and submit it to PayHere
-      const form = document.createElement("form");
-      form.method = "POST";
-      form.action = import.meta.env.VITE_PAYHERE_URL;
-
-      Object.entries(params).forEach(([key, value]) => {
-        const input = document.createElement("input");
-        input.type  = "hidden";
-        input.name  = key;
-        input.value = value;
-        form.appendChild(input);
-      });
-
-      document.body.appendChild(form);
-      form.submit();   // user leaves your site, goes to PayHere's hosted page
+      
+      // Navigate to My Ticket page after successful upload
+      navigate("/my-ticket");
     } catch (err) {
       const detail = err.response?.data?.detail;
       if (err.response?.status === 409) {
@@ -245,6 +262,63 @@ export default function AttendeeDetailsPage() {
                 className="adp-input"
               />
               <p className="adp-hint">10-digit Sri Lankan mobile number</p>
+            </div>
+
+            {/* Slip Upload */}
+            <div className="adp-field">
+              <label className="adp-label">Upload Payment Slip or Ticket</label>
+              <div 
+                style={{
+                  border: "2px dashed rgba(139, 92, 246, 0.4)",
+                  borderRadius: 12,
+                  padding: "24px",
+                  textAlign: "center",
+                  background: "rgba(0,0,0,0.2)",
+                  cursor: "pointer",
+                  transition: "all 0.2s"
+                }}
+                onClick={() => document.getElementById("slip-upload").click()}
+                onMouseEnter={e => e.currentTarget.style.borderColor = "rgba(139, 92, 246, 0.8)"}
+                onMouseLeave={e => e.currentTarget.style.borderColor = "rgba(139, 92, 246, 0.4)"}
+              >
+                <input 
+                  type="file" 
+                  id="slip-upload" 
+                  style={{ display: "none" }} 
+                  accept="image/*"
+                  onChange={e => {
+                    if (e.target.files && e.target.files[0]) {
+                      setSlipFile(e.target.files[0]);
+                    }
+                  }}
+                />
+                {slipFile ? (
+                  <div style={{ color: "#a78bfa", fontWeight: 600 }}>
+                    ✓ {slipFile.name} attached
+                  </div>
+                ) : (
+                  <div style={{ color: "rgba(255,255,255,0.6)", fontSize: 14 }}>
+                    Click here to attach your bank transfer slip or ticket screenshot (JPG, PNG)
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Timer Warning */}
+            <div style={{ 
+              marginBottom: 20, 
+              padding: 12, 
+              background: "rgba(248, 113, 113, 0.1)", 
+              border: "1px solid rgba(248, 113, 113, 0.3)",
+              borderRadius: 8,
+              color: "#fca5a5",
+              fontSize: 14,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between"
+            }}>
+              <span>Seats are reserved for:</span>
+              <span style={{ fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>{formatTime(timeLeft)}</span>
             </div>
 
             {/* Privacy Policies tickbox */}

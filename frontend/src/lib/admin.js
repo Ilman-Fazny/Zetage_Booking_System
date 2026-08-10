@@ -74,3 +74,13 @@ export async function unmarkAttendance(bookingRef) {
   const { data } = await api.post("/admin/unscan", { booking_ref: bookingRef });
   return data;
 }
+
+export async function fetchPendingSlips() {
+  const { data } = await api.get("/admin/pending-slips");
+  return data;
+}
+
+export async function verifySlip(bookingRef, action) {
+  const { data } = await api.post(`/admin/bookings/${bookingRef}/verify`, { action });
+  return data;
+}

@@ -114,6 +114,7 @@ def get_booking_stats(db: Session) -> dict:
     total_seats = db.query(Seat).count()
     booked_seats = db.query(Seat).filter(Seat.status == SeatStatus.BOOKED).count()
     available_seats = db.query(Seat).filter(Seat.status == SeatStatus.AVAILABLE).count()
+    held_seats = db.query(Seat).filter(Seat.status == SeatStatus.HELD).count()
 
     confirmed = db.query(Booking).filter(Booking.status == BookingStatus.CONFIRMED)
     sasnaka_count = confirmed.filter(Booking.is_sasnaka_member == True).count()  # noqa: E712
@@ -152,6 +153,7 @@ def get_booking_stats(db: Session) -> dict:
         "total_seats":          total_seats,
         "booked_seats":         booked_seats,
         "available_seats":       available_seats,
+        "held_seats":            held_seats,
         "total_revenue":         total_revenue,
         "sasnaka_member_count":  sasnaka_count,
         "by_district":            {d: c for d, c in by_district_rows},

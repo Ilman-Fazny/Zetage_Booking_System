@@ -15,7 +15,9 @@ const EVENT = {
 
 export default function TicketCard({ booking }) {
   const canvasRef = useRef(null);
-  const isPending = booking.status === "pending" || booking.status === "PENDING";
+  const isPendingPayment = booking.status === "pending" || booking.status === "PENDING";
+  const isPendingVerification = booking.status === "pending_verification" || booking.status === "PENDING_VERIFICATION";
+  const isPending = isPendingPayment || isPendingVerification;
 
   useEffect(() => {
     if (!isPending && canvasRef.current) {
@@ -40,7 +42,7 @@ export default function TicketCard({ booking }) {
       <div className="tp-banner">
         <span className="tp-banner-dot" />
         <span className="tp-banner-text">
-          {isPending ? "✦ Pending Payment ✦" : "✦ Confirmed ✦"}
+          {isPendingVerification ? "✦ Under Review ✦" : isPendingPayment ? "✦ Pending Payment ✦" : "✦ Confirmed ✦"}
         </span>
         <span className="tp-banner-dot" />
       </div>
@@ -96,7 +98,7 @@ export default function TicketCard({ booking }) {
               padding: "0 16px",
               fontFamily: "'Inter',system-ui,sans-serif",
             }}>
-              QR code available after payment
+              {isPendingVerification ? "QR code available after admin approval" : "QR code available after payment"}
             </div>
           </div>
         </div>
@@ -118,7 +120,7 @@ export default function TicketCard({ booking }) {
       {/* Bottom strip */}
       <div className="tp-foot">
         <span className="tp-foot-text">Non-transferable · 1 person</span>
-        <span className="tp-foot-badge">{isPending ? "Pending" : "E-Ticket"}</span>
+        <span className="tp-foot-badge">{isPendingVerification ? "Under Review" : isPendingPayment ? "Pending" : "E-Ticket"}</span>
       </div>
     </motion.div>
   );

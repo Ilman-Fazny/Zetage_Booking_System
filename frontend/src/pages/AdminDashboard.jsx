@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { fetchStats, fetchBookings, fetchAdmins, promoteUser, demoteUser, resendBookingEmail, adminBookSeats, fetchUsers, deleteBooking, deleteUser, markAttendance, unmarkAttendance } from "../lib/admin";
+import { fetchStats, fetchBookings, fetchAdmins, promoteUser, demoteUser, resendBookingEmail, adminBookSeats, fetchUsers, deleteBooking, deleteUser, markAttendance, unmarkAttendance, fetchPendingSlips, verifySlip } from "../lib/admin";
 import { DISTRICTS } from "../lib/districts";
 import { listContainerVariants, listItemVariants, microSpring } from "../lib/motionVariants";
 import { useDocumentTitle } from "../lib/useDocumentTitle";
@@ -118,13 +118,13 @@ export default function AdminDashboard() {
 
       {/* ── Tab bar ─────────────────────────────────────── */}
       <div className="adm-tabs">
-        {["overview", "bookings", "users", "book", "admins"].map((t) => (
+        {["overview", "slips", "bookings", "users", "book", "admins"].map((t) => (
           <button
             key={t}
             className={`adm-tab ${tab === t ? "active" : ""}`}
             onClick={() => setTab(t)}
           >
-            {t === "overview" ? "Overview" : t === "bookings" ? "Bookings" : t === "users" ? "Users" : t === "book" ? "Book a Seat" : "Admins"}
+            {t === "overview" ? "Overview" : t === "slips" ? "Verify Slips" : t === "bookings" ? "Bookings" : t === "users" ? "Users" : t === "book" ? "Book a Seat" : "Admins"}
           </button>
         ))}
       </div>
@@ -133,6 +133,9 @@ export default function AdminDashboard() {
       <div className="adm-content">
         {tab === "overview" && (
           <OverviewTab stats={stats} loading={loadingStats} />
+        )}
+        {tab === "slips" && (
+          <SlipVerificationTab />
         )}
         {tab === "bookings" && (
           <BookingsTab
@@ -190,10 +193,12 @@ function OverviewTab({ stats, loading }) {
         variants={listContainerVariants}
         initial="initial"
         animate="animate"
+        style={{ gridTemplateColumns: "repeat(5, 1fr)" }}
       >
         <GlassCard variant="total" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" /></svg>} label="Total Seats" value={stats.total_seats} sub="venue capacity" />
         <GlassCard variant="booked" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>} label="Booked" value={stats.booked_seats} sub="confirmed tickets" />
         <GlassCard variant="avail" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /></svg>} label="Available" value={stats.available_seats} sub="seats remaining" />
+        <GlassCard variant="held" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>} label="Held" value={stats.held_seats} sub="in checkout" />
         <GlassCard variant="revenue" icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>} label="Revenue" value={`LKR ${stats.total_revenue.toLocaleString()}`} small sub="total collected" />
       </motion.div>
 
@@ -1189,6 +1194,155 @@ function UsersTab() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+/* ─── Slip Verification Tab ─────────────────────────────────────────────────── */
+function SlipVerificationTab() {
+  const [slips, setSlips] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedSlip, setSelectedSlip] = useState(null);
+  
+  const loadSlips = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await fetchPendingSlips();
+      setSlips(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadSlips();
+    const interval = setInterval(loadSlips, 10000);
+    return () => clearInterval(interval);
+  }, [loadSlips]);
+
+  const handleVerify = async (bookingRef, action) => {
+    if (!window.confirm(`Are you sure you want to ${action} this slip?`)) return;
+    
+    try {
+      await verifySlip(bookingRef, action);
+      alert(`Slip ${action}d successfully`);
+      setSelectedSlip(null);
+      loadSlips();
+    } catch (err) {
+      alert("Error: " + (err.response?.data?.detail || err.message));
+    }
+  };
+
+  if (loading && slips.length === 0) return <StatsSkeleton />;
+
+  return (
+    <div>
+      <div className="adm-panel">
+        <p className="adm-panel-title">Pending Slip Verifications</p>
+        {slips.length === 0 ? (
+          <p style={{ fontSize: "13px", color: "rgba(180,170,210,0.35)", textAlign: "center", padding: "20px 0" }}>
+            No slips pending verification.
+          </p>
+        ) : (
+          <div className="adm-table-wrap">
+            <table className="adm-table">
+              <thead>
+                <tr>
+                  <th>Ref</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Seat</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {slips.map((b) => (
+                  <tr key={b.id}>
+                    <td>{b.booking_ref}</td>
+                    <td>{b.attendee_name}</td>
+                    <td>{b.user_email}</td>
+                    <td>{b.seat_code}</td>
+                    <td>
+                      <button 
+                        className="adm-apply-btn" 
+                        style={{ padding: "6px 12px", fontSize: 12 }}
+                        onClick={() => setSelectedSlip(b)}
+                      >
+                        Review
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      <AnimatePresence>
+        {selectedSlip && (
+          <div style={{
+            position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+            zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center",
+            background: "rgba(0,0,0,0.8)", backdropFilter: "blur(8px)"
+          }}>
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              style={{
+                background: "#1e1b4b", padding: 24, borderRadius: 16, maxWidth: 600, width: "100%",
+                maxHeight: "90vh", overflowY: "auto", border: "1px solid rgba(139,92,246,0.3)"
+              }}
+            >
+              <h2 style={{ color: "#fff", marginTop: 0 }}>Review Slip: {selectedSlip.booking_ref}</h2>
+              <div style={{ marginBottom: 16 }}>
+                <p style={{ margin: "4px 0", color: "#e2d9ff" }}><strong>Name:</strong> {selectedSlip.attendee_name}</p>
+                <p style={{ margin: "4px 0", color: "#e2d9ff" }}><strong>Email:</strong> {selectedSlip.user_email}</p>
+                <p style={{ margin: "4px 0", color: "#e2d9ff" }}><strong>Seat:</strong> {selectedSlip.seat_code} ({selectedSlip.section})</p>
+              </div>
+              
+              <div style={{ background: "#000", borderRadius: 8, padding: 8, marginBottom: 20 }}>
+                {selectedSlip.slip_url ? (
+                  <img 
+                    src={import.meta.env.VITE_API_URL + selectedSlip.slip_url} 
+                    alt="Slip" 
+                    style={{ width: "100%", maxHeight: "50vh", objectFit: "contain" }} 
+                    onError={(e) => { e.target.src = ""; e.target.alt = "Image not found"; }}
+                  />
+                ) : (
+                  <p style={{ color: "red", textAlign: "center" }}>No image attached</p>
+                )}
+              </div>
+
+              <div style={{ display: "flex", gap: 12, justifyContent: "flex-end" }}>
+                <button 
+                  onClick={() => setSelectedSlip(null)}
+                  className="adm-back-btn"
+                  style={{ background: "transparent", border: "1px solid rgba(255,255,255,0.2)", padding: "8px 16px", color: "#fff", borderRadius: 8, cursor: "pointer" }}
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={() => handleVerify(selectedSlip.booking_ref, "reject")}
+                  style={{ background: "rgba(239,68,68,0.2)", border: "1px solid rgba(239,68,68,0.5)", padding: "8px 16px", color: "#fca5a5", borderRadius: 8, cursor: "pointer" }}
+                >
+                  Reject
+                </button>
+                <button 
+                  onClick={() => handleVerify(selectedSlip.booking_ref, "approve")}
+                  className="adm-apply-btn"
+                  style={{ padding: "8px 16px" }}
+                >
+                  Approve
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

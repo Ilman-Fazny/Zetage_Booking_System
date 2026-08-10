@@ -4,8 +4,8 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timezone, timedelta
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
+from fastapi.staticfiles import StaticFiles
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
@@ -36,7 +36,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
 
 async def release_expired_holds():
-    """Runs every 30 seconds. Releases seats held > 10 minutes with no payment."""
+    """Runs every 30 seconds. Releases seats held > 5 minutes with no payment."""
     while True:
         try:
             await asyncio.sleep(30)  # 30 seconds
@@ -56,9 +56,9 @@ async def release_expired_holds():
                     if not b_time:
                         continue
                     if b_time.tzinfo is None:
-                        compare_time = datetime.utcnow() - timedelta(minutes=10)
+                        compare_time = datetime.utcnow() - timedelta(minutes=5)
                     else:
-                        compare_time = datetime.now(timezone.utc) - timedelta(minutes=10)
+                        compare_time = datetime.now(timezone.utc) - timedelta(minutes=5)
 
                     if b_time < compare_time:
                         seat = db.query(Seat).filter(Seat.id == booking.seat_id).first()
@@ -136,6 +136,9 @@ app.include_router(seats.router, prefix="/api")
 app.include_router(availability.router, prefix="/api")
 app.include_router(admin.router,    prefix="/api")
 app.include_router(payments.router, prefix="/api")
+
+os.makedirs("uploads", exist_ok=True)
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 @app.get("/")
 def read_root():

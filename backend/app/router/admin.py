@@ -13,6 +13,10 @@ from app.models.booking import Booking, BookingStatus
 from app.models.seat import Seat, SeatStatus
 from app.services.admin_service import scan_entrance, unscan_entrance
 from app.services.email_service import send_ticket_email_raise, send_ticket_email
+from pydantic import BaseModel
+
+class VerifySlipRequest(BaseModel):
+    action: str  # 'approve' or 'reject'
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -43,9 +47,77 @@ def admin_list_bookings(
             is_entered=b.is_entered,
             entered_at=b.entered_at,
             email_sent=b.email_sent,
+            slip_url=b.slip_url,
         )
         for b in bookings
     ]
+
+@router.get("/pending-slips", response_model=list[AdminBookingOut])
+def admin_list_pending_slips(
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_admin_user),
+):
+    bookings = db.query(Booking).filter(Booking.status == BookingStatus.PENDING_VERIFICATION).order_by(Booking.created_at.asc()).all()
+    return [
+        AdminBookingOut(
+            id=b.id,
+            booking_ref=b.booking_ref,
+            seat_code=b.seat.seat_code,
+            section=b.seat.section.value,
+            attendee_name=b.attendee_name,
+            district=b.district,
+            is_sasnaka_member=b.is_sasnaka_member,
+            status=b.status,
+            price=b.seat.price,
+            created_at=b.created_at,
+            user_email=b.user.email,
+            user_name=b.user.name,
+            is_entered=b.is_entered,
+            entered_at=b.entered_at,
+            email_sent=b.email_sent,
+            slip_url=b.slip_url,
+        )
+        for b in bookings
+    ]
+
+@router.post("/bookings/{booking_ref}/verify")
+def admin_verify_slip(
+    booking_ref: str,
+    payload: VerifySlipRequest,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_admin_user),
+):
+    booking = db.query(Booking).filter(Booking.booking_ref == booking_ref).first()
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+        
+    if booking.status != BookingStatus.PENDING_VERIFICATION:
+        raise HTTPException(status_code=400, detail="Booking is not pending verification")
+
+    seat = db.query(Seat).filter(Seat.id == booking.seat_id).first()
+    
+    if payload.action == "approve":
+        booking.status = BookingStatus.CONFIRMED
+        seat.status = SeatStatus.BOOKED
+        db.commit()
+        db.refresh(booking)
+        
+        # Send ticket email in background
+        user = db.query(User).filter(User.id == booking.user_id).first()
+        background_tasks.add_task(send_ticket_email, user, [booking])
+        
+        return {"detail": "Booking approved successfully"}
+        
+    elif payload.action == "reject":
+        booking.status = BookingStatus.CANCELLED
+        if seat:
+            seat.status = SeatStatus.AVAILABLE
+        db.commit()
+        return {"detail": "Booking rejected and seats released"}
+        
+    else:
+        raise HTTPException(status_code=400, detail="Invalid action")
 
 
 @router.get("/stats", response_model=BookingStats)

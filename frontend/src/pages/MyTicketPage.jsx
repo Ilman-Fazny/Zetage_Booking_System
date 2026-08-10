@@ -62,6 +62,11 @@ export default function MyTicketPage() {
             Your seat is held for 1 minute - complete payment quickly.
           </div>
         )}
+        {!loading && bookings.some(b => b.status === "pending_verification" || b.status === "PENDING_VERIFICATION") && (
+          <div style={{ background: "rgba(167, 139, 250, 0.1)", border: "1px solid rgba(167, 139, 250, 0.3)", borderRadius: "8px", padding: "12px", marginBottom: "20px", textAlign: "center", color: "#a78bfa", fontSize: "13px", fontWeight: "500" }}>
+            Your payment slip is being reviewed by our admins. Please check back shortly.
+          </div>
+        )}
 
         {/* ── Content ── */}
         <div className="tp-wrapper" style={{ marginTop: 24 }}>

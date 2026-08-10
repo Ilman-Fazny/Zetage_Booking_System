@@ -1,5 +1,9 @@
-from fastapi import APIRouter, Depends, BackgroundTasks
+from fastapi import APIRouter, Depends, BackgroundTasks, UploadFile, File, HTTPException
+import shutil
+import os
+import uuid
 from sqlalchemy.orm import Session
+from sqlalchemy import select
 from app.dependencies import get_db, get_current_user
 from app.services.booking_service import create_booking, cancel_booking, get_my_bookings
 from app.services.email_service import send_ticket_email
@@ -41,6 +45,7 @@ def my_bookings(
             "entered_at": b.entered_at,
             "email_sent": b.email_sent,
             "attendee_name": b.attendee_name,
+            "slip_url": b.slip_url,
         }
         for b in bookings
     ]
@@ -53,3 +58,108 @@ def cancel_one_booking(
 ):
     cancel_booking(db, current_user, booking_ref)
     return {"detail": f"Booking {booking_ref} cancelled."}
+
+@router.post("/{booking_ref}/upload-slip")
+def upload_booking_slip(
+    booking_ref: str,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    from app.models.booking import Booking, BookingStatus
+    
+    # 1. Find the booking
+    booking = db.query(Booking).filter(Booking.booking_ref == booking_ref, Booking.user_id == current_user.id).first()
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found.")
+    
+    if booking.status not in [BookingStatus.PENDING, BookingStatus.PENDING_VERIFICATION]:
+        raise HTTPException(status_code=400, detail="Cannot upload slip for this booking state.")
+        
+    # 2. Save the file
+    ext = file.filename.split('.')[-1]
+    filename = f"{uuid.uuid4().hex}.{ext}"
+    filepath = os.path.join("uploads", filename)
+    
+    with open(filepath, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+        
+    # 3. Update the booking
+    booking.slip_url = f"/uploads/{filename}"
+    booking.status = BookingStatus.PENDING_VERIFICATION
+    db.commit()
+    
+    return {"detail": "Slip uploaded successfully", "slip_url": booking.slip_url}
+
+from fastapi import Form
+from app.models.seat import Seat, SeatStatus
+
+@router.post("/upload-slip-batch")
+def upload_booking_slip_batch(
+    seat_codes: str = Form(...),
+    district: str = Form(...),
+    is_sasnaka_member: bool = Form(...),
+    phone: str = Form(None),
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    from app.models.booking import Booking, BookingStatus
+    
+    # 1. Parse seat codes
+    seat_codes_list = [s.strip() for s in seat_codes.split(",") if s.strip()]
+    if not seat_codes_list:
+        raise HTTPException(status_code=400, detail="No seats selected.")
+        
+    # 2. Save the file
+    ext = file.filename.split('.')[-1]
+    filename = f"{uuid.uuid4().hex}.{ext}"
+    filepath = os.path.join("uploads", filename)
+    with open(filepath, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+        
+    slip_url = f"/uploads/{filename}"
+    order_id = str(uuid.uuid4())[:12].upper()
+    
+    new_bookings = []
+    
+    # 3. Create bookings and lock seats
+    for seat_code in seat_codes_list:
+        seat = (
+            db.execute(
+                select(Seat)
+                .where(Seat.seat_code == seat_code)
+                .with_for_update()
+            )
+            .scalars()
+            .first()
+        )
+        if not seat:
+            db.rollback()
+            raise HTTPException(status_code=404, detail=f"Seat {seat_code} not found.")
+
+        if seat.status != SeatStatus.AVAILABLE:
+            db.rollback()
+            raise HTTPException(
+                status_code=409,
+                detail=f"Seat {seat_code} is no longer available."
+            )
+
+        seat.status = SeatStatus.HELD
+        booking = Booking(
+            user_id=current_user.id,
+            seat_id=seat.id,
+            attendee_name=current_user.name or current_user.email or "Unknown",
+            district=district,
+            is_sasnaka_member=is_sasnaka_member,
+            phone=phone,
+            status=BookingStatus.PENDING_VERIFICATION,
+            slip_url=slip_url,
+            order_id=order_id
+        )
+        db.add(booking)
+        new_bookings.append(booking)
+
+    db.commit()
+    
+    return {"detail": "Bookings created and slip uploaded successfully", "order_id": order_id}

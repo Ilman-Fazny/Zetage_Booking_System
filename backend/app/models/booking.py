@@ -9,6 +9,7 @@ from app.db.session import Base
 
 class BookingStatus(str, enum.Enum):
     PENDING   = "pending"    # payment initiated, not yet confirmed
+    PENDING_VERIFICATION = "pending_verification" # slip uploaded, awaiting admin check
     CONFIRMED = "confirmed"  # payment successful
     CANCELLED = "cancelled"  # payment failed or timed out
 
@@ -30,6 +31,7 @@ class Booking(Base):
     status             = Column(SAEnum(BookingStatus, values_callable=lambda x: [e.value for e in x]),
                                 default=BookingStatus.PENDING, nullable=False)
     order_id           = Column(String, nullable=True, index=True)
+    slip_url           = Column(String, nullable=True)
     created_at         = Column(DateTime(timezone=True), server_default=func.now())
     # New attendance tracking fields
     is_entered         = Column(Boolean, default=False, nullable=False)

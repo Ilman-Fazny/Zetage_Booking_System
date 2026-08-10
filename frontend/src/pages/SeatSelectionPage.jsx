@@ -1,5 +1,5 @@
 // src/pages/SeatSelectionPage.jsx
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, Link } from "react-router-dom";
 import { useSeatMap } from "../lib/useSeatMap";
@@ -24,6 +24,7 @@ export default function SeatSelectionPage() {
   const { sections, selectedSeats, selectSeat, loading, error } = useSeatMap();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [showChoiceModal, setShowChoiceModal] = useState(true);
 
   function handleContinue() {
     if (!selectedSeats.length) return;
@@ -261,6 +262,120 @@ export default function SeatSelectionPage() {
         </AnimatePresence>,
         document.body
       )}
+
+      {/* Booking Choice Modal */}
+      <AnimatePresence>
+        {showChoiceModal && (
+          <div style={{
+            position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+            zIndex: 9999,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: 20
+          }}>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              style={{
+                position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
+                background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)",
+                WebkitBackdropFilter: "blur(8px)"
+              }}
+            />
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              style={{
+                background: "#1e1b4b", // deep rich purple/indigo
+                border: "1px solid rgba(139, 92, 246, 0.3)",
+                borderRadius: 24,
+                padding: "32px 24px",
+                width: "100%",
+                maxWidth: 440,
+                position: "relative",
+                zIndex: 10000,
+                boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 40px rgba(139, 92, 246, 0.15)",
+                display: "flex",
+                flexDirection: "column",
+                gap: 24
+              }}
+            >
+              <div style={{ textAlign: "center" }}>
+                <h2 style={{ margin: "0 0 8px", fontSize: 24, color: "#fff", fontWeight: 700, letterSpacing: "-0.02em" }}>Choose Booking Type</h2>
+                <p style={{ margin: 0, color: "rgba(255,255,255,0.7)", fontSize: 14, lineHeight: 1.5 }}>
+                  Please select how you want to book your seats.
+                </p>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                <a 
+                  href="https://www.ticketsministry.com/theatre/zentage/018d5fdb-7c2b-4c56-b070-fb58ce53443f"
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{
+                    display: "block",
+                    textDecoration: "none",
+                    background: "rgba(255,255,255,0.05)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    borderRadius: 16,
+                    padding: 20,
+                    transition: "all 0.2s ease"
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.background = "rgba(255,255,255,0.1)";
+                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)";
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.background = "rgba(255,255,255,0.05)";
+                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)";
+                  }}
+                >
+                  <h3 style={{ margin: "0 0 6px", color: "#fff", fontSize: 18, fontWeight: 600 }}>Standard Online Booking</h3>
+                  <p style={{ margin: 0, color: "rgba(255,255,255,0.6)", fontSize: 13, lineHeight: 1.4 }}>
+                    Quickest way to book regular seats. Not available for special/premium seating choices.
+                  </p>
+                  <div style={{ marginTop: 12, display: "flex", alignItems: "center", color: "#a78bfa", fontSize: 13, fontWeight: 600 }}>
+                    Book via TicketMinistry →
+                  </div>
+                </a>
+
+                <button
+                  onClick={() => setShowChoiceModal(false)}
+                  style={{
+                    background: "linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)",
+                    border: "none",
+                    borderRadius: 16,
+                    padding: 20,
+                    textAlign: "left",
+                    cursor: "pointer",
+                    boxShadow: "0 4px 15px rgba(124, 58, 237, 0.3)",
+                    transition: "all 0.2s ease"
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.transform = "translateY(-2px)";
+                    e.currentTarget.style.boxShadow = "0 8px 25px rgba(124, 58, 237, 0.4)";
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.transform = "translateY(0)";
+                    e.currentTarget.style.boxShadow = "0 4px 15px rgba(124, 58, 237, 0.3)";
+                  }}
+                >
+                  <h3 style={{ margin: "0 0 6px", color: "#fff", fontSize: 18, fontWeight: 600 }}>Special Seat Booking</h3>
+                  <p style={{ margin: 0, color: "rgba(255,255,255,0.8)", fontSize: 13, lineHeight: 1.4 }}>
+                    Choose specific seats on our interactive map. Requires manual upload of your payment slip.
+                  </p>
+                  <div style={{ marginTop: 12, display: "flex", alignItems: "center", color: "#e2d9ff", fontSize: 13, fontWeight: 600 }}>
+                    Proceed to Seat Map →
+                  </div>
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }

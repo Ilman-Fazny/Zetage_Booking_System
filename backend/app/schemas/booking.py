@@ -38,6 +38,7 @@ class BookingOut(BaseModel):
     entered_at:        Optional[datetime] = None
     email_sent:        bool
     phone:             str | None = None
+    slip_url:          str | None = None
     created_at:        datetime
 
     model_config = {"from_attributes": True}
@@ -58,12 +59,14 @@ class AdminBookingOut(BaseModel):
     is_entered:        bool
     entered_at:        Optional[datetime] = None
     email_sent:        bool
+    slip_url:          str | None = None
 
     model_config = {"from_attributes": True}
 
 class BookingStats(BaseModel):
     total_seats:        int
     booked_seats:        int
+    held_seats:          int
     available_seats:     int
     total_revenue:        int          # LKR
     sasnaka_member_count: int

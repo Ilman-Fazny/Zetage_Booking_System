@@ -9,8 +9,8 @@ router = APIRouter(prefix="/availability", tags=["availability"])
 @router.get("")
 def get_availability(db: Session = Depends(get_db)):
     """Lightweight endpoint for real-time seat availability counts."""
-    total_seats = db.query(func.count(Seat.id)).scalar() or 0
-    available_seats = db.query(func.count(Seat.id)).filter(Seat.status == SeatStatus.AVAILABLE).scalar() or 0
+    total_seats = db.query(Seat).count()
+    available_seats = db.query(Seat).filter(Seat.status == SeatStatus.AVAILABLE).count()
     
     return {
         "total": total_seats,
