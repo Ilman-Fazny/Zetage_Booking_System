@@ -302,7 +302,7 @@ export default function SeatSelectionPage() {
             position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
             zIndex: 9999,
             display: "flex", alignItems: "center", justifyContent: "center",
-            padding: 20
+            padding: 16
           }}>
             <motion.div 
               initial={{ opacity: 0 }}
@@ -310,8 +310,8 @@ export default function SeatSelectionPage() {
               exit={{ opacity: 0 }}
               style={{
                 position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
-                background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)",
-                WebkitBackdropFilter: "blur(8px)"
+                background: "rgba(0,0,0,0.75)", backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)"
               }}
             />
             <motion.div
@@ -320,186 +320,98 @@ export default function SeatSelectionPage() {
               exit={{ scale: 0.95, opacity: 0, y: 20 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
               style={{
-                background: "#1e1b4b", // deep rich purple/indigo
-                border: "1px solid rgba(139, 92, 246, 0.3)",
-                borderRadius: 24,
-                padding: "32px 24px",
+                background: "linear-gradient(165deg, #1e1b4b 0%, #0f0a2e 100%)",
+                border: "1px solid rgba(139, 92, 246, 0.2)",
+                borderRadius: 20,
+                padding: "28px 24px",
                 width: "100%",
-                maxWidth: 440,
+                maxWidth: 380,
                 position: "relative",
                 zIndex: 10000,
-                boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 40px rgba(139, 92, 246, 0.15)",
-                display: "flex",
-                flexDirection: "column",
-                gap: 16,
-                width: "100%"
+                boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 30px rgba(139, 92, 246, 0.1)",
+                textAlign: "center",
+                boxSizing: "border-box"
               }}
             >
-              <div style={{ textAlign: "center" }}>
-                <h2 style={{ margin: "0 0 8px", fontSize: 24, color: "#fff", fontWeight: 700, letterSpacing: "-0.02em" }}>Choose Booking Type</h2>
-                <p style={{ margin: 0, color: "rgba(255,255,255,0.7)", fontSize: 14, lineHeight: 1.5 }}>
-                  Please select how you want to book your seats.
-                </p>
+              {/* Welcome text */}
+              <p style={{ margin: "0 0 4px", color: "rgba(167, 139, 250, 0.7)", fontSize: 12, fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase" }}>
+                Welcome back
+              </p>
+              <h2 style={{ margin: "0 0 6px", fontSize: 22, color: "#fff", fontWeight: 700, letterSpacing: "-0.02em", lineHeight: 1.3 }}>
+                Ready to pick your seats?
+              </h2>
+              <p style={{ margin: "0 0 24px", color: "rgba(255,255,255,0.55)", fontSize: 13, lineHeight: 1.5 }}>
+                Browse the interactive seat map and choose your exact seats for Zentage.
+              </p>
+
+              {/* Primary CTA */}
+              <motion.button
+                onClick={() => {
+                  sessionStorage.setItem("hasChosenBookingType", "true");
+                  setShowChoiceModal(false);
+                }}
+                whileHover={{ scale: 1.02, boxShadow: "0 8px 30px rgba(245, 158, 11, 0.25)" }}
+                whileTap={{ scale: 0.98 }}
+                style={{
+                  width: "100%",
+                  padding: "14px 20px",
+                  background: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+                  border: "none",
+                  borderRadius: 12,
+                  color: "#000",
+                  fontSize: 15,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  letterSpacing: "-0.01em",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  boxSizing: "border-box",
+                  transition: "box-shadow 0.2s ease"
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2"/>
+                  <path d="M9 3v18M15 3v18M3 9h18M3 15h18"/>
+                </svg>
+                Open Seat Map
+              </motion.button>
+
+              {/* Divider */}
+              <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "20px 0 16px" }}>
+                <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.08)" }} />
+                <span style={{ color: "rgba(255,255,255,0.3)", fontSize: 11, fontWeight: 500 }}>or</span>
+                <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.08)" }} />
               </div>
 
-              <div style={{ display: "flex", flexDirection: "column", gap: 16, width: "100%" }}>
-                {/* TicketsMinistry Card */}
-                <motion.a 
-                  href="https://www.ticketsministry.com/theatre/zentage/018d5fdb-7c2b-4c56-b070-fb58ce53443f"
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={() => sessionStorage.setItem("hasChosenBookingType", "true")}
-                  whileHover={{ scale: 1.01, backgroundColor: "rgba(255,255,255,0.06)" }}
-                  whileTap={{ scale: 0.99 }}
-                  style={{
-                    display: "block",
-                    textDecoration: "none",
-                    background: "rgba(255,255,255,0.03)",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                    borderRadius: 16,
-                    padding: "20px",
-                    boxSizing: "border-box",
-                    textAlign: "left",
-                    transition: "border-color 0.2s ease, box-shadow 0.2s ease",
-                    position: "relative",
-                    overflow: "hidden"
-                  }}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.borderColor = "rgba(6, 182, 212, 0.4)";
-                    e.currentTarget.style.boxShadow = "0 8px 24px rgba(6, 182, 212, 0.08)";
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
-                    e.currentTarget.style.boxShadow = "none";
-                  }}
-                >
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: 12 }}>
-                    <div>
-                      <span style={{
-                        fontSize: 9,
-                        fontWeight: 800,
-                        color: "#06b6d4",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.06em",
-                        background: "rgba(6, 182, 212, 0.12)",
-                        padding: "3px 10px",
-                        borderRadius: 99,
-                        display: "inline-block",
-                        marginBottom: 8,
-                        border: "1px solid rgba(6, 182, 212, 0.15)"
-                      }}>
-                        Partner Portal
-                      </span>
-                      <h3 style={{ margin: 0, color: "#fff", fontSize: 18, fontWeight: 700, letterSpacing: "-0.01em" }}>
-                        Standard Booking
-                      </h3>
-                    </div>
-                    {/* TicketsMinistry Logo */}
-                    <div style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,0.03)", padding: "5px 10px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.05)", flexShrink: 0 }}>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/>
-                        <path d="M9 9h.01M9 15h.01M15 9h.01M15 15h.01"/>
-                      </svg>
-                      <span style={{ fontSize: 9, fontWeight: 800, color: "#fff", letterSpacing: "0.05em" }}>TICKETS<span style={{ color: "#06b6d4" }}>MINISTRY</span></span>
-                    </div>
-                  </div>
-                  <p style={{ margin: "0 0 8px", color: "rgba(255,255,255,0.7)", fontSize: 13, lineHeight: 1.45 }}>
-                    Buy standard tickets for any tier. 
-                  </p>
-                  <p style={{ margin: 0, color: "rgba(255,255,255,0.45)", fontSize: 11.5, fontStyle: "italic", lineHeight: 1.4 }}>
-                    ⚠️ Note: You cannot choose exact seat numbers on TicketsMinistry.
-                  </p>
-                  <div style={{ marginTop: 16, display: "flex", alignItems: "center", gap: 4, color: "#06b6d4", fontSize: 13, fontWeight: 700 }}>
-                    Book via TicketMinistry <span>→</span>
-                  </div>
-                </motion.a>
-
-                {/* Select by Seat Number Card */}
-                <motion.button
-                  onClick={() => {
-                    sessionStorage.setItem("hasChosenBookingType", "true");
-                    setShowChoiceModal(false);
-                  }}
-                  whileHover={{ scale: 1.01, borderColor: "rgba(245, 158, 11, 0.45)", boxShadow: "0 12px 30px rgba(245, 158, 11, 0.12)" }}
-                  whileTap={{ scale: 0.99 }}
-                  style={{
-                    background: "linear-gradient(135deg, rgba(30, 27, 75, 0.7) 0%, rgba(15, 10, 50, 0.85) 100%)",
-                    border: "1px solid rgba(245, 158, 11, 0.25)",
-                    borderRadius: 16,
-                    padding: "20px",
-                    boxSizing: "border-box",
-                    textAlign: "left",
-                    cursor: "pointer",
-                    transition: "border-color 0.2s ease, box-shadow 0.2s ease",
-                    position: "relative",
-                    overflow: "hidden"
-                  }}
-                >
-                  {/* Subtle golden ambient background glow */}
-                  <div style={{
-                    position: "absolute",
-                    top: "-50%",
-                    right: "-20%",
-                    width: 140,
-                    height: 140,
-                    background: "radial-gradient(circle, rgba(245, 158, 11, 0.12) 0%, transparent 70%)",
-                    pointerEvents: "none"
-                  }} />
-
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: 12 }}>
-                    <div>
-                      {/* Pulsing Gold Badge */}
-                      <span style={{
-                        fontSize: 9,
-                        fontWeight: 800,
-                        color: "#f59e0b",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.06em",
-                        background: "rgba(245, 158, 11, 0.12)",
-                        padding: "3px 10px",
-                        borderRadius: 99,
-                        display: "inline-block",
-                        marginBottom: 8,
-                        border: "1px solid rgba(245, 158, 11, 0.2)"
-                      }}>
-                        Early Bird Special (Closes Soon)
-                      </span>
-                      <h3 style={{ margin: 0, color: "#fff", fontSize: 18, fontWeight: 700, letterSpacing: "-0.01em" }}>
-                        Choose specific seats on our interactive map.
-                      </h3>
-                    </div>
-                    {/* Gold Star / Seat grid SVG logo */}
-                    <div style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(245, 158, 11, 0.05)", padding: "5px 10px", borderRadius: 8, border: "1px solid rgba(245, 158, 11, 0.15)", flexShrink: 0 }}>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="3" y="3" width="18" height="18" rx="2"/>
-                        <path d="M9 3v18M15 3v18M3 9h18M3 15h18"/>
-                      </svg>
-                      <span style={{ fontSize: 9, fontWeight: 800, color: "#f59e0b", letterSpacing: "0.05em" }}>SEAT MAP</span>
-                    </div>
-                  </div>
-
-                  {/* Scarcity highlight box */}
-                  <div style={{
-                    background: "rgba(245, 158, 11, 0.08)",
-                    border: "1px dashed rgba(245, 158, 11, 0.25)",
-                    borderRadius: 8,
-                    padding: "8px 12px",
-                    marginBottom: 12
-                  }}>
-                    <p style={{ margin: 0, color: "#fbbf24", fontSize: 12.5, fontWeight: 600, lineHeight: 1.45 }}>
-                      ⭐ The Early Bird Offer is a limited chance to reserve your exact preferred seats directly from the layout.
-                    </p>
-                  </div>
-
-                  <p style={{ margin: "0 0 12px", color: "rgba(255,255,255,0.7)", fontSize: 13, lineHeight: 1.45 }}>
-                    Choose exact rows/numbers from the layout. Requires bank slip upload or purchased TicketsMinistry ticket/screenshot.
-                  </p>
-                  
-                  <div style={{ display: "flex", alignItems: "center", gap: 4, color: "#f59e0b", fontSize: 13, fontWeight: 700 }}>
-                    Proceed to Interactive Map <span>→</span>
-                  </div>
-                </motion.button>
-              </div>
+              {/* Secondary link */}
+              <a
+                href="https://www.ticketsministry.com/theatre/zentage/018d5fdb-7c2b-4c56-b070-fb58ce53443f"
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => sessionStorage.setItem("hasChosenBookingType", "true")}
+                style={{
+                  color: "rgba(255,255,255,0.5)",
+                  fontSize: 13,
+                  textDecoration: "none",
+                  fontWeight: 500,
+                  transition: "color 0.15s",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 4
+                }}
+                onMouseEnter={e => e.currentTarget.style.color = "rgba(255,255,255,0.8)"}
+                onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.5)"}
+              >
+                Buy via TicketsMinistry instead
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/>
+                </svg>
+              </a>
+              <p style={{ margin: "6px 0 0", color: "rgba(255,255,255,0.3)", fontSize: 11, lineHeight: 1.4 }}>
+                Seat numbers are randomly assigned on TicketsMinistry
+              </p>
             </motion.div>
           </div>
         )}
