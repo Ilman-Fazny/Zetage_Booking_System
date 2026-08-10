@@ -361,8 +361,23 @@ export default function SeatSelectionPage() {
                       <span style={{ fontSize: 9, fontWeight: 800, color: "#fff", letterSpacing: "0.05em" }}>TICKETS<span style={{ color: "#06b6d4" }}>MINISTRY</span></span>
                     </div>
                   </div>
-                  <p style={{ margin: 0, color: "rgba(255,255,255,0.55)", fontSize: 12.5, lineHeight: 1.4 }}>
-                    Quickest way to book regular seats. Not available for special/premium rows.
+                  <p style={{ margin: 0, color: "rgba(255,255,255,0.7)", fontSize: 13, lineHeight: 1.4, fontWeight: 500 }}>
+                    Buy standard tickets for any tier:
+                  </p>
+                  <div style={{
+                    margin: "8px 0 10px",
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: 6,
+                    fontSize: 11,
+                    fontWeight: 600
+                  }}>
+                    <span style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.8)", padding: "2px 8px", borderRadius: 4 }}>Normal: 500</span>
+                    <span style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.8)", padding: "2px 8px", borderRadius: 4 }}>Standard: 600</span>
+                    <span style={{ background: "rgba(255,255,255,0.06)", color: "rgba(245, 158, 11, 0.85)", padding: "2px 8px", borderRadius: 4 }}>Premium: 800</span>
+                  </div>
+                  <p style={{ margin: 0, color: "rgba(255,255,255,0.45)", fontSize: 12, fontStyle: "italic", lineHeight: 1.3 }}>
+                    *Note: You cannot choose exact seat numbers on TicketsMinistry.
                   </p>
                   <div style={{ marginTop: 14, display: "flex", alignItems: "center", gap: 4, color: "#06b6d4", fontSize: 12.5, fontWeight: 700 }}>
                     Book via TicketMinistry <span>→</span>
@@ -420,7 +435,7 @@ export default function SeatSelectionPage() {
                         Early Bird Special (Closes Soon)
                       </motion.span>
                       <h3 style={{ margin: 0, color: "#fff", fontSize: 17, fontWeight: 700, letterSpacing: "-0.01em" }}>
-                        Select by Seat Number
+                        Choose specific seats on our interactive map.
                       </h3>
                     </div>
                     {/* Gold Star / Seat grid SVG logo */}
@@ -434,6 +449,9 @@ export default function SeatSelectionPage() {
                   </div>
                   <p style={{ margin: 0, color: "rgba(255,255,255,0.55)", fontSize: 12.5, lineHeight: 1.4 }}>
                     Choose exact rows/numbers from the interactive layout. Requires bank slip upload.
+                  </p>
+                  <p style={{ margin: "8px 0 0", color: "rgba(255,255,255,0.45)", fontSize: 12, lineHeight: 1.3 }}>
+                    *Book by making a direct payment OR by uploading your pre-purchased TicketsMinistry ticket/screenshot to claim your specific seat code.
                   </p>
                   <div style={{ marginTop: 14, display: "flex", alignItems: "center", gap: 4, color: "#f59e0b", fontSize: 12.5, fontWeight: 700 }}>
                     Proceed to Interactive Map <span>→</span>

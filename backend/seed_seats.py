@@ -115,7 +115,7 @@ def _ground_floor_tier(row_label: str) -> SeatTier:
     """Determine tier from a ground-floor row label like 'A1', 'H8', 'N16'.
 
     The first character is the row letter (A-Q).
-    Rows A-G → PREMIUM (LKR 750)
+    Rows A-G → PREMIUM (LKR 800)
     Rows H-Q → STANDARD (LKR 600)
     """
     letter = row_label[0].upper()

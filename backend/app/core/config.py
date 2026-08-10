@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     event_name: str = "Zentage Talent Show"
     event_date: str = "September 6, 2026"
     event_venue: str = "Elphinstone Theatre, Maradana"
-    price_premium:  int = 750   # LKR — Ground floor front rows
+    price_premium:  int = 800   # LKR — Ground floor front rows
     price_standard: int = 600   # LKR — Ground floor back rows
     price_normal:   int = 500   # LKR — Balcony seats
 
@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     PAYHERE_MERCHANT_ID:     str = ""
     PAYHERE_MERCHANT_SECRET: str = ""
     PAYHERE_BASE_URL:        str = "https://sandbox.payhere.lk/pay/checkout"
-    PRICE_PREMIUM:           int = 750
+    PRICE_PREMIUM:           int = 800
     PRICE_STANDARD:          int = 600
     PRICE_NORMAL:            int = 500
     FRONTEND_URL:            str = "http://localhost:5173"

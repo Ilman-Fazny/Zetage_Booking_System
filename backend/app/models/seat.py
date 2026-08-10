@@ -10,13 +10,13 @@ class SeatStatus(str, enum.Enum):
     HELD      = "held"        # reserved briefly during checkout (future use)
 
 class SeatTier(str, enum.Enum):
-    PREMIUM  = "premium"    # Ground floor front rows (A-G) — LKR 750
+    PREMIUM  = "premium"    # Ground floor front rows (A-G) — LKR 800
     STANDARD = "standard"   # Ground floor back rows  (H-Q) — LKR 600
     NORMAL   = "normal"     # All balcony sections          — LKR 500
 
 # Tier → price mapping (LKR)
 TIER_PRICES = {
-    SeatTier.PREMIUM:  750,
+    SeatTier.PREMIUM:  800,
     SeatTier.STANDARD: 600,
     SeatTier.NORMAL:   500,
 }

@@ -6,7 +6,7 @@
 
 export const TIER_CONFIG = {
   premium: {
-    price: 750,
+    price: 800,
     label: "Premium",
     color: "#f59e0b",           // warm amber/gold
     borderColor: "rgba(245,158,11,0.55)",

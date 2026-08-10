@@ -4,7 +4,7 @@ One-off migration script that:
   1. Adds the 'tier' column to the existing 'seats' table (if missing)
   2. Assigns the correct tier to each existing seat based on its section/row
 
-Ground Floor rows A-G  -> PREMIUM  (LKR 750)
+Ground Floor rows A-G  -> PREMIUM  (LKR 800)
 Ground Floor rows H-Q  -> STANDARD (LKR 600)
 All Balcony seats       -> NORMAL   (LKR 500)
 
@@ -66,7 +66,7 @@ def migrate():
             )
 
         print(f"      [OK] Updated {len(rows)} seats:")
-        print(f"        Premium  (LKR 750): {premium_count}")
+        print(f"        Premium  (LKR 800): {premium_count}")
         print(f"        Standard (LKR 600): {standard_count}")
         print(f"        Normal   (LKR 500): {normal_count}")
 
