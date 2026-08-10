@@ -1307,7 +1307,7 @@ function SlipVerificationTab() {
               <div style={{ background: "#000", borderRadius: 8, padding: 8, marginBottom: 20 }}>
                 {selectedSlip.slip_url ? (
                   <img 
-                    src={import.meta.env.VITE_API_URL + selectedSlip.slip_url} 
+                    src={import.meta.env.VITE_API_URL.replace('/api', '') + selectedSlip.slip_url} 
                     alt="Slip" 
                     style={{ width: "100%", maxHeight: "50vh", objectFit: "contain" }} 
                     onError={(e) => { e.target.src = ""; e.target.alt = "Image not found"; }}

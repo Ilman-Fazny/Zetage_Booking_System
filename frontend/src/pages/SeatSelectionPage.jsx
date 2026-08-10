@@ -24,7 +24,11 @@ export default function SeatSelectionPage() {
   const { sections, selectedSeats, selectSeat, loading, error } = useSeatMap();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [showChoiceModal, setShowChoiceModal] = useState(true);
+  const [showChoiceModal, setShowChoiceModal] = useState(false);
+  
+  useEffect(() => {
+    if (user) setShowChoiceModal(true);
+  }, [user]);
 
   function handleContinue() {
     if (!selectedSeats.length) return;
