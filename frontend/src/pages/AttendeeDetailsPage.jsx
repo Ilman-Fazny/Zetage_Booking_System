@@ -31,7 +31,7 @@ export default function AttendeeDetailsPage() {
   const [slipFile, setSlipFile] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(300); // 5 minutes
+  const [timeLeft, setTimeLeft] = useState(600); // 10 minutes
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -302,23 +302,6 @@ export default function AttendeeDetailsPage() {
                   </div>
                 )}
               </div>
-            </div>
-
-            {/* Timer Warning */}
-            <div style={{ 
-              marginBottom: 20, 
-              padding: 12, 
-              background: "rgba(248, 113, 113, 0.1)", 
-              border: "1px solid rgba(248, 113, 113, 0.3)",
-              borderRadius: 8,
-              color: "#fca5a5",
-              fontSize: 14,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between"
-            }}>
-              <span>Seats are reserved for:</span>
-              <span style={{ fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>{formatTime(timeLeft)}</span>
             </div>
 
             {/* Privacy Policies tickbox */}
