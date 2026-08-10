@@ -370,6 +370,76 @@ export default function AttendeeDetailsPage() {
         </motion.div>
 
       </div>
+
+      {/* Uploading Overlay */}
+      <AnimatePresence>
+        {loading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(6, 8, 15, 0.85)",
+              backdropFilter: "blur(10px)",
+              WebkitBackdropFilter: "blur(10px)",
+              zIndex: 99999,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 20,
+            }}
+          >
+            {/* Premium Rotating/Spinning Wheel */}
+            <div style={{ position: "relative", width: 80, height: 80 }}>
+              {/* Glowing background ring */}
+              <div style={{
+                position: "absolute",
+                inset: 0,
+                borderRadius: "50%",
+                border: "4px solid rgba(139, 92, 246, 0.1)",
+              }} />
+              {/* Spinning golden/purple gradient ring */}
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ repeat: Infinity, duration: 1.2, ease: "linear" }}
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  borderRadius: "50%",
+                  border: "4px solid transparent",
+                  borderTopColor: "#fbbf24", // gold
+                  borderRightColor: "#c084fc", // light purple
+                }}
+              />
+              {/* Center uploading icon */}
+              <div style={{
+                position: "absolute",
+                inset: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center"
+              }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                </svg>
+              </div>
+            </div>
+
+            {/* Uploading Status Text */}
+            <div style={{ textAlign: "center" }}>
+              <h3 style={{ margin: "0 0 4px", color: "#fff", fontSize: 18, fontWeight: 700, letterSpacing: "-0.01em" }}>
+                Uploading Payment Slip
+              </h3>
+              <p style={{ margin: 0, color: "rgba(167, 139, 250, 0.7)", fontSize: 13, fontWeight: 500 }}>
+                Securing your selected seats. Please don't close this window.
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
