@@ -310,66 +310,135 @@ export default function SeatSelectionPage() {
               </div>
 
               <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                <a 
+                {/* TicketsMinistry Card */}
+                <motion.a 
                   href="https://www.ticketsministry.com/theatre/zentage/018d5fdb-7c2b-4c56-b070-fb58ce53443f"
                   target="_blank"
                   rel="noreferrer"
+                  whileHover={{ scale: 1.02, y: -3, backgroundColor: "rgba(255,255,255,0.08)" }}
+                  whileTap={{ scale: 0.98 }}
                   style={{
                     display: "block",
                     textDecoration: "none",
-                    background: "rgba(255,255,255,0.05)",
-                    border: "1px solid rgba(255,255,255,0.1)",
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.08)",
                     borderRadius: 16,
-                    padding: 20,
-                    transition: "all 0.2s ease"
+                    padding: "20px 24px",
+                    textAlign: "left",
+                    transition: "border-color 0.2s ease",
+                    position: "relative",
+                    overflow: "hidden"
                   }}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.background = "rgba(255,255,255,0.1)";
-                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)";
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.background = "rgba(255,255,255,0.05)";
-                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)";
-                  }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = "rgba(6, 182, 212, 0.4)"}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"}
                 >
-                  <h3 style={{ margin: "0 0 6px", color: "#fff", fontSize: 18, fontWeight: 600 }}>Standard Online Booking</h3>
-                  <p style={{ margin: 0, color: "rgba(255,255,255,0.6)", fontSize: 13, lineHeight: 1.4 }}>
-                    Quickest way to book regular seats. Not available for special/premium seating choices.
-                  </p>
-                  <div style={{ marginTop: 12, display: "flex", alignItems: "center", color: "#a78bfa", fontSize: 13, fontWeight: 600 }}>
-                    Book via TicketMinistry →
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+                    <div>
+                      <span style={{
+                        fontSize: 10,
+                        fontWeight: 700,
+                        color: "#06b6d4",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.05em",
+                        background: "rgba(6, 182, 212, 0.1)",
+                        padding: "2px 8px",
+                        borderRadius: 99,
+                        display: "inline-block",
+                        marginBottom: 6
+                      }}>
+                        Partner Portal
+                      </span>
+                      <h3 style={{ margin: 0, color: "#fff", fontSize: 17, fontWeight: 700, letterSpacing: "-0.01em" }}>
+                        Standard Booking
+                      </h3>
+                    </div>
+                    {/* TicketsMinistry SVG logo */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,0.03)", padding: "4px 8px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.05)" }}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/>
+                        <path d="M9 9h.01M9 15h.01M15 9h.01M15 15h.01"/>
+                      </svg>
+                      <span style={{ fontSize: 9, fontWeight: 800, color: "#fff", letterSpacing: "0.05em" }}>TICKETS<span style={{ color: "#06b6d4" }}>MINISTRY</span></span>
+                    </div>
                   </div>
-                </a>
+                  <p style={{ margin: 0, color: "rgba(255,255,255,0.55)", fontSize: 12.5, lineHeight: 1.4 }}>
+                    Quickest way to book regular seats. Not available for special/premium rows.
+                  </p>
+                  <div style={{ marginTop: 14, display: "flex", alignItems: "center", gap: 4, color: "#06b6d4", fontSize: 12.5, fontWeight: 700 }}>
+                    Book via TicketMinistry <span>→</span>
+                  </div>
+                </motion.a>
 
-                <button
+                {/* Select by Seat Number Card */}
+                <motion.button
                   onClick={() => setShowChoiceModal(false)}
+                  whileHover={{ scale: 1.02, y: -3, borderColor: "rgba(245, 158, 11, 0.5)", boxShadow: "0 12px 30px rgba(245, 158, 11, 0.15)" }}
+                  whileTap={{ scale: 0.98 }}
                   style={{
-                    background: "linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)",
-                    border: "none",
+                    background: "linear-gradient(135deg, rgba(30, 27, 75, 0.8) 0%, rgba(15, 10, 50, 0.9) 100%)",
+                    border: "1px solid rgba(245, 158, 11, 0.25)",
                     borderRadius: 16,
-                    padding: 20,
+                    padding: "20px 24px",
                     textAlign: "left",
                     cursor: "pointer",
-                    boxShadow: "0 4px 15px rgba(124, 58, 237, 0.3)",
-                    transition: "all 0.2s ease"
-                  }}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.transform = "translateY(-2px)";
-                    e.currentTarget.style.boxShadow = "0 8px 25px rgba(124, 58, 237, 0.4)";
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.boxShadow = "0 4px 15px rgba(124, 58, 237, 0.3)";
+                    transition: "all 0.2s ease",
+                    position: "relative",
+                    overflow: "hidden"
                   }}
                 >
-                  <h3 style={{ margin: "0 0 6px", color: "#fff", fontSize: 18, fontWeight: 600 }}>Special Seat Booking</h3>
-                  <p style={{ margin: 0, color: "rgba(255,255,255,0.8)", fontSize: 13, lineHeight: 1.4 }}>
-                    Choose specific seats on our interactive map. Requires manual upload of your payment slip.
-                  </p>
-                  <div style={{ marginTop: 12, display: "flex", alignItems: "center", color: "#e2d9ff", fontSize: 13, fontWeight: 600 }}>
-                    Proceed to Seat Map →
+                  {/* Subtle golden ambient background glow */}
+                  <div style={{
+                    position: "absolute",
+                    top: "-50%",
+                    right: "-20%",
+                    width: 140,
+                    height: 140,
+                    background: "radial-gradient(circle, rgba(245, 158, 11, 0.15) 0%, transparent 70%)",
+                    pointerEvents: "none"
+                  }} />
+
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+                    <div>
+                      {/* Pulsing Gold Badge */}
+                      <motion.span 
+                        animate={{ opacity: [0.8, 1, 0.8] }}
+                        transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                        style={{
+                          fontSize: 10,
+                          fontWeight: 700,
+                          color: "#f59e0b",
+                          textTransform: "uppercase",
+                          letterSpacing: "0.05em",
+                          background: "rgba(245, 158, 11, 0.12)",
+                          padding: "2px 8px",
+                          borderRadius: 99,
+                          display: "inline-block",
+                          marginBottom: 6,
+                          border: "1px solid rgba(245, 158, 11, 0.2)"
+                        }}
+                      >
+                        Early Bird Special (Closes Soon)
+                      </motion.span>
+                      <h3 style={{ margin: 0, color: "#fff", fontSize: 17, fontWeight: 700, letterSpacing: "-0.01em" }}>
+                        Select by Seat Number
+                      </h3>
+                    </div>
+                    {/* Gold Star / Seat grid SVG logo */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(245, 158, 11, 0.05)", padding: "4px 8px", borderRadius: 8, border: "1px solid rgba(245, 158, 11, 0.15)" }}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <path d="M9 3v18M15 3v18M3 9h18M3 15h18"/>
+                      </svg>
+                      <span style={{ fontSize: 9, fontWeight: 800, color: "#f59e0b", letterSpacing: "0.05em" }}>SEAT MAP</span>
+                    </div>
                   </div>
-                </button>
+                  <p style={{ margin: 0, color: "rgba(255,255,255,0.55)", fontSize: 12.5, lineHeight: 1.4 }}>
+                    Choose exact rows/numbers from the interactive layout. Requires bank slip upload.
+                  </p>
+                  <div style={{ marginTop: 14, display: "flex", alignItems: "center", gap: 4, color: "#f59e0b", fontSize: 12.5, fontWeight: 700 }}>
+                    Proceed to Interactive Map <span>→</span>
+                  </div>
+                </motion.button>
               </div>
             </motion.div>
           </div>
